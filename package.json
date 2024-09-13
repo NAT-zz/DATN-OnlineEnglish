@@ -1,0 +1,21 @@
+{
+  "name": "onlineenglish",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install-server": "cd Backend-ExpressJs && npm install",
+    "install-client": "cd FrontEnd-ReactJs && cd fe-online-english && npm install",
+    "install": "npm run install-server && npm run install-client",
+    "server": "npm run watch --prefix Backend-ExpressJs",
+    "client": "cd FrontEnd-ReactJs && npm start",
+    "deploy": "cd FrontEnd-ReactJs && npm run build && cd .. && cd.. && npm run server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "morgan": "^1.10.0"
+  }
+}

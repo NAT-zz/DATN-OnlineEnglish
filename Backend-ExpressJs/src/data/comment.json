@@ -1,0 +1,34 @@
+{
+    "1": {
+        "commentType": "TOPIC",
+        "idType": 1,
+        "content": [
+            {
+                "idUser": 1,
+                "content": "This topic is mid"
+            },
+            {
+                "idUser": 2,
+                "content": "I find this topic very helpfull"
+            }
+        ]
+    },
+    "2": {
+        "commentType": "TIP",
+        "idType": 1,
+        "content": [
+            {
+                "idUser": 1,
+                "content": "This tip help me alot"
+            },
+            {
+                "idUser": 2,
+                "content": "Very useful, thank you very much"
+            },
+            {
+                "idUser": 3,
+                "content": "Looking forward for more tip like this"
+            }
+        ]
+    }
+}

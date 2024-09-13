@@ -1,0 +1,18 @@
+{
+    "1": {
+        "name": "A request from your boss",
+        "preview": "Listen to some requests from a manager to practise and improve your listening skills.",
+        "topicSkill": "LISTENING",
+        "level": "A1",
+        "instruction": "Please listening to the audio and do the preparation tasks first",
+        "media": [ 1 ]
+    },
+    "2": {
+        "name": "An invitation from your coworker",
+        "preview": "Listen to some requests from a manager to practise and improve your listening skills.",
+        "topicSkill": "LISTENING",
+        "level": "A1",
+        "instruction": "Please listening to the audio and do the preparation tasks first",
+        "media": [ 1 ]
+    }
+}
