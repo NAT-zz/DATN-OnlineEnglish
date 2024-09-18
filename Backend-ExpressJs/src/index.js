@@ -1,21 +1,20 @@
-const http = require("http");
-const app = require('./app/middlewares/config');
-const PORT = process.env.PORT || 8000;
+import http from 'http';
+import app from './app/middlewares/config.js';
+import { mongoConnect } from './services/mongo.js';
+import { redisConnect } from './services/redis.js';
+
+import { initDataUser } from './models/users.model.js';
+import { initDataGrammar } from './models/grammars.model.js';
+import { initDataTest } from './models/tests.model.js';
+import { initDataMedia } from './models/medias.model.js';
+import { initDatatopic } from './models/topics.model.js';
+import { initDataTip } from './models/tips.model.js';
+import { initDataRate } from './models/rates.model.js';
+import { initDataComment } from './models/comments.model.js';
+
+const PORT = process.env.SERVER_PORT;
 const server = http.createServer(app);
-const { mongoConnect } = require('./services/mongo');
-const { redisConnect } = require('./services/redis');
-
-const { initDataUser } = require('./models/users.model');
-const { initDataGrammar } = require('./models/grammars.model');
-const { initDataTest } = require('./models/tests.model');
-const { initDataMedia } = require('./models/medias.model');
-const { initDatatopic } = require('./models/topics.model');
-const { initDataTip } = require('./models/tips.model');
-const { initDataRate } = require('./models/rates.model');
-const { initDataComment } = require('./models/comments.model');
-
-(async function startServer()
-{
+(async function startServer() {
     await mongoConnect();
     await redisConnect();
 
@@ -33,4 +32,3 @@ const { initDataComment } = require('./models/comments.model');
         console.log(`Listening on port ${PORT}`);
     });
 })();
-

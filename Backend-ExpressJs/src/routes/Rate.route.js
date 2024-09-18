@@ -1,11 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const { rate, getRate } = require('../app/controllers/Rate.controller');
+import express from 'express';
+import { rate, getRate } from '../app/controllers/Rate.controller.js';
 
-const { verifyToken, verifyPermission } = require('./auth');
-const { ROLES } = require('../utils/Constants');
+import { verifyToken, verifyPermission } from './auth.js';
+import { ROLES } from '../utils/Constants.js';
+const router = express.Router();
 
 router.get('/:type/:id', getRate);
 router.post('/:type/:id/:rateCount', verifyToken, rate);
 
-module.exports = router;
+export default router;

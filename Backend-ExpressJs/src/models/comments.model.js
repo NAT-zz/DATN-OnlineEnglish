@@ -1,32 +1,38 @@
-const { readFileSync } =  require('fs');
-const path = require('path');
-const comments = require('./comments.mongo');
+import { readFileSync } from 'fs';
+import path from 'path';
+import comments from './comments.mongo.js';
 
+const __dirname = path.resolve();
 const findMaxId = async () => {
     const lastestComment = await comments.findOne().sort('-id');
-  
-    if(!lastestComment && !(lastestComment instanceof comments)){
-      return 0;
+
+    if (!lastestComment && !(lastestComment instanceof comments)) {
+        return 0;
     }
     return lastestComment.id;
 };
 
-const saveComment = async(comment) => {
+const saveComment = async (comment) => {
     try {
         let getComment = await comments.findOne({
-            $or: [ {
-                commentType: comment?.commentType,
-                idType: comment?.idType
-            }, { id: comment?.id } ]
+            $or: [
+                {
+                    commentType: comment?.commentType,
+                    idType: comment?.idType,
+                },
+                { id: comment?.id },
+            ],
         });
 
-        if(getComment instanceof comments && getComment)
-        {
-            getComment.commentType = comment?.commentType ? comment.commentType : getComment.commentType;
-            getComment.idType = comment?.idType ? comment.idType : getComment.idType;
-            if(comment?.content)
-            {
-                comment.content.forEach(val => {
+        if (getComment instanceof comments && getComment) {
+            getComment.commentType = comment?.commentType
+                ? comment.commentType
+                : getComment.commentType;
+            getComment.idType = comment?.idType
+                ? comment.idType
+                : getComment.idType;
+            if (comment?.content) {
+                comment.content.forEach((val) => {
                     val.time = new Date(Date.now());
                 });
 
@@ -35,42 +41,32 @@ const saveComment = async(comment) => {
 
             await getComment.save();
             return getComment;
-        }
-        else
-        {
-            comment.content.forEach(val => {
+        } else {
+            comment.content.forEach((val) => {
                 val.time = new Date(Date.now());
             });
 
             getComment = await comments.create({
-                id: Number(await findMaxId() + 1),
+                id: Number((await findMaxId()) + 1),
                 commentType: comment.commentType,
                 idType: comment.idType,
-                content: comment?.content ? comment.content : []
-            })
-            if(getComment instanceof comments && getComment)
-                return getComment;
+                content: comment?.content ? comment.content : [],
+            });
+            if (getComment instanceof comments && getComment) return getComment;
             throw new Error('Unable to create new Comment');
         }
-    }catch(err){
+    } catch (err) {
         console.error(err.message);
     }
 };
-    
-const initDataComment = async() => {
-    console.log('Init comment started');  
-    const json = readFileSync(
-      path.join(__dirname, '../data/comment.json')
-    );
+
+const initDataComment = async () => {
+    console.log('Init comment started');
+    const json = readFileSync(path.join(__dirname, 'src/data/comment.json'));
     const readComments = JSON.parse(json.toString());
-    for(const prop in readComments)
-    {
+    for (const prop in readComments) {
         await saveComment(readComments[prop]);
     }
 };
 
-module.exports = {
-    initDataComment,
-    findMaxId,
-    saveComment
-}
+export { initDataComment, findMaxId, saveComment };

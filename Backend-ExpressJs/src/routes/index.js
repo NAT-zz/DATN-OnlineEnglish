@@ -1,10 +1,10 @@
-const userRoute = require('./User.route');
-const grammarRoute = require('./Task.route');
-const testRoute = require('./Test.route');
-const selfStudyRoute = require('./SelfStudy.route');
-const tipRoute = require('./Tip.route');
-const rateRoute = require('./Rate.route');
-const commentRoute = require('./Comment.route');
+import userRoute from './User.route.js';
+import grammarRoute from './Task.route.js';
+import testRoute from './Test.route.js';
+import selfStudyRoute from './SelfStudy.route.js';
+import tipRoute from './Tip.route.js';
+import rateRoute from './Rate.route.js';
+import commentRoute from './Comment.route.js';
 
 function route(app) {
     app.use('/api/user', userRoute);
@@ -18,4 +18,4 @@ function route(app) {
     // app.use('/api/course');
 }
 
-module.exports = route;
+export default route;

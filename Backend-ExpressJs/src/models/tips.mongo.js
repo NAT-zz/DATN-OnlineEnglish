@@ -1,32 +1,32 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const tipSchema = new mongoose.Schema({
-    id: { 
-        type: Number, 
+    id: {
+        type: Number,
         require: true,
-        unique: true
+        unique: true,
     },
     idProvider: {
         type: Number,
         require: false,
-        default: 1
+        default: 1,
     },
     name: {
         type: String,
-        unique: true
+        unique: true,
     },
     preview: {
-        type: String
+        type: String,
     },
     picture: {
-        type: String
+        type: String,
     },
     content: [
         {
             title: String,
-            content: [ String ]
-        }
-    ]
+            content: [String],
+        },
+    ],
 });
 
-module.exports = mongoose.model('Tip', tipSchema);
+export default mongoose.model('Tip', tipSchema);

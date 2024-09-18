@@ -1,13 +1,13 @@
-const jwt = require('jsonwebtoken');
-const { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, ROLES } = require('../utils/Constants');
-const { makeSuccessResponse } = require('../utils/Response'); 
-const { redisClient, getValue } = require('../services/redis');
+import jwt from 'jsonwebtoken';
+import { ROLES, CONFIG } from '../utils/Constants.js';
+import { makeSuccessResponse } from '../utils/Response.js';
+import { redisClient, getValue } from '../services/redis.js';
 
 const verifyToken = async (req, res, next) => {
-    try{
+    try {
         // Bearer token
         const token = req.headers.authorization?.split(' ')[1];
-        const decoded = jwt.verify(token, JWT_ACCESS_SECRET);
+        const decoded = jwt.verify(token, CONFIG.JWT_ACCESS_SECRET);
         // { sub: 'admin', role: 'ADMIN', iat: 1668352408, exp: 1668352438 }
         console.log(decoded);
 
@@ -17,32 +17,30 @@ const verifyToken = async (req, res, next) => {
 
         // verify bl access token
         const getToken = await redisClient.get('BL_' + decoded.sub.toString());
-        if(getToken === token)
+        if (getToken === token)
             return makeSuccessResponse(res, 401, {
-                message: "Blacklisted token",
-                })
+                message: 'Blacklisted token',
+            });
         next();
-    }
-    catch(error)
-    {
+    } catch (error) {
         return makeSuccessResponse(res, 401, {
-            message: "Your session is not valid",
+            message: 'Your session is not valid',
             data: {
                 message: error.message,
-                data: error
-            }
-        })
+                data: error,
+            },
+        });
     }
-}
+};
 
 const verifyRefreshToken = async (req, res, next) => {
     const token = req.body?.token;
     if (!token)
         return makeSuccessResponse(res, 401, {
-            message: "Invalid request"
-        })
+            message: 'Invalid request',
+        });
 
-    try{
+    try {
         const decoded = jwt.verify(token, JWT_REFRESH_SECRET);
         req.userData = decoded;
         // { sub: 'admin', role: 'ADMIN', iat: 1668352408, exp: 1668352438 }
@@ -52,43 +50,40 @@ const verifyRefreshToken = async (req, res, next) => {
         const getToken = await getValue(decoded.sub.toString());
         if (!getToken)
             return makeSuccessResponse(res, 401, {
-                message: "Token is not stored"
-            })
-        if (JSON.parse(getToken).token != token) 
+                message: 'Token is not stored',
+            });
+        if (JSON.parse(getToken).token != token)
             return makeSuccessResponse(res, 401, {
-                message: "Token is not the same in the store"
-            })
+                message: 'Token is not the same in the store',
+            });
         next();
-    }
-    catch(error)
-    {
+    } catch (error) {
         return makeSuccessResponse(res, 401, {
-            message: error.message 
-        })
+            message: error.message,
+        });
     }
-}
+};
 
 const verifyPermission = (reqRole) => {
     // vefiry token successfully
     return (req, res, next) => {
         const role = req?.userData?.role;
-        if(role)
-        {
-            if (!reqRole.find(valRole => { return valRole === role}))
+        if (role) {
+            if (
+                !reqRole.find((valRole) => {
+                    return valRole === role;
+                })
+            )
                 return makeSuccessResponse(res, 401, {
-                    message: 'permission not allowed'
+                    message: 'permission not allowed',
                 });
             next();
-        }else{
+        } else {
             return makeSuccessResponse(res, 401, {
-                message: 'no role found'
+                message: 'no role found',
             });
-        }   
-    }
-}
+        }
+    };
+};
 
-module.exports = {
-    verifyToken,
-    verifyRefreshToken,
-    verifyPermission
-}
+export { verifyToken, verifyRefreshToken, verifyPermission };

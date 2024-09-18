@@ -1,42 +1,50 @@
-const { readFileSync } =  require('fs');
-const path = require('path');
-const topics = require('./topics.mongo');
+import { readFileSync } from 'fs';
+import path from 'path';
+import topics from './topics.mongo.js';
 
+const __dirname = path.resolve();
 const findMaxId = async () => {
     const latestTopic = await topics.findOne().sort('-id');
-  
-    if(!latestTopic && !(latestTopic instanceof topics)){
-      return 0;
+
+    if (!latestTopic && !(latestTopic instanceof topics)) {
+        return 0;
     }
     return latestTopic.id;
 };
 
-const saveTopic = async(topic) => {
+const saveTopic = async (topic) => {
     try {
         let getTopic = await topics.findOne({
             name: topic?.name,
-            topicSkill: topic?.topicSkill
+            topicSkill: topic?.topicSkill,
         });
 
-        if(getTopic instanceof topics && getTopic)
-        {
+        if (getTopic instanceof topics && getTopic) {
             getTopic.name = topic?.name ? topic.name : getTopic.name;
-            getTopic.preview = topic?.preview ? topic.preview : getTopic.preview;
-            getTopic.topicSkill = topic?.topicSkill ? topic.topicSkill : getTopic.topicSkill;
+            getTopic.preview = topic?.preview
+                ? topic.preview
+                : getTopic.preview;
+            getTopic.topicSkill = topic?.topicSkill
+                ? topic.topicSkill
+                : getTopic.topicSkill;
             getTopic.level = topic?.level ? topic.level : getTopic.level;
-            getTopic.instruction = topic?.instruction ? topic.instruction : getTopic.instruction;
-            getTopic.preparationTask = topic?.preparationTask ? topic.preparationTask : getTopic.preparationTask;
+            getTopic.instruction = topic?.instruction
+                ? topic.instruction
+                : getTopic.instruction;
+            getTopic.preparationTask = topic?.preparationTask
+                ? topic.preparationTask
+                : getTopic.preparationTask;
             getTopic.tasks = topic?.tasks ? topic.tasks : getTopic.tasks;
             getTopic.media = topic?.media ? topic.media : getTopic.media;
-            getTopic.idProvider = topic?.idProvider ? topic.idProvider : getTopic.idProvider;
+            getTopic.idProvider = topic?.idProvider
+                ? topic.idProvider
+                : getTopic.idProvider;
 
             await getTopic.save();
             return getTopic.id;
-        }
-        else
-        {
+        } else {
             getTopic = await topics.create({
-                id: Number(await findMaxId() + 1),
+                id: Number((await findMaxId()) + 1),
                 name: topic.name,
                 preview: topic.preview,
                 topicSkill: topic.topicSkill,
@@ -46,31 +54,23 @@ const saveTopic = async(topic) => {
                 preparationTask: topic.preparationTask,
                 tasks: topic.tasks,
                 media: topic.media,
-                idProvider: topic?.idProvider ? topic.idProvider : 1
-            })
-            if(getTopic instanceof topics && getTopic)
-                return getTopic.id;
+                idProvider: topic?.idProvider ? topic.idProvider : 1,
+            });
+            if (getTopic instanceof topics && getTopic) return getTopic.id;
             throw new Error('Unable to create new Topic!');
         }
-    }catch(err){
+    } catch (err) {
         console.error(err.message);
     }
 };
-    
-const initDatatopic = async() => {
-    console.log('Init topic started');  
-    const json = readFileSync(
-      path.join(__dirname, '../data/topic.json')
-    );
+
+const initDatatopic = async () => {
+    console.log('Init topic started');
+    const json = readFileSync(path.join(__dirname, 'src/data/topic.json'));
     const readtopics = JSON.parse(json.toString());
-    for(const prop in readtopics)
-    {
+    for (const prop in readtopics) {
         await saveTopic(readtopics[prop]);
     }
 };
 
-module.exports = {
-    initDatatopic,
-    findMaxId,
-    saveTopic
-}
+export { initDatatopic, findMaxId, saveTopic };

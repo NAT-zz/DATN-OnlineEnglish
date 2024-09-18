@@ -1,11 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const { getComment, comment } = require('../app/controllers/Comment.controller');
+import express from 'express';
+import { getComment, comment } from '../app/controllers/Comment.controller.js';
 
-const { verifyToken, verifyPermission } = require('./auth');
-const { ROLES } = require('../utils/Constants');
+import { verifyToken, verifyPermission } from './auth.js';
+import { ROLES } from '../utils/Constants.js';
+const router = express.Router();
 
 router.get('/:type/:id', getComment);
-router.post('/:type/:id',verifyToken, comment);
+router.post('/:type/:id', verifyToken, comment);
 
-module.exports = router;
+export default router;

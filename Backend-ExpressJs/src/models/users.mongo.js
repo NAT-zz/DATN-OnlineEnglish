@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
-const { ROLES, COURSE } = require('../utils/Constants') 
+import mongoose from 'mongoose';
+import { ROLES, COURSE } from '../utils/Constants.js';
 
 const userSchema = new mongoose.Schema({
     id: {
         type: Number,
         unique: true,
-        require: true
+        require: true,
     },
     userName: {
         type: String,
@@ -33,36 +33,38 @@ const userSchema = new mongoose.Schema({
     avatar: {
         type: String,
         default: null,
-        required: false
+        required: false,
     },
     coin: {
         type: Number,
-        default: 0
+        default: 0,
     },
     role: {
         type: String,
-        enum: [ ROLES.ADMIN, ROLES.STUDENT, ROLES.TEACHER ],
-        default: ROLES.STUDENT
+        enum: [ROLES.ADMIN, ROLES.STUDENT, ROLES.TEACHER],
+        default: ROLES.STUDENT,
     },
     achivement: {
-        SelfStudy: [{
-            topicId: [Number],
-            courseType: {
-                type: String,
-                enum: [COURSE.A1, COURSE.B1, COURSE.B2, COURSE.C1],
-            }
-        }],  
+        SelfStudy: [
+            {
+                topicId: [Number],
+                courseType: {
+                    type: String,
+                    enum: [COURSE.A1, COURSE.B1, COURSE.B2, COURSE.C1],
+                },
+            },
+        ],
         OnlineCourse: [
             {
                 idCourse: Number,
-                teacherId: Number
-            }
-        ]
+                teacherId: Number,
+            },
+        ],
     },
     status: {
         type: Boolean,
         default: false,
-    }
-})
+    },
+});
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema);

@@ -6,7 +6,4 @@ const makeSuccessResponse = (res, status, data) => {
     });
 };
 
-
-module.exports = {
-    makeSuccessResponse,
-}
+export { makeSuccessResponse };

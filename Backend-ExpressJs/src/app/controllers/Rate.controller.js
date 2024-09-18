@@ -1,107 +1,97 @@
-const { makeSuccessResponse } = require('../../utils/Response');
-const { StatusCodes, ReasonPhrases } = require('http-status-codes');
-const { saveRate } = require('../../models/rates.model');
+import { makeSuccessResponse } from '../../utils/Response.js';
+import { StatusCodes, ReasonPhrases } from 'http-status-codes';
+import { saveRate } from '../../models/rates.model.js';
 
-const { RATE_TYPE } = require('../../utils/Constants')
-const rates = require('../../models/rates.mongo');
-const users = require('../../models/users.mongo');
+import { RATE_TYPE } from '../../utils/Constants.js';
+import rates from '../../models/rates.mongo.js';
+import users from '../../models/users.mongo.js';
 
-const getRate = async(req, res) => {
-    try{
-        if(!req.params.type || !req.params.id)
+const getRate = async (req, res) => {
+    try {
+        if (!req.params.type || !req.params.id)
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Type and id must be provided'
+                message: 'Type and id must be provided',
             });
         const type = req.params.type.toUpperCase();
         const id = req.params.id;
-        if(!(type in RATE_TYPE))
+        if (!(type in RATE_TYPE))
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Type not found'
+                message: 'Type not found',
             });
         const getRate = await saveRate({
             type,
-            idType: id
+            idType: id,
         });
-        if(getRate instanceof rates && getRate)
-        {   
+        if (getRate instanceof rates && getRate) {
             let calRate = 0;
-            getRate.content.forEach(val => {
-                calRate+=val.rateCount
+            getRate.content.forEach((val) => {
+                calRate += val.rateCount;
             });
             return makeSuccessResponse(res, StatusCodes.OK, {
-                data: (calRate/(getRate.content.length || 1)).toFixed(1)
+                data: (calRate / (getRate.content.length || 1)).toFixed(1),
             });
         }
         throw new Error('Something went wrong');
-
-    }catch(error)
-    {
+    } catch (error) {
         console.log(error);
         return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-            message: error.message
-        })
-    };
+            message: error.message,
+        });
+    }
 };
 
-const rate = async(req, res) => {
-    try{
-        if(!req.params.type || !req.params.id || !req.params.rateCount)
+const rate = async (req, res) => {
+    try {
+        if (!req.params.type || !req.params.id || !req.params.rateCount)
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Type, id and rate must be provided'
+                message: 'Type, id and rate must be provided',
             });
         const type = req.params.type.toUpperCase();
         const id = req.params.id;
         const rateCount = req.params.rateCount;
-        if(!(type in RATE_TYPE))
+        if (!(type in RATE_TYPE))
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Type not found'
+                message: 'Type not found',
             });
         const reqUserName = req?.userData?.sub;
         const getUser = await users.findOne({ userName: reqUserName });
-        if(getUser instanceof users && getUser)
-        {
+        if (getUser instanceof users && getUser) {
             const getRate = await saveRate({
                 type,
-                idType: id
+                idType: id,
             });
 
-            if(getRate instanceof rates && getRate)
-            {
-                if(getRate.content.find(val => val.idUser == getUser.id))
-                {
-                    getRate.content[getRate.content.indexOf(
-                        getRate.content.find(val => val.idUser == getUser.id)
-                    )].rateCount = rateCount;
-                }
-                else
-                {
+            if (getRate instanceof rates && getRate) {
+                if (getRate.content.find((val) => val.idUser == getUser.id)) {
+                    getRate.content[
+                        getRate.content.indexOf(
+                            getRate.content.find(
+                                (val) => val.idUser == getUser.id,
+                            ),
+                        )
+                    ].rateCount = rateCount;
+                } else {
                     getRate.content.push({
                         idUser: getUser.id,
-                        rateCount
+                        rateCount,
                     });
                 }
                 await getRate.save();
                 return makeSuccessResponse(res, StatusCodes.OK, {
-                    message: `Your rate for this ${type.toLowerCase()} has been submitted`
+                    message: `Your rate for this ${type.toLowerCase()} has been submitted`,
                 });
             }
             throw new Error('Something went wrong');
         }
         return makeSuccessResponse(res, StatusCodes.FORBIDDEN, {
-            message: 'No user found'
+            message: 'No user found',
         });
-
-    }catch(error)
-    {
+    } catch (error) {
         console.log(error);
         return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-            message: error.message
-        })
-    };
+            message: error.message,
+        });
+    }
 };
 
-
-module.exports = {
-   getRate,
-   rate
-}
+export { getRate, rate };

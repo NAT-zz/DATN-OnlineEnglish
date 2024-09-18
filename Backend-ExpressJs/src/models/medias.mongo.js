@@ -1,23 +1,23 @@
-const mongoose = require('mongoose');
-const random = require('mongoose-random');
+import mongoose from 'mongoose';
+import random from 'mongoose-random';
 
 const mediaSchema = new mongoose.Schema({
-    id: { 
-        type: Number, 
+    id: {
+        type: Number,
         require: true,
-        unique: true
+        unique: true,
     },
     titlePicture: {
         type: String,
-        unique: true
+        unique: true,
     },
     transcript: {
         type: String,
-        unique: true
+        unique: true,
     },
     audio: {
         type: String,
-    }
+    },
 });
 
-module.exports = mongoose.model('Media', mediaSchema);
+export default mongoose.model('Media', mediaSchema);

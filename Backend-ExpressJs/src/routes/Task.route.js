@@ -1,18 +1,24 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
 
-const { verifyToken, verifyPermission } = require('./auth');
-const {  getRandomTasks, checkAnswers, createGrammar, deleteGrammar, getGrammar } = require('../app/controllers/Task.controller');
-const { ROLES } = require('../utils/Constants');
+import { verifyToken, verifyPermission } from './auth.js';
+import {
+    getRandomTasks,
+    checkAnswers,
+    createGrammar,
+    deleteGrammar,
+    getGrammar,
+} from '../app/controllers/Task.controller.js';
+import { ROLES } from '../utils/Constants.js';
+const router = express.Router();
 
 // type: SELECTION, FILL
 router.get('/get-random/:skill/:type/:topic/:number', getRandomTasks);
 router.post('/check-answers/:skill/:type', checkAnswers);
 
-// CRUD 
+// CRUD
 router.get('/get/:skill/:id', getGrammar);
-router.post('/create/:skill', createGrammar); 
+router.post('/create/:skill', createGrammar);
 router.delete('/delete/:skill/:id', deleteGrammar);
 //edit
 
-module.exports = router;
+export default router;

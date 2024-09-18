@@ -1,17 +1,17 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const testSchema = new mongoose.Schema({
-    id: { 
-        type: Number, 
+    id: {
+        type: Number,
         require: true,
-        unique: true
+        unique: true,
     },
     name: {
         type: String,
         require: true,
-        unique: true
+        unique: true,
     },
-    grammarIds: [ Number ]
+    grammarIds: [Number],
 });
 
-module.exports = mongoose.model('Test', testSchema);
+export default mongoose.model('Test', testSchema);

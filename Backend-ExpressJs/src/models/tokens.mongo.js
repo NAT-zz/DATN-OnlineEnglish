@@ -1,25 +1,25 @@
-const mongoose = require('mongoose');
-const { TOKENS } = require('../utils/Constants');
+import mongoose from 'mongoose';
+import { TOKENS } from '../utils/Constants.js';
 
 const tokenSchema = new mongoose.Schema({
-    _userId: { 
-        type: Number, 
-        ref: 'User' 
+    _userId: {
+        type: Number,
+        ref: 'User',
     },
-    token: { 
-        type: String, 
-        required: true 
+    token: {
+        type: String,
+        required: true,
     },
     type: {
         type: String,
-        enum: [ TOKENS.EMAIL_VERIFY, TOKENS.PASSWORD_RESET ],
-        required: true
+        enum: [TOKENS.EMAIL_VERIFY, TOKENS.PASSWORD_RESET],
+        required: true,
     },
-    expireAt: { 
-        type: Date, 
-        default: Date.now, 
-        index: { expires: 60 }
-    }
+    expireAt: {
+        type: Date,
+        default: Date.now,
+        index: { expires: 60 },
+    },
 });
 
-module.exports = mongoose.model('Token', tokenSchema);
+export default mongoose.model('Token', tokenSchema);

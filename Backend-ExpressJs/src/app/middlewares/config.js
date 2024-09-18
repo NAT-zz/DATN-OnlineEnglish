@@ -1,20 +1,39 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const morgan = require('morgan');
-const route = require('../../routes/index');
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import morgan from 'morgan';
+import route from '../../routes/index.js';
+import cookieParser from 'cookie-parser';
+import { CONFIG } from '../../utils/Constants.js';
 
 const app = express();
-app.use(cors({
-    origin: "http://localhost:3000"
-}));
+const __dirname = path.resolve();
+
+app.use(
+    cors({
+        origin: `${CONFIG.DOMAIN_CLIENT}`,
+        credentials: true,
+    }),
+);
 app.use(morgan('combined'));
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', '..', '..', 'public')));
 
+if (process.env.NODE_ENV.trim() == 'production') {
+    app.use(express.static(path.join(__dirname, 'FrontEnd-ReactJs', 'dist')));
+
+    app.get('*', (req, res) => {
+        res.sendFile(
+            path.resolve(
+                path.join(__dirname, 'FrontEnd-ReactJs', 'dist', 'index.html'),
+            ),
+        );
+    });
+}
 // app.get('/*', (req, res) => {
 //     res.sendFile(path.join(__dirname, '..', '..', '..', 'public', 'index.html'))
 // })
-    
+
 route(app);
-module.exports = app;
+export default app;

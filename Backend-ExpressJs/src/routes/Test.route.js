@@ -1,16 +1,22 @@
-const express = require('express');
+import express from 'express';
+import {
+    createTest,
+    checkAnswers,
+    getTest,
+    deleteTest,
+    makeTestFromRandom,
+} from '../app/controllers/Test.controller.js';
+
+import { verifyToken, verifyPermission } from './auth.js';
+import { ROLES } from '../utils/Constants.js';
 const router = express.Router();
-const { createTest, checkAnswers, getTest, deleteTest, makeTestFromRandom } = require('../app/controllers/Test.controller');
 
-const { verifyToken, verifyPermission } = require('./auth');
-const { ROLES } = require('../utils/Constants')
-
-router.get('/:id', getTest)
+router.get('/:id', getTest);
 router.post('/create', createTest); // create
 router.delete('/:id', deleteTest);
 //edit
 
-router.get('/get-random',  makeTestFromRandom);
+router.get('/get-random', makeTestFromRandom);
 router.post('/check-answers', checkAnswers);
 
-module.exports = router;
+export default router;
