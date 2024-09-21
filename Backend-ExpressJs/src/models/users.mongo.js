@@ -17,10 +17,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         minLength: 3,
     },
-    fullName: {
-        type: String,
-        required: true,
-    },
     email: {
         type: String,
         required: true,
@@ -29,6 +25,7 @@ const userSchema = new mongoose.Schema({
     birthDate: {
         type: Date,
         default: null,
+        required: false,
     },
     avatar: {
         type: String,

@@ -25,15 +25,8 @@ const saveUser = async (user) => {
             getUser.passWord = user?.passWord
                 ? bcrypt.hashSync(user.passWord, 10)
                 : getUser.passWord;
-            getUser.fullName = user?.fullName
-                ? user.fullName
-                : getUser.fullName;
-            getUser.birthDate = user?.birthDate
-                ? new Date(user.birthDate)
-                : getUser.birthDate;
             getUser.role = user?.role ? user.role : getUser.role;
             getUser.status = user?.status ? user.status : getUser.status;
-            getUser.avatar = user?.avatar ? user.avatar : getUser.avatar;
             getUser.coin = user?.coin ? user.coin : getUser.coin;
             getUser.achivement = user?.achivement
                 ? user.achivement
@@ -47,8 +40,6 @@ const saveUser = async (user) => {
                 id: Number((await findMaxId()) + 1),
                 userName: user.userName,
                 passWord: bcrypt.hashSync(user.passWord, 10),
-                fullName: user.fullName,
-                birthDate: new Date(user.birthDate),
                 role: user?.role ? user.role : 'STUDENT',
                 status: user?.status ? user.status : false,
                 avatar: null,

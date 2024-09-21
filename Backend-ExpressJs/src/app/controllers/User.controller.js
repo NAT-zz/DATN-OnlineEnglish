@@ -1,34 +1,85 @@
 import { makeSuccessResponse } from '../../utils/Response.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
 import { StatusCodes } from 'http-status-codes';
 
 import users from '../../models/users.mongo.js';
 import tokens from '../../models/tokens.mongo.js';
-import { redisClient, getValue, setValue } from '../../services/redis.js';
+import { redisClient, setValue } from '../../services/redis.js';
 import { findMaxId } from '../../models/users.model.js';
-import { CONFIG, TOKENS } from '../../utils/Constants.js';
+import { TOKENS } from '../../utils/Constants.js';
 import { saveUser } from '../../models/users.model.js';
 import { streamUpload } from '../../models/medias.model.js';
 
 import { validateEmail } from '../../utils/Validate.js';
 import jwt from 'jsonwebtoken';
+import {
+    generateTokenAndSetCookie,
+    generateRefreshToken,
+} from '../../utils/GenerateTokens.js';
+import mongoose from 'mongoose';
+import { sendVerificationEmail } from '../../services/email.js';
 
-const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: 'olivertuan1310@gmail.com',
-        pass: 'pykwzozcafkwbfhz',
-    },
-});
+const getAllUsers = async (req, res) => {
+    try {
+        const getUsers = await users.find({});
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data: getUsers,
+        });
+    } catch (error) {
+        console.log('Error in getting users: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Error in getting users.',
+        });
+    }
+};
 
-const firstTes = (req, res) => {
-    return makeSuccessResponse(res, StatusCodes.OK, {
-        data: {
-            ok: req.userData,
-        },
-    });
+const deleteUser = async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+            message: 'Error in getting users.',
+        });
+    }
+
+    try {
+        const user = await users.findByIdAndDelete(id);
+        if (!user)
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                message: 'User not found',
+            });
+        else
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                message: 'User deleted successfully',
+            });
+    } catch (error) {
+        console.log('Error in deleting user: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: error.message,
+        });
+    }
+};
+
+const checkAuth = async (req, res, next) => {
+    try {
+        const user = await users
+            .findById(req.userData.userId)
+            .select('-passWord');
+        if (!user) {
+            return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
+                message: 'User not found.',
+            });
+        }
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data: {user},
+        });
+    } catch (err) {
+        console.log('Error in check-auth: ', err.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'User not found.',
+        });
+    }
 };
 
 const registerUser = async (req, res) => {
@@ -40,38 +91,41 @@ const registerUser = async (req, res) => {
         const reqEmail = req.body.email.trim();
         const reqPassword = req.body.password.trim();
         const reqUsername = req.body.username.trim();
-        const reqFullname = req.body?.fullname?.trim()
-            ? req.body.fullname
-            : null;
-        const reqBirthdate = req.body?.birthdate ? req.body.birthdate : null;
 
         if (!validateEmail(reqEmail))
-            return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
                 message: 'Invalid email',
             });
 
-        const getUser = await users.findOne({
-            $or: [{ email: reqEmail }, { userName: reqUsername }],
-        });
+        const getUser = await users.findOne({ email: reqEmail });
 
         if (getUser) {
             // if user exist in db
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'This email address / username is already existed.',
+                message: 'This email address is already existed.',
             });
         } else {
             const genId = Number((await findMaxId()) + 1);
             const user = new users({
                 id: genId,
-                fullName: reqFullname,
-                email: reqEmail,
                 userName: reqUsername,
+                email: reqEmail,
                 passWord: bcrypt.hashSync(reqPassword, 10),
-                birthDate: reqBirthdate,
             });
             const newUser = await user.save();
 
+            // jwt token saved in cookie
+            generateTokenAndSetCookie(res, {
+                userId: newUser._id,
+                role: newUser.role,
+            });
+            const refreshToken = generateRefreshToken(
+                newUser.userName,
+                newUser.role,
+            );
+
             if (newUser instanceof users && newUser) {
+                //generate email verify token
                 const token = new tokens({
                     _userId: newUser.id,
                     token: crypto.randomBytes(16).toString('hex'),
@@ -81,51 +135,29 @@ const registerUser = async (req, res) => {
 
                 if (newToken instanceof tokens && newToken) {
                     // send mail
-                    const mailOptions = {
-                        from: 'no-reply@example.com',
-                        to: newUser.email,
-                        subject: 'Account Verification Link',
-                        text:
-                            'Hello ' +
-                            newUser.userName +
-                            ',\n\n' +
-                            'Please verify your account by clicking the link: \nhttp://' +
-                            req.headers.host +
-                            '/api/' +
-                            'user' +
-                            '/confirmation/' +
+                    sendVerificationEmail(req, newUser, token);
+                    return makeSuccessResponse(res, StatusCodes.OK, {
+                        data: {
+                            user: {
+                                ...newUser._doc,
+                                passWord: undefined,
+                            },
+                            token: {
+                                refresh_token: refreshToken,
+                            },
+                        },
+                        message:
+                            'A verification email has been sent to ' +
                             newUser.email +
-                            '/' +
-                            token.token +
-                            '\n\nThank You!\n',
-                    };
-
-                    transporter.sendMail(mailOptions, (err) => {
-                        if (err) {
-                            return makeSuccessResponse(
-                                res,
-                                StatusCodes.INTERNAL_SERVER_ERROR,
-                                {
-                                    message:
-                                        'Technical Issue!, Please click on resend for verify your Email.',
-                                },
-                            );
-                        }
-
-                        return makeSuccessResponse(res, StatusCodes.OK, {
-                            message:
-                                'A verification email has been sent to ' +
-                                newUser.email +
-                                '. It will be expire after 1 minute. If you not get verification Email click on resend.',
-                        });
+                            '. It will be expire after 1 minute. If you not get verification Email click on resend.',
                     });
                 } else throw new Error('Something went wrong');
             } else throw new Error('Something went wrong');
         }
     } catch (error) {
-        console.log(error);
+        console.log('Error in signing up:', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error',
         });
     }
 };
@@ -142,34 +174,22 @@ const loginUser = async (req, res) => {
         const getUser = await users.findOne({ email: reqEmail });
         if (!getUser) {
             // if email not found in db
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
                 message:
                     'The email address ' +
                     reqEmail +
                     ' is not associated with any account. please check and try again!',
             });
         } else if (!bcrypt.compareSync(reqPasword, getUser.passWord)) {
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Wrong password',
-            });
-        } else if (!getUser.status) {
-            // if email not verified
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message:
-                    'Your Email has not been verified. Please click on resend',
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                message: 'Check you credentials and try again',
             });
         } else {
-            const accessToken = jwt.sign(
-                {
-                    sub: getUser.userName,
-                    role: getUser.role,
-                },
-                JWT_ACCESS_SECRET,
-                {
-                    expiresIn: JWT_ACCESS_TIME,
-                },
-            );
-            const refreshToken = await generateRefreshToken(
+            generateTokenAndSetCookie(res, {
+                userId: getUser._id,
+                role: getUser.role,
+            });
+            const refreshToken = generateRefreshToken(
                 getUser.userName,
                 getUser.role,
             );
@@ -177,25 +197,20 @@ const loginUser = async (req, res) => {
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: 'User successfully logged in.',
                 data: {
-                    userData: {
-                        username: getUser.userName,
-                        fullname: getUser.fullName,
-                        email: getUser.email,
-                        role: getUser.role,
-                        birthdate: getUser.birthDate,
-                        coin: getUser.coin,
-                        avatar: getUser.avatar,
+                    user: {
+                        ...getUser._doc,
+                        passWord: undefined,
                     },
                     token: {
-                        access_token: accessToken,
                         refresh_token: refreshToken,
                     },
                 },
             });
         }
     } catch (error) {
+        console.log('Error in logging in', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error',
         });
     }
 };
@@ -358,44 +373,6 @@ const resendLink = async (req, res) => {
     }
 };
 
-const logoutUser = async (req, res) => {
-    const username = req.userData.sub;
-    const token = req.token;
-
-    // remove the resfesh token
-    await redisClient.del(username.toString());
-
-    // if access_token is till valid => blacklist the current access_token
-    setValue('BL_' + username.toString(), token);
-
-    return makeSuccessResponse(res, StatusCodes.OK, {
-        message: 'Logout success',
-    });
-};
-
-const generateRefreshToken = async (username, role) => {
-    const refreshToken = jwt.sign(
-        {
-            sub: username,
-            role: role,
-        },
-        JWT_REFRESH_SECRET,
-        {
-            expiresIn: JWT_REFRESH_TIME,
-        },
-    );
-
-    try {
-        // const checkToken = await getValue(username.toString());
-        // if(checkToken)
-        setValue(username.toString(), JSON.stringify({ token: refreshToken }));
-    } catch (error) {
-        console.log(error.message);
-    }
-
-    return refreshToken;
-};
-
 const generateTokens = async (req, res) => {
     const { sub, role } = req.userData;
 
@@ -409,7 +386,7 @@ const generateTokens = async (req, res) => {
             expiresIn: JWT_ACCESS_TIME,
         },
     );
-    const refreshToken = await generateRefreshToken(sub, role);
+    const refreshToken = generateRefreshToken(sub, role);
 
     return makeSuccessResponse(res, StatusCodes.OK, {
         message: 'Success',
@@ -417,6 +394,21 @@ const generateTokens = async (req, res) => {
             access_token: accessToken,
             refresh_token: refreshToken,
         },
+    });
+};
+
+const logoutUser = async (req, res) => {
+    const username = req.userData.sub;
+    const token = req.token;
+
+    // remove the resfesh token
+    await redisClient.del(username.toString());
+
+    // if access_token is till valid => blacklist the current access_token
+    setValue('BL_' + username.toString(), token);
+
+    return makeSuccessResponse(res, StatusCodes.OK, {
+        message: 'Logout success',
     });
 };
 
@@ -615,7 +607,6 @@ const resetPassword = async (req, res) => {
 const getProfile = async (req, res) => {};
 
 export {
-    firstTes,
     registerUser,
     loginUser,
     verifyAccount,
@@ -626,4 +617,7 @@ export {
     resetPassword,
     editProfile,
     getProfile,
+    checkAuth,
+    deleteUser,
+    getAllUsers,
 };

@@ -1,7 +1,7 @@
 import express from 'express';
 import {
-    firstTes,
     registerUser,
+    getAllUsers,
     loginUser,
     verifyAccount,
     resendLink,
@@ -10,24 +10,26 @@ import {
     forgotPassword,
     resetPassword,
     editProfile,
+    checkAuth,
+    deleteUser,
 } from '../app/controllers/User.controller.js';
+import multer from 'multer';
 import { verifyToken, verifyRefreshToken, verifyPermission } from './auth.js';
 import { ROLES } from '../utils/Constants.js';
 
 const router = express.Router();
-router.get('/', firstTes);
-router.get('/test', verifyToken, verifyPermission([ROLES.ADMIN]), firstTes);
-
-router.get('/logout', verifyToken, logoutUser);
-router.get('/confirmation/:email/:token', verifyAccount);
-
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.post('/resend', resendLink);
-router.post('/token', verifyRefreshToken, generateTokens);
-
-import multer from 'multer';
 const fileUpload = multer();
+router.get('/users', getAllUsers);
+router.delete('/:id', deleteUser);
+
+router.get('/check-auth', verifyToken, checkAuth);
+router.post('/register', registerUser);
+router.get('/verify-email/:email/:token', verifyAccount);
+router.post('/resend', resendLink);
+router.post('/login', loginUser);
+router.get('/logout', verifyToken, logoutUser);
+
+router.post('/token', verifyRefreshToken, generateTokens);
 
 router.post(
     '/edit',

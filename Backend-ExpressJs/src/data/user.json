@@ -1,34 +1,23 @@
 {
     "1": {
-        "userName": "admin",
+        "userName": "Admin",
         "passWord": "admin123",
-        "fullName": "Tuan Admin",
         "email": "admin@gmail.com",
         "birthDate": "2001-10-13",
         "role": "ADMIN",
         "status": true
     },
     "2": {
-        "userName": "tuanoliver01",
+        "userName": "Nguyen Tuan",
         "passWord": "tuan123",
-        "fullName": "Nguyen Anh Tuan",
         "email": "tuanemail@gmail.com",
         "birthDate": "2001-10-13",
         "role": "TEACHER",
         "status": true
     },
     "3": {
-        "userName": "tuan not active",
-        "passWord": "tuan123",
-        "fullName": "Tuan not active",
-        "email": "notactive@gmail.com",
-        "birthDate": "2001-10-13",
-        "status": true
-    },
-    "4": {
-        "userName": "tuan nguyen",
+        "userName": "Tuan Nguyen",
         "passWord": "tuan@1310",
-        "fullName": "Nguyen Anh Tuan",
         "email": "tuannacv@gmail.com",
         "birthDate": "2001-10-13",
         "status": true
