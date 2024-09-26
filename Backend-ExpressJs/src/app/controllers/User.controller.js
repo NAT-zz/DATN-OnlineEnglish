@@ -18,7 +18,10 @@ import {
     generateRefreshToken,
 } from '../../utils/GenerateTokens.js';
 import mongoose from 'mongoose';
-import { sendVerificationEmail } from '../../services/email.js';
+import {
+    sendPasswordResetEmail,
+    sendVerificationEmail,
+} from '../../services/email.js';
 
 const getAllUsers = async (req, res) => {
     try {
@@ -72,7 +75,7 @@ const checkAuth = async (req, res, next) => {
             });
         }
         return makeSuccessResponse(res, StatusCodes.OK, {
-            data: {user},
+            data: { user },
         });
     } catch (err) {
         console.log('Error in check-auth: ', err.message);
@@ -135,7 +138,7 @@ const registerUser = async (req, res) => {
 
                 if (newToken instanceof tokens && newToken) {
                     // send mail
-                    sendVerificationEmail(req, newUser, token);
+                    await sendVerificationEmail(req, newUser, token);
                     return makeSuccessResponse(res, StatusCodes.OK, {
                         data: {
                             user: {
@@ -398,14 +401,13 @@ const generateTokens = async (req, res) => {
 };
 
 const logoutUser = async (req, res) => {
-    const username = req.userData.sub;
-    const token = req.token;
+    res.clearCookie('token');
 
     // remove the resfesh token
-    await redisClient.del(username.toString());
+    // await redisClient.del(username.toString());
 
     // if access_token is till valid => blacklist the current access_token
-    setValue('BL_' + username.toString(), token);
+    // setValue('BL_' + username.toString(), token);
 
     return makeSuccessResponse(res, StatusCodes.OK, {
         message: 'Logout success',
@@ -419,7 +421,7 @@ const forgotPassword = async (req, res) => {
                 message: 'Missing email',
             });
         else if (!validateEmail(req.body.email)) {
-            return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
                 message: 'Invalid email',
             });
         } else {
@@ -434,50 +436,69 @@ const forgotPassword = async (req, res) => {
                     type: TOKENS.PASSWORD_RESET,
                 });
                 const newToken = await token.save();
-
                 if (newToken instanceof tokens && newToken) {
-                    const url =
-                        '\nhttp://' +
-                        req.headers.host +
-                        '/user' +
-                        '/reset-password/' +
-                        newToken.token;
-                    const mailOptions = {
-                        from: 'no-reply@example.com',
-                        to: getUser.email,
-                        subject: 'Password reset',
-                        html: `Hello ${getUser.userName} <br></br><br></br> Click <a href="${url}">here</a> to reset your password <br></br><br></br> Thank You!`,
-                    };
-
-                    transporter.sendMail(mailOptions, (err) => {
-                        if (err) {
-                            return makeSuccessResponse(
-                                res,
-                                StatusCodes.INTERNAL_SERVER_ERROR,
-                                {
-                                    message:
-                                        'Technical Issue!, Please try again.',
-                                },
-                            );
-                        }
-
-                        return makeSuccessResponse(res, StatusCodes.OK, {
-                            message:
-                                'An email has been sent to ' +
-                                getUser.email +
-                                '. It will be expired after 1 minute.',
-                        });
+                    await sendPasswordResetEmail(
+                        req,
+                        getUser.email,
+                        newToken.token,
+                    );
+                    return makeSuccessResponse(res, StatusCodes.OK, {
+                        message:
+                            'A reset password link has been sent to your email if it exists. The link will be expired in 1 minute',
                     });
                 } else throw new Error('Something went wrong');
             } else
-                throw new Error(
-                    'No account corresponding with that email was found',
-                );
+                return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                    message:
+                        'No account corresponding with that email was found',
+                });
         }
     } catch (error) {
-        console.log(error);
+        console.log('Error in forgot-email: ', error);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error',
+        });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        if (req.body.password !== req.body.confirmpassword)
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Password not match',
+            });
+        const passwordReset = await tokens.findOne({
+            type: TOKENS.PASSWORD_RESET,
+            token: req.body.token,
+        });
+        if (passwordReset instanceof tokens && passwordReset) {
+            const getUser = await users.findOne({
+                id: passwordReset._userId,
+            });
+            if (getUser instanceof users && getUser) {
+                getUser.passWord = bcrypt.hashSync(
+                    req.body.password.trim(),
+                    10,
+                );
+                await getUser.save();
+                await tokens.deleteOne({
+                    type: TOKENS.PASSWORD_RESET,
+                    _userId: passwordReset._userId,
+                });
+                return makeSuccessResponse(res, StatusCodes.OK, {
+                    message:
+                        'Reset password successfully, please login with your new password',
+                });
+            } else throw new Error('User not found');
+        } else {
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Your reset password link may have expired',
+            });
+        }
+    } catch (error) {
+        console.log('Error in reset password: ', error);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
         });
     }
 };
@@ -556,49 +577,6 @@ const editProfile = async (req, res) => {
         } else throw new Error('Incorrect user information');
     } catch (error) {
         return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-            message: error.message,
-        });
-    }
-};
-
-const resetPassword = async (req, res) => {
-    try {
-        if (req.body.password !== req.body.confirmpassword)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Password not match',
-            });
-        const passwordReset = await tokens.findOne({
-            type: TOKENS.PASSWORD_RESET,
-            token: req.body.token,
-        });
-        if (passwordReset instanceof tokens && passwordReset) {
-            const getUser = await users.findOne({
-                id: passwordReset._userId,
-            });
-            if (getUser instanceof users && getUser) {
-                getUser.passWord = bcrypt.hashSync(
-                    req.body.password.trim(),
-                    10,
-                );
-                await getUser.save();
-                await tokens.deleteOne({
-                    type: TOKENS.PASSWORD_RESET,
-                    _userId: passwordReset._userId,
-                });
-                return makeSuccessResponse(res, StatusCodes.OK, {
-                    message:
-                        'Reset password successfully, please login with your new password',
-                });
-            } else throw new Error('User not found');
-        } else {
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message:
-                    'Your reset password link may have expired. Please try again.',
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: error.message,
         });
     }

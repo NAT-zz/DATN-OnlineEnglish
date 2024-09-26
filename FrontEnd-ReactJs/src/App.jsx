@@ -80,10 +80,6 @@ function App() {
                     }
                 />
                 <Route
-                    path="/forgot-password"
-                    element={<FloatingBackground comp={'forgot'} />}
-                />
-                <Route
                     path="/verify-email"
                     element={<FloatingBackground comp={'verify'} />}
                 />

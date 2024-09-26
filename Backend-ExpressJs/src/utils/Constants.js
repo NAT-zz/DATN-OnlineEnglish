@@ -10,6 +10,7 @@ const CONFIG = {
     REDIS_PORT: process.env.REDIS_PORT,
     REDIS_HOST: process.env.REDIS_HOST,
     DOMAIN_CLIENT: process.env.DOMAIN_CLIENT,
+    DOMAIN_SERVER: process.env.DOMAIN_SERVER,
     CLOUDINARY_URL: process.env.CLOUDINARY_URL,
 };
 

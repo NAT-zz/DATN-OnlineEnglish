@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/AuthStore';
 import { ArrowLeft, Loader, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -7,10 +7,14 @@ import Input from '../components/Input';
 
 const ForgotPasswordPage = () => {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const {isLoading, forgotPassword} = useAuthStore();
+    const { isLoading, forgotPassword, error, resetUlt } = useAuthStore();
+
+    useEffect(() => {
+        resetUlt();
+    }, [resetUlt]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         await forgotPassword(email);
@@ -32,8 +36,8 @@ const ForgotPasswordPage = () => {
                 {!isSubmitted ? (
                     <form onSubmit={handleSubmit}>
                         <p className="text-gray-300 mb-6 text-center">
-                            Enter your email address and we'll send you a link
-                            to reset your password.
+                            Enter your email address and a link to reset your
+                            password will be sent to your email
                         </p>
                         <Input
                             icon={Mail}
@@ -43,6 +47,11 @@ const ForgotPasswordPage = () => {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
+                        {error && (
+                            <p className="text-red-500 font-semibold mb-2 text-center">
+                                {error}
+                            </p>
+                        )}
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}

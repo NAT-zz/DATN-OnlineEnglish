@@ -5,10 +5,18 @@ const API_URL = 'http://localhost:5000/api/user';
 axios.defaults.withCredentials = true;
 export const useAuthStore = create((set) => ({
     user: null,
+    message: null,
     error: null,
     isAuthenticated: false,
     isLoading: false,
     isCheckingAuth: true,
+
+    resetUlt: () => {
+        set({
+            error: null,
+            message: null
+        })
+    },
 
     signup: async (email, password, username) => {
         set({ isLoading: true, error: null });
@@ -24,7 +32,7 @@ export const useAuthStore = create((set) => ({
                 isLoading: false,
             });
         } catch (error) {
-            console.log(error.message);
+            console.log(error);
             set({
                 error: error?.response.data.message || 'Error signing up',
                 isLoading: false,
@@ -47,7 +55,7 @@ export const useAuthStore = create((set) => ({
             });
             return response.data;
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log(error);
             set({
                 error: error.response.data.message || 'Error signing up',
                 isLoading: false,
@@ -70,8 +78,9 @@ export const useAuthStore = create((set) => ({
                 error: null,
             });
         } catch (error) {
+            console.log(error);
             set({
-                error: error.response.data.message || 'Error logging up',
+                error: error.response.data.message || 'Error logging in',
                 isLoading: false,
             });
             throw error;
@@ -85,63 +94,79 @@ export const useAuthStore = create((set) => ({
         set({ isCheckingAuth: true, error: null });
         try {
             const response = await axios.get(`${API_URL}/check-auth`);
-            console.log("checkAuth: ", response.data.data.user);
+            console.log('checkAuth: ', response.data.data.user);
             set({
                 user: response.data.data.user,
                 isAuthenticated: true,
                 isCheckingAuth: false,
             });
         } catch (error) {
-            console.log(error.message);
+            console.log(error);
             set({ error: null, isCheckingAuth: false, isAuthenticated: false });
         }
     },
 
-    // logout: async () => {
-    //     set({ isLoading: true, error: null });
-    //     try {
-    //         await axios.post(`${API_URL}/logout`);
-    //         set({
-    //             user: null,
-    //             isAuthenticated: false,
-    //             error: null,
-    //             isLoading: false,
-    //         });
-    //     } catch (error) {
-    //         set({ error: 'Error logging out', isLoading: false });
-    //         throw error;
-    //     }
-    // },
+    forgotPassword: async (email) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await axios.post(`${API_URL}/forgot-password`, {
+                email,
+            });
+            set({
+                message: response.data.message,
+            });
+            console.log('Server response: ', response.data.message);
+        } catch (error) {
+            error.response.data.message
+                ? console.log('Server error: ', error.response.data.message)
+                : console.log('Client error: ', error) &
+                  set({
+                      error: 'Error sending reset password email',
+                  });
+        }
+        set({ isLoading: false });
+    },
 
-    // resetPassword: async (token, password, confirmPassword) => {
-    //     set({ isLoading: true, error: null });
-    //     try {
-    //         const response = await axios.post(
-    //             `${API_URL}/reset-password/${token}`,
-    //             { password, repeat: confirmPassword },
-    //         );
-    //         set({ message: response.data.message, isLoading: false });
-    //     } catch (error) {
-    //         set({
-    //             isLoading: false,
-    //             error:
-    //                 error.response.data.message || 'Error resetting password',
-    //         });
-    //         throw error;
-    //     }
-    // },
+    resetPassword: async (token, password, confirmPassword) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await axios.post(`${API_URL}/reset-password`, {
+                password,
+                confirmpassword: confirmPassword,
+                token,
+            });
+            set({
+                message: response.data.message,
+            });
+            console.log('Server response: ', response.data.message);
+        } catch (error) {
+            error.response.data.message
+                ? set({
+                      error: error.response.data.message,
+                  }) &
+                  console.log('Server error: ', error.response.data.message)
+                : console.log('Client error: ', error) &
+                  set({
+                      error: 'Error sending reset password email',
+                  });
+        }
+        set({ isLoading: false });
+    },
 
-    // forgotPassword: async (email) => {
-    // 	set({ isLoading: true, error: null });
-    // 	try {
-    // 		const response = await axios.post(`${API_URL}/forgot-password`, { email });
-    // 		set({ message: response.data.message, isLoading: false });
-    // 	} catch (error) {
-    // 		set({
-    // 			isLoading: false,
-    // 			error: error.response.data.message || "Error sending reset password email",
-    // 		});
-    // 		throw error;
-    // 	}
-    // },
+    logout: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            await axios.post(`${API_URL}/logout`);
+            set({
+                user: null,
+                isAuthenticated: false,
+                error: null,
+                isLoading: false,
+            });
+        } catch (error) {
+            console.log(error);
+            set({ error: 'Error logging out', isLoading: false });
+            throw error;
+        }
+    },
 }));
