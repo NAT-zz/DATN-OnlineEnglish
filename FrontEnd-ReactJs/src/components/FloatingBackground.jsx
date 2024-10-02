@@ -4,7 +4,6 @@ import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import FloatingShape from './FloatingShape';
 import EmailVerificationPage from '../pages/EmailVerificationPage';
 import DashboardPage from '../pages/DashboardPage';
-
 import { Toaster } from 'react-hot-toast';
 import ResetPasswordPage from '../pages/ResetPassordPage';
 

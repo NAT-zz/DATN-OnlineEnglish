@@ -64,6 +64,20 @@ const deleteUser = async (req, res, next) => {
     }
 };
 
+const deleteLastestUser = async (req, res, next) => {
+    try {
+        const getUsers = await users.findOneAndDelete({}).sort('-id').limit(1);
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            message: 'Success',
+        });
+    } catch (error) {
+        console.log('Error in deleting latest user: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: error.message,
+        });
+    }
+};
+
 const checkAuth = async (req, res, next) => {
     try {
         const user = await users
@@ -80,7 +94,7 @@ const checkAuth = async (req, res, next) => {
     } catch (err) {
         console.log('Error in check-auth: ', err.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: 'User not found.',
+            message: 'Server error',
         });
     }
 };
@@ -150,9 +164,7 @@ const registerUser = async (req, res) => {
                             },
                         },
                         message:
-                            'A verification email has been sent to ' +
-                            newUser.email +
-                            '. It will be expire after 1 minute. If you not get verification Email click on resend.',
+                            'Check your email for verification, the link will be expired after 1 minute',
                     });
                 } else throw new Error('Something went wrong');
             } else throw new Error('Something went wrong');
@@ -160,7 +172,7 @@ const registerUser = async (req, res) => {
     } catch (error) {
         console.log('Error in signing up:', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: 'Server error',
+            message: 'Server error, try again later!',
         });
     }
 };
@@ -213,7 +225,7 @@ const loginUser = async (req, res) => {
     } catch (error) {
         console.log('Error in logging in', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: 'Server error',
+            message: 'Server error, try again later!',
         });
     }
 };
@@ -262,7 +274,7 @@ const verifyAccount = async (req, res) => {
             } else {
                 return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
                     message:
-                        'We were unable to find a user for this verification. Please SignUp!',
+                        'We were unable to find a user for this verification. Please Signup!',
                 });
             }
         } else {
@@ -272,9 +284,9 @@ const verifyAccount = async (req, res) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        console.log('Error in verification: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error, try again later!',
         });
     }
 };
@@ -298,7 +310,7 @@ const resendLink = async (req, res) => {
             if (getUser.status)
                 return makeSuccessResponse(res, StatusCodes.OK, {
                     message:
-                        'This account has been already verified. Please log in.',
+                        'This account has been already verified. Please Login.',
                 });
             else {
                 // delete the old ones
@@ -318,47 +330,19 @@ const resendLink = async (req, res) => {
 
                 // send mail
                 if (newToken instanceof tokens && newToken) {
-                    const mailOptions = {
-                        from: 'no-reply@example.com',
-                        to: getUser.email,
-                        subject: 'Account Verification Link',
-                        text:
-                            'Hello ' +
-                            getUser.userName +
-                            ',\n\n' +
-                            'Please verify your account by clicking the link: \nhttp://' +
-                            req.headers.host +
-                            '/api/' +
-                            'user' +
-                            '/confirmation/' +
-                            getUser.email +
-                            '/' +
-                            newToken.token +
-                            '\n\nThank You!\n',
-                    };
-
-                    transporter.sendMail(mailOptions, (err) => {
-                        if (err) {
-                            return makeSuccessResponse(
-                                res,
-                                StatusCodes.INTERNAL_SERVER_ERROR,
-                                {
-                                    message:
-                                        'Technical Issue!, Please click on resend for verify your Email.',
-                                },
-                            );
-                        }
-
-                        return makeSuccessResponse(
-                            res,
-                            StatusCodes.BAD_REQUEST,
-                            {
-                                message:
-                                    'A verification email has been sent to ' +
-                                    getUser.email +
-                                    '. It will be expire after 1 minutes. If you not get verification Email click on resend token.',
+                    // send mail
+                    await sendVerificationEmail(req, getUser, newToken);
+                    return makeSuccessResponse(res, StatusCodes.OK, {
+                        data: {
+                            user: {
+                                ...getUser._doc,
+                                passWord: undefined,
                             },
-                        );
+                        },
+                        message:
+                            'A verification email has been sent to ' +
+                            newUser.email +
+                            '. It will be expire after 1 minute. If you not get verification Email click on resend.',
                     });
                 } else throw new Error('Something went wrong');
             }
@@ -369,9 +353,9 @@ const resendLink = async (req, res) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        console.log('Error in resend link: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error, try again later!',
         });
     }
 };
@@ -598,4 +582,5 @@ export {
     checkAuth,
     deleteUser,
     getAllUsers,
+    deleteLastestUser,
 };

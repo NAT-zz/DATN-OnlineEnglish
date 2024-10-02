@@ -10,11 +10,12 @@ const SignUpPage = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { signup, error, isLoading, resetUlt } = useAuthStore();
+    const { signup, error, message, isLoading, resetUlt } = useAuthStore();
     const navigate = useNavigate();
 
     useEffect(() => {
         resetUlt();
+        console.log('effect used');
     }, [resetUlt]);
 
     const handleSignUp = async (e) => {
@@ -22,9 +23,13 @@ const SignUpPage = () => {
 
         try {
             await signup(email, password, name);
-            navigate('/');
+
+            setName('');
+            setEmail('');
+            setPassword('');
         } catch (error) {
-            console.log(error);
+            console.log(error.message);
+            setPassword('');
         }
     };
 
@@ -63,9 +68,13 @@ const SignUpPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     ></Input>
-                    {error && (
+                    {error ? (
                         <p className="text-red-500 font-semibold mt-2">
                             {error}
+                        </p>
+                    ) : (
+                        <p className="text-green-500 font-semibold mt-2 text-center">
+                            {message}
                         </p>
                     )}
                     <PasswordStrengthMeter password={password} />

@@ -1,9 +1,10 @@
-import { PlusSquareIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import {
     Button,
     Container,
     Flex,
     HStack,
+    Icon,
     Text,
     useColorMode,
 } from '@chakra-ui/react';
@@ -11,33 +12,39 @@ import { LuSun } from 'react-icons/lu';
 import { IoMoon } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/AuthStore';
+import { LuBrainCircuit } from 'react-icons/lu';
 
 const Navbar = () => {
     const { colorMode, toggleColorMode } = useColorMode();
-    const { isAuthenticated, user } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
 
     return (
-        <Container maxW={'1140px'} px={4}>
+        <Container maxW={'full'} height={'100px'}>
             <Flex
-                h={16}
+                h={14}
                 alignItems={'center'}
-                justifyContent={'space-between'}
+                margin={1}
                 flexDir={{
                     base: 'column',
                     sm: 'row',
                 }}
             >
-                <Text
-                    bgGradient="linear(to-l, #7928CA, #FF0080)"
-                    bgClip="text"
-                    fontSize={{ base: '22', sm: '28' }}
-                    fontWeight="extrabold"
-                    textTransform={'uppercase'}
-                >
-                    <Link to={'/'}>Product Store</Link>
-                </Text>
-
-                <HStack spacing={2} alignItems={'center'}>
+                <HStack>
+                    <Icon
+                        as={LuBrainCircuit}
+                        boxSize={6}
+                        marginTop={1}
+                        color={'#7928CA'}
+                    />
+                    <Text
+                        bgGradient="linear(to-l, #7928CA, #FF0080)"
+                        bgClip="text"
+                        fontSize={{ base: '22', sm: '28' }}
+                    >
+                        <Link to={'/'}>E-Learning</Link>
+                    </Text>
+                </HStack>
+                <HStack spacing={2} alignItems={'center'} marginLeft={'auto'}>
                     {isAuthenticated ? (
                         <Link to={'/dashboard'}>
                             <Button>
