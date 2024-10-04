@@ -1,13 +1,14 @@
 import jwt from 'jsonwebtoken';
-import { ROLES, CONFIG } from '../utils/Constants.js';
+import { CONFIG } from '../utils/Constants.js';
 import { makeSuccessResponse } from '../utils/Response.js';
-import { redisClient, getValue } from '../services/redis.js';
+import { getValue } from '../services/redis.js';
 import { StatusCodes } from 'http-status-codes';
+import users from './users.mongo.js';
 
 const verifyToken = async (req, res, next) => {
     const token = req.cookies.token;
     if (!token) {
-        return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
+        return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
             message: 'No token provided',
         });
     }
@@ -21,11 +22,19 @@ const verifyToken = async (req, res, next) => {
         //   }
         console.log(decoded);
 
-        if (!decoded) {
+        if (!decoded || (await getValue(decoded.userId))) {
             return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
                 message: 'Token is invalid or expired',
             });
         }
+
+        const user = await users.findById(decoded.userId).select('-password');
+        if (!(user && user instanceof users)) {
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                message: 'User not found',
+            });
+        }
+
         req.userData = decoded;
 
         next();
@@ -33,37 +42,6 @@ const verifyToken = async (req, res, next) => {
         console.log('Error is verifying token: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error',
-        });
-    }
-};
-
-const verifyRefreshToken = async (req, res, next) => {
-    const token = req.body?.token;
-    if (!token)
-        return makeSuccessResponse(res, 401, {
-            message: 'Invalid request',
-        });
-
-    try {
-        const decoded = jwt.verify(token, JWT_REFRESH_SECRET);
-        req.userData = decoded;
-        // { sub: 'admin', role: 'ADMIN', iat: 1668352408, exp: 1668352438 }
-        console.log(decoded);
-
-        // verify if token is in store or not
-        const getToken = await getValue(decoded.sub.toString());
-        if (!getToken)
-            return makeSuccessResponse(res, 401, {
-                message: 'Token is not stored',
-            });
-        if (JSON.parse(getToken).token != token)
-            return makeSuccessResponse(res, 401, {
-                message: 'Token is not the same in the store',
-            });
-        next();
-    } catch (error) {
-        return makeSuccessResponse(res, 401, {
-            message: error.message,
         });
     }
 };
@@ -90,4 +68,4 @@ const verifyPermission = (reqRole) => {
     };
 };
 
-export { verifyToken, verifyRefreshToken, verifyPermission };
+export { verifyToken, verifyPermission };

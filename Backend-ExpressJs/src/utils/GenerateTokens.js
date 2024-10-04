@@ -6,29 +6,6 @@ const generateVerificationCode = () => {
     return Math.floor(100000 + Math.random() * 90000).toString();
 };
 
-const generateRefreshToken = (username, role) => {
-    const refreshToken = jwt.sign(
-        {
-            sub: username,
-            role: role,
-        },
-        CONFIG.JWT_REFRESH_SECRET,
-        {
-            expiresIn: CONFIG.JWT_REFRESH_TIME,
-        },
-    );
-
-    try {
-        // const checkToken = await getValue(username.toString());
-        // if(checkToken)
-        setValue(username.toString(), JSON.stringify({ token: refreshToken }));
-    } catch (error) {
-        console.log(error.message);
-    }
-
-    return refreshToken;
-};
-
 const generateTokenAndSetCookie = (res, userData) => {
     const accessToken = jwt.sign(
         {
@@ -54,5 +31,4 @@ const generateTokenAndSetCookie = (res, userData) => {
 export {
     generateVerificationCode,
     generateTokenAndSetCookie,
-    generateRefreshToken,
 };

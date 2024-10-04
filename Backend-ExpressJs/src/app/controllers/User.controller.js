@@ -5,23 +5,21 @@ import { StatusCodes } from 'http-status-codes';
 
 import users from '../../models/users.mongo.js';
 import tokens from '../../models/tokens.mongo.js';
-import { redisClient, setValue } from '../../services/redis.js';
+import conversations from '../../models/conversations.mongo.js';
+import messages from 'assertions/messages.mongo.js';
 import { findMaxId } from '../../models/users.model.js';
 import { TOKENS } from '../../utils/Constants.js';
 import { saveUser } from '../../models/users.model.js';
 import { streamUpload } from '../../models/medias.model.js';
 
 import { validateEmail } from '../../utils/Validate.js';
-import jwt from 'jsonwebtoken';
-import {
-    generateTokenAndSetCookie,
-    generateRefreshToken,
-} from '../../utils/GenerateTokens.js';
+import { generateTokenAndSetCookie } from '../../utils/GenerateTokens.js';
 import mongoose from 'mongoose';
 import {
     sendPasswordResetEmail,
     sendVerificationEmail,
 } from '../../services/email.js';
+import { getReceiverSocketId } from '../../services/socket.js';
 
 const getAllUsers = async (req, res) => {
     try {
@@ -136,10 +134,6 @@ const registerUser = async (req, res) => {
                 userId: newUser._id,
                 role: newUser.role,
             });
-            const refreshToken = generateRefreshToken(
-                newUser.userName,
-                newUser.role,
-            );
 
             if (newUser instanceof users && newUser) {
                 //generate email verify token
@@ -158,9 +152,6 @@ const registerUser = async (req, res) => {
                             user: {
                                 ...newUser._doc,
                                 passWord: undefined,
-                            },
-                            token: {
-                                refresh_token: refreshToken,
                             },
                         },
                         message:
@@ -204,10 +195,6 @@ const loginUser = async (req, res) => {
                 userId: getUser._id,
                 role: getUser.role,
             });
-            const refreshToken = generateRefreshToken(
-                getUser.userName,
-                getUser.role,
-            );
 
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: 'User successfully logged in.',
@@ -215,9 +202,6 @@ const loginUser = async (req, res) => {
                     user: {
                         ...getUser._doc,
                         passWord: undefined,
-                    },
-                    token: {
-                        refresh_token: refreshToken,
                     },
                 },
             });
@@ -360,38 +344,10 @@ const resendLink = async (req, res) => {
     }
 };
 
-const generateTokens = async (req, res) => {
-    const { sub, role } = req.userData;
-
-    const accessToken = jwt.sign(
-        {
-            sub: sub,
-            role: role,
-        },
-        JWT_ACCESS_SECRET,
-        {
-            expiresIn: JWT_ACCESS_TIME,
-        },
-    );
-    const refreshToken = generateRefreshToken(sub, role);
-
-    return makeSuccessResponse(res, StatusCodes.OK, {
-        message: 'Success',
-        data: {
-            access_token: accessToken,
-            refresh_token: refreshToken,
-        },
-    });
-};
-
 const logoutUser = async (req, res) => {
-    res.clearCookie('token');
-
-    // remove the resfesh token
-    // await redisClient.del(username.toString());
-
     // if access_token is till valid => blacklist the current access_token
-    // setValue('BL_' + username.toString(), token);
+    await setValue(req.userData.userId, req.cookies.token);
+    res.clearCookie('token');
 
     return makeSuccessResponse(res, StatusCodes.OK, {
         message: 'Logout success',
@@ -566,6 +522,90 @@ const editProfile = async (req, res) => {
     }
 };
 
+const getMessages = async (req, res, next) => {
+    try {
+        if (!req.params.id) {
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Missing required information',
+            });
+        }
+
+        const { id: userToChatId } = req.params;
+        const senderId = req.userData.user._id;
+
+        const conversation = await conversations
+            .findOne({
+                participants: { $all: [senderId, userToChatId] },
+            })
+            .populate('messages'); // NOT REFERENCE BUT ACTUAL MESSAGES
+
+        if (!conversation) return makeSuccessResponse(res, StatusCodes.OK, {});
+
+        const messages = conversation.messages;
+
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data: messages,
+        });
+    } catch (error) {
+        console.log('Error in getMessages: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+
+const sendMessage = async (req, res, next) => {
+    try {
+        if (!req.params.id) {
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Missing required information',
+            });
+        }
+
+        const { message } = req.body;
+        const { id: receiverId } = req.params;
+        const senderId = req.userData.userId;
+
+        let conversation = await conversations.findOne({
+            participants: { $all: [senderId, receiverId] },
+        });
+
+        if (!conversation) {
+            conversation = await conversations.create({
+                participants: [senderId, receiverId],
+            });
+        }
+
+        const newMessage = new messages({
+            senderId,
+            receiverId,
+            message,
+        });
+
+        if (newMessage) {
+            conversation.messages.push(newMessage._id);
+        }
+
+        await Promise.all([conversation.save(), newMessage.save()]);
+
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('newMessage', newMessage); // send events to specific client
+        }
+
+        return makeSuccessResponse(res, StatusCodes.CREATED, {
+            data: {
+                newMessage,
+            },
+        });
+    } catch (error) {
+        console.log('Error in sendMessage: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+
 const getProfile = async (req, res) => {};
 
 export {
@@ -574,7 +614,6 @@ export {
     verifyAccount,
     resendLink,
     logoutUser,
-    generateTokens,
     forgotPassword,
     resetPassword,
     editProfile,
@@ -583,4 +622,6 @@ export {
     deleteUser,
     getAllUsers,
     deleteLastestUser,
+    getMessages,
+    sendMessage,
 };

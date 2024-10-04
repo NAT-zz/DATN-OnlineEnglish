@@ -4,9 +4,7 @@ dotenv.config();
 const CONFIG = {
     URL_MONGO: process.env.URL_MONGO,
     JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
-    JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
     JWT_ACCESS_TIME: process.env.JWT_ACCESS_TIME,
-    JWT_REFRESH_TIME: process.env.JWT_REFRESH_TIME,
     REDIS_PORT: process.env.REDIS_PORT,
     REDIS_HOST: process.env.REDIS_HOST,
     DOMAIN_CLIENT: process.env.DOMAIN_CLIENT,

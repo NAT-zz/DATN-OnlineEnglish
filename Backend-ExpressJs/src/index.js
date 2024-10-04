@@ -8,8 +8,6 @@ import { initDataGrammar } from './models/grammars.model.js';
 import { initDataTest } from './models/tests.model.js';
 import { initDataMedia } from './models/medias.model.js';
 import { initDatatopic } from './models/topics.model.js';
-import { initDataTip } from './models/tips.model.js';
-import { initDataRate } from './models/rates.model.js';
 import { initDataComment } from './models/comments.model.js';
 
 const PORT = process.env.SERVER_PORT;
@@ -23,9 +21,7 @@ const server = http.createServer(app);
     await initDataTest();
     await initDataMedia();
     await initDatatopic();
-    await initDataTip();
 
-    await initDataRate();
     await initDataComment();
 
     server.listen(PORT, () => {

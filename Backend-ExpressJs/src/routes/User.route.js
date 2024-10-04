@@ -6,16 +6,17 @@ import {
     verifyAccount,
     resendLink,
     logoutUser,
-    generateTokens,
     forgotPassword,
     resetPassword,
     editProfile,
     checkAuth,
     deleteUser,
     deleteLastestUser,
+    getMessages,
+    sendMessage,
 } from '../app/controllers/User.controller.js';
 import multer from 'multer';
-import { verifyToken, verifyRefreshToken, verifyPermission } from './auth.js';
+import { verifyToken, verifyPermission } from './auth.js';
 import { ROLES } from '../utils/Constants.js';
 
 const router = express.Router();
@@ -35,7 +36,6 @@ router.post('/reset-password', resetPassword);
 router.post('/logout', verifyToken, logoutUser);
 
 router.post('/resend', resendLink);
-router.post('/token', verifyRefreshToken, generateTokens);
 router.post(
     '/edit',
     fileUpload.single('avatar'),
@@ -43,6 +43,9 @@ router.post(
     verifyPermission([ROLES.ADMIN, ROLES.STUDENT, ROLES.TEACHER]),
     editProfile,
 );
+
+router.get('/message/:id', verifyToken, getMessages);
+router.post('/message/send/:id', verifyToken, sendMessage);
 
 //achivement
 export default router;
