@@ -16,7 +16,7 @@ const findMaxId = async () => {
 const saveUser = async (user) => {
     try {
         let getUser = await users.findOne({
-            $or: [{ email: user?.email }, { userName: user?.userName }],
+            email: user?.email,
         });
         if (getUser instanceof users && getUser) {
             getUser.userName = user?.userName
@@ -25,25 +25,28 @@ const saveUser = async (user) => {
             getUser.passWord = user?.passWord
                 ? bcrypt.hashSync(user.passWord, 10)
                 : getUser.passWord;
+            getUser.email = user?.email ? user.email : getUser.email;
+            getUser.birthDate = user?.birthDate
+                ? user.birthDate
+                : getUser.birthDate;
+            getUser.avatar = user?.avatar ? user.avatar : getUser.avatar;
+            getUser.description = user?.description ? user.description : getUser.description;
             getUser.role = user?.role ? user.role : getUser.role;
             getUser.status = user?.status ? user.status : getUser.status;
-            getUser.coin = user?.coin ? user.coin : getUser.coin;
-            getUser.achivement = user?.achivement
-                ? user.achivement
-                : getUser.achivement;
+            getUser.studying = user?.studying
+                ? user.studying
+                : getUser.studying;
 
             await getUser.save();
             return getUser;
         } else {
             getUser = await users.create({
-                email: user.email,
                 id: Number((await findMaxId()) + 1),
+                email: user.email,
                 userName: user.userName,
                 passWord: bcrypt.hashSync(user.passWord, 10),
                 role: user?.role ? user.role : 'STUDENT',
                 status: user?.status ? user.status : false,
-                avatar: null,
-                coin: 0,
             });
             if (getUser instanceof user && getUser) return getUser;
             throw new Error('Unable to create new User');

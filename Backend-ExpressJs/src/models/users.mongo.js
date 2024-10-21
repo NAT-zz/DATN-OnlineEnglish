@@ -1,11 +1,16 @@
 import mongoose from 'mongoose';
-import { ROLES, COURSE } from '../utils/Constants.js';
+import { ROLES } from '../utils/Constants.js';
 
 const userSchema = new mongoose.Schema({
     id: {
         type: Number,
         unique: true,
-        require: true,
+        required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
     },
     userName: {
         type: String,
@@ -16,51 +21,35 @@ const userSchema = new mongoose.Schema({
         required: true,
         minLength: 3,
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
     birthDate: {
         type: Date,
         default: null,
-        required: false,
     },
     avatar: {
         type: String,
         default: null,
-        required: false,
     },
-    coin: {
-        type: Number,
-        default: 0,
+    description: {
+        type: String,
+        default: null,
+    },
+    studying: {
+        type: [Number],
+        default: [],
     },
     role: {
         type: String,
         enum: [ROLES.ADMIN, ROLES.STUDENT, ROLES.TEACHER],
         default: ROLES.STUDENT,
-    },
-    achivement: {
-        SelfStudy: [
-            {
-                topicId: [Number],
-                courseType: {
-                    type: String,
-                    enum: [COURSE.A1, COURSE.B1, COURSE.B2, COURSE.C1],
-                },
-            },
-        ],
-        OnlineCourse: [
-            {
-                idCourse: Number,
-                teacherId: Number,
-            },
-        ],
+        required: true,
     },
     status: {
         type: Boolean,
         default: false,
+        required: true,
     },
+    //achivements
+    //coin
 });
 
 export default mongoose.model('User', userSchema);

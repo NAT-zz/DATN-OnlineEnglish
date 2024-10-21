@@ -29,4 +29,24 @@ const mongoDisconnect = async () => {
     }
 };
 
-export { mongoConnect, mongoDisconnect };
+const mongoDeleteAllDB = async () => {
+    await mongoConnect();
+    try {
+        // Get all model names (collections)
+        const modelNames = mongoose.modelNames();
+
+        // Drop each collection
+        for (let modelName of modelNames) {
+            const model = mongoose.model(modelName);
+            console.log(`Dropping collection: ${model.collection.name}`);
+            await model.collection.drop();
+        }
+
+        console.log('All models dropped');
+    } catch (err) {
+        console.error('Error deleting databases:', err);
+        throw err;
+    }
+};
+
+export { mongoConnect, mongoDisconnect, mongoDeleteAllDB };

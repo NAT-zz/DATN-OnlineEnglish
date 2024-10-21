@@ -3,7 +3,7 @@ import { CONFIG } from '../utils/Constants.js';
 import { makeSuccessResponse } from '../utils/Response.js';
 import { getValue } from '../services/redis.js';
 import { StatusCodes } from 'http-status-codes';
-import users from './users.mongo.js';
+import users from '../models/users.mongo.js';
 
 const verifyToken = async (req, res, next) => {
     const token = req.cookies.token;

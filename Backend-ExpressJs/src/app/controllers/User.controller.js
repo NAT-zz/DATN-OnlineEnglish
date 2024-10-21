@@ -6,7 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 import users from '../../models/users.mongo.js';
 import tokens from '../../models/tokens.mongo.js';
 import conversations from '../../models/conversations.mongo.js';
-import messages from 'assertions/messages.mongo.js';
+import messages from '../../models/messages.mongo.js';
 import { findMaxId } from '../../models/users.model.js';
 import { TOKENS } from '../../utils/Constants.js';
 import { saveUser } from '../../models/users.model.js';

@@ -5,8 +5,8 @@ import morgan from 'morgan';
 import route from '../../routes/index.js';
 import cookieParser from 'cookie-parser';
 import { CONFIG } from '../../utils/Constants.js';
+import { app } from '../../services/socket.js';
 
-const app = express();
 const __dirname = path.resolve();
 
 app.use(

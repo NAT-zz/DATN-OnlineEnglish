@@ -26,7 +26,7 @@ router.get('/users', getAllUsers);
 router.delete('/:id', deleteUser);
 router.post('/deleteLastest', deleteLastestUser);
 
-// api
+// auth
 router.get('/check-auth', verifyToken, checkAuth);
 router.post('/register', registerUser);
 router.get('/verify-email/:email/:token', verifyAccount);
@@ -34,8 +34,9 @@ router.post('/login', loginUser);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/logout', verifyToken, logoutUser);
-
 router.post('/resend', resendLink);
+
+// profile
 router.post(
     '/edit',
     fileUpload.single('avatar'),
@@ -44,8 +45,14 @@ router.post(
     editProfile,
 );
 
+// chat
 router.get('/message/:id', verifyToken, getMessages);
 router.post('/message/send/:id', verifyToken, sendMessage);
 
-//achivement
+// users
+// get teachers/students studying
+// get all teachers
+// router.get('/teachers', verifyToken, getTeachers)
+// achivements
+// coins
 export default router;

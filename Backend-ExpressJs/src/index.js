@@ -10,19 +10,21 @@ import { initDataMedia } from './models/medias.model.js';
 import { initDatatopic } from './models/topics.model.js';
 import { initDataComment } from './models/comments.model.js';
 
+import { server } from './services/socket.js';
+
 const PORT = process.env.SERVER_PORT;
-const server = http.createServer(app);
+// const server = http.createServer(app);
 (async function startServer() {
     await mongoConnect();
     await redisConnect();
 
     await initDataUser();
-    await initDataGrammar();
-    await initDataTest();
-    await initDataMedia();
-    await initDatatopic();
+    // await initDataGrammar();
+    // await initDataTest();
+    // await initDataMedia();
+    // await initDatatopic();
 
-    await initDataComment();
+    // await initDataComment();
 
     server.listen(PORT, () => {
         console.log(`Listening on port ${PORT}`);

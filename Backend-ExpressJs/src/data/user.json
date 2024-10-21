@@ -5,6 +5,7 @@
         "email": "admin@gmail.com",
         "birthDate": "2001-10-13",
         "role": "ADMIN",
+        "description": "",
         "status": true
     },
     "2": {
@@ -13,6 +14,8 @@
         "email": "tuanemail@gmail.com",
         "birthDate": "2001-10-13",
         "role": "TEACHER",
+        "description": "Teacher Nguyen Tuan's description",
+        "studying": [3],
         "status": true
     },
     "3": {
@@ -20,6 +23,8 @@
         "passWord": "tuan@1310",
         "email": "tuannacv@gmail.com",
         "birthDate": "2001-10-13",
+        "description": "Student Tuan Nguyen's description",
+        "studying": [2],
         "status": true
     }
 }
