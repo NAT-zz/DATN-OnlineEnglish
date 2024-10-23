@@ -22,7 +22,7 @@ const verifyToken = async (req, res, next) => {
         //   }
         console.log(decoded);
 
-        if (!decoded || (await getValue(decoded.userId))) {
+        if (!decoded || (await getValue(req.cookies.token))) {
             return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
                 message: 'Token is invalid or expired',
             });

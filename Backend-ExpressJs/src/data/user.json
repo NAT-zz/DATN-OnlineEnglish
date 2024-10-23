@@ -15,7 +15,7 @@
         "birthDate": "2001-10-13",
         "role": "TEACHER",
         "description": "Teacher Nguyen Tuan's description",
-        "studying": [3],
+        "studying": [3, 4],
         "status": true
     },
     "3": {
@@ -24,6 +24,15 @@
         "email": "tuannacv@gmail.com",
         "birthDate": "2001-10-13",
         "description": "Student Tuan Nguyen's description",
+        "studying": [2],
+        "status": true
+    },
+    "4": {
+        "userName": "Tuan Nguyen 1",
+        "passWord": "tuan123",
+        "email": "tuan123@gmail.com",
+        "birthDate": "2001-10-13",
+        "description": "Student Tuan Nguyen's description 1",
         "studying": [2],
         "status": true
     }

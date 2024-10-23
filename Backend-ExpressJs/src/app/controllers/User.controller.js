@@ -20,6 +20,7 @@ import {
     sendVerificationEmail,
 } from '../../services/email.js';
 import { getReceiverSocketId } from '../../services/socket.js';
+import { setValue } from '../../services/redis.js';
 
 const getAllUsers = async (req, res) => {
     try {
@@ -345,8 +346,8 @@ const resendLink = async (req, res) => {
 };
 
 const logoutUser = async (req, res) => {
-    // if access_token is till valid => blacklist the current access_token
-    await setValue(req.userData.userId, req.cookies.token);
+    // if token is till valid => blacklist the current token
+    setValue(req.cookies.token, "BL");
     res.clearCookie('token');
 
     return makeSuccessResponse(res, StatusCodes.OK, {
@@ -606,9 +607,54 @@ const sendMessage = async (req, res, next) => {
     }
 };
 
-const getProfile = async (req, res) => {};
+const getStudyings = async (req, res) => {
+    const userId = req?.userData?.userId;
+    if (userId) {
+        try {
+            const getUser = await users.findOne({ _id: userId });
+
+            if (getUser && getUser instanceof users) {
+                let studyings = [];
+                console.log('####', getUser.studying);
+                for (let id of getUser.studying) {
+                    console.log('####', id);
+                    let user =  await users.findOne({ id: id });
+                    if(user && user instanceof users)
+                    {
+                        studyings.push({
+                            ...user._doc,
+                            passWord: undefined,
+                        });
+                    }
+                }
+                return makeSuccessResponse(res, StatusCodes.OK, {
+                    data: studyings,
+                });
+            } else {
+                return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                    message: 'User not found',
+                });
+            }
+        } catch (err) {
+            console.error('Error in getStudyings: ', err.message);
+            return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+                message: 'Server error, please try again later!',
+            });
+        }
+    } else {
+        return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
+            message: 'Missing required information',
+        });
+    }
+};
+
+const getTeachers = async (req, res) => {
+    
+};
 
 export {
+    getStudyings,
+    getTeachers,
     registerUser,
     loginUser,
     verifyAccount,
@@ -617,7 +663,6 @@ export {
     forgotPassword,
     resetPassword,
     editProfile,
-    getProfile,
     checkAuth,
     deleteUser,
     getAllUsers,

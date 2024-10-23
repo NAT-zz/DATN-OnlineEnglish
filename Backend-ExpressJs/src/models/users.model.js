@@ -47,6 +47,10 @@ const saveUser = async (user) => {
                 passWord: bcrypt.hashSync(user.passWord, 10),
                 role: user?.role ? user.role : 'STUDENT',
                 status: user?.status ? user.status : false,
+                birthDate: user?.birthDate ? user.birthDate : null,
+                description: user?.description ? user.description : null,
+                avatar: user?.avatar ? user.avatar : null,
+                studying: user?.studying? user.studying : [],
             });
             if (getUser instanceof user && getUser) return getUser;
             throw new Error('Unable to create new User');

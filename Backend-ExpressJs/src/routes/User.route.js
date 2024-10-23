@@ -14,6 +14,8 @@ import {
     deleteLastestUser,
     getMessages,
     sendMessage,
+    getStudyings, 
+    getTeachers,
 } from '../app/controllers/User.controller.js';
 import multer from 'multer';
 import { verifyToken, verifyPermission } from './auth.js';
@@ -50,9 +52,11 @@ router.get('/message/:id', verifyToken, getMessages);
 router.post('/message/send/:id', verifyToken, sendMessage);
 
 // users
-// get teachers/students studying
-// get all teachers
-// router.get('/teachers', verifyToken, getTeachers)
+router.get('/studyings', verifyToken, getStudyings);
+router.get('/teachers', verifyToken, getTeachers)
+// student choose teacher
+// lesson, questions view for teachers
+
 // achivements
 // coins
 export default router;
