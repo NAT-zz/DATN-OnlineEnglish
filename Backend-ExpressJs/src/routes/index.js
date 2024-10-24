@@ -1,8 +1,7 @@
 import userRoute from './User.route.js';
-import grammarRoute from './Task.route.js';
-import testRoute from './Test.route.js';
-import selfStudyRoute from './SelfStudy.route.js';
-import commentRoute from './Comment.route.js';
+import questionRoute from './Question.route.js';
+import taskRoute from './Task.route.js';
+// import testRoute from './Test.route.js';
 
 import { mongoDeleteAllDB } from '../services/mongo.js';
 function route(app) {
@@ -21,11 +20,10 @@ function route(app) {
     });
 
     app.use('/api/user', userRoute);
-    app.use('/api/task', grammarRoute);
-    app.use('/api/test', testRoute);
-    app.use('/api/self-study', selfStudyRoute);
+    app.use('/api/question', questionRoute);
+    app.use('/api/task', taskRoute);
 
-    app.use('/api/comment', commentRoute);
+    // app.use('/api/test', testRoute);
 }
 
 export default route;

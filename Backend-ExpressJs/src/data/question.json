@@ -1,0 +1,20 @@
+{
+    "1": {
+        "sentence": "How are you ?",
+        "answers": [ "I'm fine", "Thank you!", "No worry!", "What's about you?" ],
+        "key": "I'm fine",
+        "questionType": "SELECT"
+    },
+    "2": {
+        "sentence": "How are you ? 1",
+        "answers": [ "I'm fine", "Thank you!", "No worry!", "What's about you?" ],
+        "key": "I'm fine",
+        "questionType": "SELECT"
+    },
+    "3": {
+        "sentence": "How _____ you ?",
+        "answers": [ "Are", "Is", "Am", "Does" ],
+        "key": "Are",
+        "questionType": "FILL"
+    }
+}

@@ -8,7 +8,7 @@ import tokens from '../../models/tokens.mongo.js';
 import conversations from '../../models/conversations.mongo.js';
 import messages from '../../models/messages.mongo.js';
 import { findMaxId } from '../../models/users.model.js';
-import { TOKENS } from '../../utils/Constants.js';
+import { TOKENS, ROLES } from '../../utils/Constants.js';
 import { saveUser } from '../../models/users.model.js';
 import { streamUpload } from '../../models/medias.model.js';
 
@@ -347,7 +347,7 @@ const resendLink = async (req, res) => {
 
 const logoutUser = async (req, res) => {
     // if token is till valid => blacklist the current token
-    setValue(req.cookies.token, "BL");
+    setValue(req.cookies.token, 'BL');
     res.clearCookie('token');
 
     return makeSuccessResponse(res, StatusCodes.OK, {
@@ -618,9 +618,8 @@ const getStudyings = async (req, res) => {
                 console.log('####', getUser.studying);
                 for (let id of getUser.studying) {
                     console.log('####', id);
-                    let user =  await users.findOne({ id: id });
-                    if(user && user instanceof users)
-                    {
+                    let user = await users.findOne({ id: id });
+                    if (user && user instanceof users) {
                         studyings.push({
                             ...user._doc,
                             passWord: undefined,
@@ -649,7 +648,17 @@ const getStudyings = async (req, res) => {
 };
 
 const getTeachers = async (req, res) => {
-    
+    try {
+        const getUsers = await users.find({ role: ROLES.TEACHER }).select('-passWord');
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data: getUsers,
+        });
+    } catch (err) {
+        console.error('Error in getTeachers: ', err.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later',
+        });
+    }
 };
 
 export {

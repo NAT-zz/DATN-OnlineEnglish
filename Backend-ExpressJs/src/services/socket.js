@@ -1,9 +1,7 @@
 import { Server } from 'socket.io';
 import http from 'http';
-import express from 'express';
 import { CONFIG } from '../utils/Constants.js';
-
-const app = express();
+import app from '../app/middlewares/config.js';
 
 const server = http.createServer(app);
 const io = new Server(server, {

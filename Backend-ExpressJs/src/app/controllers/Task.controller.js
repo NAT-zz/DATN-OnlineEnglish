@@ -1,260 +1,149 @@
 import { makeSuccessResponse } from '../../utils/Response.js';
-import grammars from '../../models/grammars.mongo.js';
-import { findRandomTasks } from '../../models/grammars.model.js';
-import { GRAMMAR_TYPE, QUESTION_TYPE, SKILLS } from '../../utils/Constants.js';
-import { StatusCodes, ReasonPhrases } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
+import tasks from '../../models/tasks.mongo.js';
+import questions from '../../models/questions.mongo.js';
+import { saveTask } from '../../models/tasks.model.js';
+import { TASK_TYPE } from '../../utils/Constants.js';
 
-const getRandomGrammar = async (topic, type, number) => {
-    let listTasks = null;
-    console.log(topic.toUpperCase());
-    if (topic === 'random')
-        listTasks = await findRandomTasks(
-            {
-                questionType: type.toUpperCase(),
-            },
-            number,
+const getTasks = async (req, res) => {
+    const topic = req.query.topic;
+    try {
+        let getTasks;
+        if (topic) {
+            getTasks = await tasks.find(
+                {
+                    topic,
+                },
+                '-r -__v',
+            );
+        } else {
+            getTasks = await tasks.find({}, '-r -__v');
+        }
+
+        let data = await Promise.all(
+            getTasks.map(async (task) => {
+                // console.log(task);
+
+                let listQuestion = [];
+                for (const id of task.questions) {
+                    let getQuestion = await questions.findOne(
+                        { id },
+                        '-r -__v',
+                    );
+                    if (getQuestion && getQuestion instanceof questions) {
+                        listQuestion.push(getQuestion);
+                    }
+                }
+                return {
+                    ...task._doc,
+                    questions: listQuestion,
+                };
+            }),
         );
-    else
-        listTasks = await findRandomTasks(
-            {
-                questionType: type.toUpperCase(),
-                grammarType: topic.toUpperCase(),
-            },
-            number,
-        );
-    return listTasks;
-};
 
-const checkGrammarAnswer = async (type, data) => {
-    // {
-    //     "data": [
-    //         {
-    //             "id": 4,
-    //             "answer": "I'm fine"
-    //         },
-    //         {
-    //             "id": 5,
-    //             "answer": "I'm fine"
-    //         }
-    //     ]
-    // }
-    const correctResult = [],
-        wrongResult = [];
-    for (const val of data) {
-        const getSentence = await grammars.findOne({
-            id: val.id,
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data,
         });
-
-        if (getSentence) {
-            if (getSentence.key === val.answer) correctResult.push(val.id);
-            else wrongResult.push(val.id);
-        }
-    }
-    return {
-        correctResult,
-        wrongResult,
-    };
-};
-
-const getRandomTasks = async (req, res) => {
-    try {
-        const skill = req.params.skill;
-        const type = req.params.type;
-        const number = req.params.number;
-        const topic = req.params.topic;
-
-        if (!skill || !type || !topic || !number)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Type or quantity or topic must be provided',
-            });
-        if (!(skill.toUpperCase() in SKILLS))
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Skill not found',
-            });
-        if (!(type.toUpperCase() in QUESTION_TYPE))
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Type not found',
-            });
-        if (topic != 'random' && !(topic.toUpperCase() in GRAMMAR_TYPE))
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Topic not found',
-            });
-
-        switch (skill.toUpperCase()) {
-            case SKILLS.GRAMMAR:
-                const listTasks = await getRandomGrammar(topic, type, number);
-                if (listTasks)
-                    return makeSuccessResponse(res, StatusCodes.OK, {
-                        data: listTasks,
-                    });
-                else
-                    return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                        message: 'No record found',
-                    });
-            case SKILLS.VOCABULARY:
-                break;
-            case SKILLS.LISTENING:
-                break;
-            case SKILLS.READING:
-                break;
-            case SKILLS.SPEAKING:
-                break;
-            case SKILLS.WRITING:
-                break;
-            default:
-                throw new Error('No skill found');
-        }
-    } catch (err) {
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: err.message,
-        });
-    }
-};
-
-const checkAnswers = async (req, res) => {
-    try {
-        const skill = req.params.skill;
-        const type = req.params.type;
-
-        if (!skill || !type)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Skill or type must be provided',
-            });
-        if (!(skill.toUpperCase() in SKILLS))
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Skill not found',
-            });
-        if (!(type.toUpperCase() in QUESTION_TYPE))
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Type not found',
-            });
-
-        switch (skill.toUpperCase()) {
-            case SKILLS.GRAMMAR:
-                if (!req.body.data || req.body.data.length === 0)
-                    return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                        message: 'No data found',
-                    });
-                const result = await checkGrammarAnswer(type, req.body.data);
-                // Total score is 1 out of 8 (13%)
-                if (result) {
-                    const percent = (
-                        (result.correctResult.length / req.body.data.length) *
-                        100
-                    ).toFixed();
-                    return makeSuccessResponse(res, StatusCodes.OK, {
-                        message: `Total score is ${result.correctResult.length} out of ${req.body.data.length} (${percent}%)`,
-                        data: result,
-                    });
-                } else
-                    return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                        message: 'No result',
-                    });
-            default:
-                throw new Error('No skill found');
-        }
-    } catch (err) {
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: err.message,
-        });
-    }
-};
-
-const createGrammar = async (req, res) => {
-    try {
-        if (!req.body.data)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Data not found',
-            });
-        const data = req.body.data;
     } catch (error) {
-        console.log(error);
+        console.log('Error in getTasks: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error, please try again later!',
         });
     }
 };
 
-const deleteGrammar = async (req, res) => {
+const deleteTask = async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+        return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+            message: 'Task ID is required.',
+        });
+    }
     try {
-        if (!req.params.skill || !req.params.id)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Skill and id must be provided',
+        const deleteTask = (
+            await tasks.deleteOne({
+                id: id,
+            })
+        ).deletedCount;
+        if (deleteTask) {
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                message: `Task deleted with id ${id}`,
             });
-        const skill = req.params.skill;
-        const reqId = req.params.id;
-        if (!(skill.toUpperCase() in SKILLS))
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Skill not found',
+        } else
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                message: 'Task not found.',
             });
+    } catch (error) {
+        console.log('Error in deleteTask: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
 
-        switch (skill.toUpperCase()) {
-            case SKILLS.GRAMMAR:
-                const deletedCount = (await grammars.deleteOne({ id: reqId }))
-                    .deletedCount;
-                if (deletedCount)
-                    return makeSuccessResponse(res, StatusCodes.OK, {
-                        message: `Delete successfully with id ${reqId}`,
+const createTask = async (req, res) => {
+    const id = req.query.updateId;
+    try {
+        if (id) {
+            const findTask = await tasks.findOne({ id });
+            if (findTask && findTask instanceof tasks) {
+                findTask.task = req.body?.task
+                    ? req.body.task.trim()
+                    : findTask.task;
+                findTask.questions = req.body?.questions
+                    ? req.body.questions
+                    : findTask.questions;
+                findTask.topic = req.body?.topic
+                    ? req.body.topic.trim()
+                    : findTask.topic;
+                findTask.taskType = req.body?.taskType
+                    ? req.body.taskType
+                    : findTask.taskType;
+                findTask.media = req.body?.media
+                    ? req.body.media.trim()
+                    : findTask.media;
+
+                await findTask.save();
+                return makeSuccessResponse(res, StatusCodes.OK, {
+                    message: `Task updated with id ${id}`,
+                    data: { ...findTask._doc, r: undefined },
+                });
+            } else
+                return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                    message: `Task not found with id ${id}`,
+                });
+        } else {
+            if (!req.body.task || !req.body.questions) {
+                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                    message: 'Missing task or questions',
+                });
+            } else {
+                if (req.body.taskType && !(req.body.taskType in TASK_TYPE))
+                    return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                        message: 'Invalid task type',
                     });
-                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                    message: `No sentence found with id: ${reqId}`,
+
+                let task = {
+                    task: req.body.task.trim(),
+                    questions: req.body.questions,
+                    topic: req.body?.topic?.trim(),
+                    taskType: req.body?.taskType,
+                    media: req.body?.media,
+                };
+
+                const newTask = await saveTask(task);
+                return makeSuccessResponse(res, StatusCodes.OK, {
+                    message: 'Task created/updated',
+                    data: { ...newTask?._doc, r: undefined },
                 });
-            default:
-                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                    message: `${skill} not found`,
-                });
+            }
         }
     } catch (error) {
-        console.log(error);
+        console.log('Error in create-updateTask: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error, please try again later!',
         });
     }
 };
 
-const getGrammar = async (req, res) => {
-    try {
-        if (!req.params.skill || !req.params.id)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Skill and id must be provided',
-            });
-        const skill = req.params.skill;
-        const reqId = req.params.id;
-        if (!(skill.toUpperCase() in SKILLS))
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Skill not found',
-            });
-
-        switch (skill.toUpperCase()) {
-            case SKILLS.GRAMMAR:
-                const findGrammar = await grammars.findOne(
-                    { id: reqId },
-                    '-_id -__v -r',
-                );
-                if (findGrammar instanceof grammars && grammars)
-                    return makeSuccessResponse(res, StatusCodes.OK, {
-                        data: findGrammar,
-                    });
-                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                    message: `No sentence found with id: ${reqId}`,
-                });
-            default:
-                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                    message: `${skill} not found`,
-                });
-        }
-    } catch (error) {
-        console.log(error);
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
-        });
-    }
-};
-
-export {
-    getRandomTasks,
-    checkAnswers,
-    createGrammar,
-    deleteGrammar,
-    getGrammar,
-};
+export { getTasks, createTask, deleteTask };

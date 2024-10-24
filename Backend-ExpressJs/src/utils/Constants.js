@@ -23,6 +23,19 @@ const ROLES = {
     ADMIN: 'ADMIN',
 };
 
+const QUESTION_TYPE = {
+    SELECT: 'SELECT',
+    FILL: 'FILL',
+    LISTEN: 'LISTEN'
+};
+
+const TASK_TYPE = {
+    MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+    ESSAY: 'ESSAY',
+};
+
+////////////////////////////////
+
 const SKILLS = {
     GRAMMAR: 'GRAMMAR',
     VOCABULARY: 'VOCABULARY',
@@ -30,23 +43,6 @@ const SKILLS = {
     LISTENING: 'LISTENING',
     WRITING: 'WRITING',
     SPEAKING: 'SPEAKING',
-};
-
-const QUESTION_TYPE = {
-    FILL: 'FILL',
-    SELECT: 'SELECT',
-};
-
-const GRAMMAR_TYPE = {
-    ED_ING: 'ED_ING',
-    CONVERSATION: 'CONVERSATION',
-    ANY: 'ANY',
-};
-
-const REALIABILITY = {
-    NOT_SURE: '1',
-    PRETTY_SURE: '2',
-    SURE: '3',
 };
 
 const COURSE = {
@@ -57,17 +53,6 @@ const COURSE = {
     C1: 'C1',
 };
 
-const TASK_TYPE = {
-    FOR_TEST: 'TEST',
-    FOR_TOPIC: 'TOPIC',
-};
-
-const RATE_TYPE = {
-    COURSE: 'COURSE',
-    TOPIC: 'TOPIC',
-    TIP: 'TIP',
-};
-
 export {
     CONFIG,
     TOKENS,
@@ -75,8 +60,5 @@ export {
     SKILLS,
     COURSE,
     QUESTION_TYPE,
-    GRAMMAR_TYPE,
-    REALIABILITY,
     TASK_TYPE,
-    RATE_TYPE,
 };

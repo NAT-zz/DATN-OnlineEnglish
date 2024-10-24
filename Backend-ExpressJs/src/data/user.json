@@ -13,8 +13,8 @@
         "passWord": "tuan123",
         "email": "tuanemail@gmail.com",
         "birthDate": "2001-10-13",
-        "role": "TEACHER",
         "description": "Teacher Nguyen Tuan's description",
+        "role": "TEACHER",
         "studying": [3, 4],
         "status": true
     },

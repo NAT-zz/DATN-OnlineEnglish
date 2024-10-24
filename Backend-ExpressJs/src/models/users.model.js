@@ -18,7 +18,7 @@ const saveUser = async (user) => {
         let getUser = await users.findOne({
             email: user?.email,
         });
-        if (getUser instanceof users && getUser) {
+        if (getUser && getUser instanceof users) {
             getUser.userName = user?.userName
                 ? user.userName
                 : getUser.userName;
@@ -52,7 +52,7 @@ const saveUser = async (user) => {
                 avatar: user?.avatar ? user.avatar : null,
                 studying: user?.studying? user.studying : [],
             });
-            if (getUser instanceof user && getUser) return getUser;
+            if (getUser && getUser instanceof user) return getUser;
             throw new Error('Unable to create new User');
         }
     } catch (err) {
