@@ -8,13 +8,14 @@ For now, read package.json for setup detailed
 
     * chia level cho lession?
 - Lesson
-    - cho phép chỉnh sửa khi chưa public
-    - show bài giảng cho học viên (public)
 - Test
     - cho phép chỉnh sửa khi chưa public
+    - deadline
 
-question, task, lesson thuộc giáo viện nào? (lưu vào db của GV)
+question, task, lesson thuộc giáo viên nào? (lưu vào db của GV)
 - user not done
 - chấm bài xong ko cho làm nữa?
+- học viên làm sao xem bài giảng/tập
 
 * Config AUTHORIZE
+- add token to res

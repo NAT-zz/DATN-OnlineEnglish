@@ -34,6 +34,11 @@ const TASK_TYPE = {
     ESSAY: 'ESSAY',
 };
 
+const LESSON_TYPE = {
+    LESSON: 'LESSON',
+    TASKS: 'TASKS'
+}
+
 ////////////////////////////////
 
 const SKILLS = {
@@ -61,4 +66,5 @@ export {
     COURSE,
     QUESTION_TYPE,
     TASK_TYPE,
+    LESSON_TYPE
 };
