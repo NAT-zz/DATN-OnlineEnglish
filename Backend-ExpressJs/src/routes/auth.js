@@ -6,7 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 import users from '../models/users.mongo.js';
 
 const verifyToken = async (req, res, next) => {
-    const token = req.cookies.token;
+    const token = req.cookies.token || req.token;
     if (!token) {
         return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
             message: 'No token provided',
