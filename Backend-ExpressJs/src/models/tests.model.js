@@ -12,32 +12,46 @@ const findMaxId = async () => {
     return latesTest.id;
 };
 
-const saveTest = async (Test) => {
+const saveTest = async (test) => {
     try {
         let getTest = await tests.findOne({
-            name: Test.name,
+            name: test?.name,
+            tasks: test?.tasks,
         });
 
-        if (getTest instanceof tests && getTest) {
-            getTest.grammarIds = Test.grammarIds;
+        if (getTest && getTest instanceof tests) {
+            getTest.name = test?.name ? test.name : getTest.name;
+            getTest.tasks = test?.tasks
+                ? test.tasks
+                : getTest.tasks;
+            getTest.publicDate = test?.publicDate
+                ? test.publicDate
+                : getTest.publicDate;
+            getTest.endDate = test?.endDate ? test.endDate : getTest.endDate;
+            getTest.time = test?.time ? test.time : getTest.time;
+
             await getTest.save();
-            return getTest.id;
+            return getTest._doc;
         } else {
             getTest = await tests.create({
                 id: Number((await findMaxId()) + 1),
-                name: Test.name,
-                grammarIds: Test.grammarIds,
+                name: test.name,
+                tasks: test?.tasks,
+                publicDate: test?.publicDate,
+                endDate: test?.endDate,
+                time: test?.time,
             });
-            if (getTest instanceof tests && getTest) return getTest.id;
+            if (getTest instanceof tests && getTest) return getTest._doc;
             throw new Error('Unable to create new Test!');
         }
     } catch (err) {
         console.error(err.message);
+        throw err;
     }
 };
 
 const initDataTest = async () => {
-    console.log('Init test started');
+    console.log('Init tests started');
     const json = readFileSync(path.join(__dirname, 'src/data/test.json'));
     const readtests = JSON.parse(json.toString());
     for (const prop in readtests) {

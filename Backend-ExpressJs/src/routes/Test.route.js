@@ -1,22 +1,15 @@
-// import express from 'express';
-// import {
-//     createTest,
-//     checkAnswers,
-//     getTest,
-//     deleteTest,
-//     makeTestFromRandom,
-// } from '../app/controllers/Test.controller.js';
+import express from 'express';
+import {
+    createTest,
+    getTests,
+    deleteTest,
+} from '../app/controllers/Test.controller.js';
 
-// import { verifyToken, verifyPermission } from './auth.js';
-// import { ROLES } from '../utils/Constants.js';
-// const router = express.Router();
+const router = express.Router();
 
-// router.get('/:id', getTest);
-// router.post('/create', createTest); // create
-// router.delete('/:id', deleteTest);
-// //edit
+// CRUD
+router.get('/tests', getTests);
+router.delete('/:id', deleteTest);
+router.post('/create', createTest); 
 
-// router.get('/get-random', makeTestFromRandom);
-// router.post('/check-answers', checkAnswers);
-
-// export default router;
+export default router;

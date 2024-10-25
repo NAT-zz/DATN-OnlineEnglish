@@ -131,7 +131,7 @@ const registerUser = async (req, res) => {
             const newUser = await user.save();
 
             // jwt token saved in cookie
-            generateTokenAndSetCookie(res, {
+            const accessToken = generateTokenAndSetCookie(res, {
                 userId: newUser._id,
                 role: newUser.role,
             });
@@ -154,6 +154,7 @@ const registerUser = async (req, res) => {
                                 ...newUser._doc,
                                 passWord: undefined,
                             },
+                            token: accessToken,
                         },
                         message:
                             'Check your email for verification, the link will be expired after 1 minute',
@@ -192,7 +193,7 @@ const loginUser = async (req, res) => {
                 message: 'Check you credentials and try again',
             });
         } else {
-            generateTokenAndSetCookie(res, {
+            const accessToken = generateTokenAndSetCookie(res, {
                 userId: getUser._id,
                 role: getUser.role,
             });
@@ -204,6 +205,7 @@ const loginUser = async (req, res) => {
                         ...getUser._doc,
                         passWord: undefined,
                     },
+                    token: accessToken,
                 },
             });
         }
@@ -649,7 +651,9 @@ const getStudyings = async (req, res) => {
 
 const getTeachers = async (req, res) => {
     try {
-        const getUsers = await users.find({ role: ROLES.TEACHER }).select('-passWord');
+        const getUsers = await users
+            .find({ role: ROLES.TEACHER })
+            .select('-passWord');
         return makeSuccessResponse(res, StatusCodes.OK, {
             data: getUsers,
         });

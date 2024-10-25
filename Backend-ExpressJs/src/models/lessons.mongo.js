@@ -36,7 +36,7 @@ const lessonSchema = new mongoose.Schema({
     },
     taskEndDate: {
         type: Date,
-        default: Date.now + (24 * 3600 * 1000),
+        default: () => Date.now() + 2 * 24 * 3600000, // 2 days
     }
 });
 lessonSchema.plugin(random, { path: 'r' });

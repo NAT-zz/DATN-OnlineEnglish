@@ -28,7 +28,4 @@ const generateTokenAndSetCookie = (res, userData) => {
     return accessToken;
 };
 
-export {
-    generateVerificationCode,
-    generateTokenAndSetCookie,
-};
+export { generateVerificationCode, generateTokenAndSetCookie };

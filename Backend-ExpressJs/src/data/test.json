@@ -1,6 +1,10 @@
 {
     "1": {
-        "name": "Grammar 01",
-        "grammarIds": [1, 2, 3, 4] 
+        "name": "Test 01",
+        "tasks": [1, 2, 3]
+    },
+    "2": {
+        "name": "Test 02",
+        "tasks": [1, 2]
     }
 }

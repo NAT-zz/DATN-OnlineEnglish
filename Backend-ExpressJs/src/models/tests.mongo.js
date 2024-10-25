@@ -3,15 +3,29 @@ import mongoose from 'mongoose';
 const testSchema = new mongoose.Schema({
     id: {
         type: Number,
-        require: true,
+        required: true,
         unique: true,
     },
     name: {
         type: String,
-        require: true,
-        unique: true,
+        required: true,
     },
-    grammarIds: [Number],
+    tasks: {
+        type: [Number],
+        default: [],
+    },
+    publicDate: {
+        type: Date,
+        default: Date.now,
+    },
+    endDate: {
+        type: Date,
+        default: () => Date.now() + 3600000, //1 hour
+    },
+    time: {
+        type: Number,
+        default: 30,
+    },
 });
 
 export default mongoose.model('Test', testSchema);
