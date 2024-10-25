@@ -24,22 +24,25 @@ const saveTask = async (task) => {
             getTask.topic = task?.topic || getTask.topic;
             getTask.questions = task?.questions || getTask.questions;
             getTask.taskType = task?.taskType || getTask.taskType;
+            getTask.media = task?.media || getTask.media;
 
             await getTask.save();
-            return getTask.id;
+            return getTask?._doc;
         } else {
             getTask = await tasks.create({
                 id: Number((await findMaxId()) + 1),
                 task: task.task,
-                topic: task.topic,
-                questions: task.questions,
-                taskType: task.taskType,
+                topic: task?.topic,
+                questions: task?.questions,
+                taskType: task?.taskType,
+                media: task?.media,
             });
-            if (getTask && getTask instanceof tasks) return getTask.id;
+            if (getTask && getTask instanceof tasks) return getTask?._doc;
             throw new Error('Unable to create new Task!');
         }
     } catch (err) {
         console.error(err.message);
+        throw err;
     }
 };
 

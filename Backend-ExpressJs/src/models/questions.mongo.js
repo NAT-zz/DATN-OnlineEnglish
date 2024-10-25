@@ -1,7 +1,5 @@
 import mongoose from 'mongoose';
-import {
-    QUESTION_TYPE,
-} from '../utils/Constants.js';
+import { QUESTION_TYPE } from '../utils/Constants.js';
 import random from 'mongoose-random';
 
 const questionsSchema = new mongoose.Schema({
@@ -14,7 +12,10 @@ const questionsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    answers: [String],
+    answers: {
+        type: [String],
+        required: true,
+    },
     key: {
         type: String,
         required: true,
@@ -22,7 +23,7 @@ const questionsSchema = new mongoose.Schema({
     questionType: {
         type: String,
         enum: [QUESTION_TYPE.FILL, QUESTION_TYPE.SELECT, QUESTION_TYPE.LISTEN],
-        required: true,
+        default: QUESTION_TYPE.SELECT,
     },
     media: {
         type: String,

@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { QUESTION_TYPE } from '../utils/Constants.js';
 import questions from './questions.mongo.js';
+import { error } from 'console';
 
 const __dirname = path.resolve();
 const findMaxId = async () => {
@@ -17,7 +18,8 @@ const saveSelect = async (question) => {
     try {
         let getQuestion = await questions.findOne({
             sentence: question?.sentence,
-            answers: question?.answers
+            answers: question?.answers,
+            key: question?.key,
         });
 
         if (getQuestion instanceof questions && getQuestion) {
@@ -33,33 +35,23 @@ const saveSelect = async (question) => {
                 : getQuestion.media;
 
             await getQuestion.save();
-            return getQuestion.id;
+            return getQuestion?._doc;
         } else {
             getQuestion = await questions.create({
                 id: Number((await findMaxId()) + 1),
                 sentence: question.sentence,
                 key: question.key,
                 answers: question.answers,
-                questionType: question.questionType,
+                questionType: question?.questionType,
                 media: question.media,
             });
             if (getQuestion instanceof questions && getQuestion)
-                return getQuestion;
+                return getQuestion?._doc;
             throw new Error('Unable to create new Question!');
         }
     } catch (err) {
         console.error(err.message);
-    }
-};
-
-const saveQuestion = async (question) => {
-    try {
-        if (question.questionType.toUpperCase() in QUESTION_TYPE) {
-            return await saveSelect(question);
-        } else
-            throw new Error(`Question type not found: ${question.questionType}`);
-    } catch (error) {
-        console.log('Error in saving question: ' + error.message);
+        throw err;
     }
 };
 
@@ -68,7 +60,7 @@ const initDataQuestion = async () => {
     const json = readFileSync(path.join(__dirname, 'src/data/question.json'));
     const readQuestions = JSON.parse(json.toString());
     for (const prop in readQuestions) {
-        await saveQuestion(readQuestions[prop]);
+        await saveSelect(readQuestions[prop]);
     }
 };
 
@@ -76,4 +68,4 @@ const findRandomQuestions = async (filter, limit) => {
     return await questions.findRandom(filter, '-_id -__v -r').limit(limit);
 };
 
-export { initDataQuestion, findMaxId, findRandomQuestions, saveQuestion };
+export { initDataQuestion, findMaxId, findRandomQuestions, saveSelect };

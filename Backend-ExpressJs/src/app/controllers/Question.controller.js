@@ -4,20 +4,16 @@ import { QUESTION_TYPE } from '../../utils/Constants.js';
 import { StatusCodes } from 'http-status-codes';
 import {
     findRandomQuestions,
-    saveQuestion,
+    saveSelect,
 } from '../../models/questions.model.js';
 
 const getQuestion = async (req, res) => {
     try {
-        const type = req.query.type;
+        const type = req.query.type?.toUpperCase();
         if (type) {
-            if (!(type.toUpperCase() in QUESTION_TYPE))
-                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                    message: 'Type not found',
-                });
             const getQuestion = await questions.find(
                 {
-                    questionType: type.toUpperCase(),
+                    questionType: type,
                 },
                 '-_id -__v -r',
             );
@@ -65,9 +61,13 @@ const deleteQuestion = async (req, res) => {
 };
 
 const createQuestion = async (req, res) => {
+    const id = req.query.updateId;
     try {
-        const id = req.query.updateId;
-        // update
+        const type = req.body?.questionType?.toUpperCase();
+        if (type && !(type in QUESTION_TYPE))
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Invalid question type',
+            });
         if (id) {
             const findQuestion = await questions.findOne({ id: id });
             if (findQuestion && findQuestion instanceof questions) {
@@ -80,8 +80,8 @@ const createQuestion = async (req, res) => {
                 findQuestion.key = req.body?.key
                     ? req.body.key.trim()
                     : findQuestion.key;
-                findQuestion.questionType = req.body?.questionType
-                    ? req.body.questionType
+                findQuestion.questionType = type
+                    ? type
                     : findQuestion.questionType;
                 findQuestion.media = req.body?.media
                     ? req.body.media
@@ -101,33 +101,24 @@ const createQuestion = async (req, res) => {
             // create
             // add teacher id
 
-            if (
-                !req.body.sentence ||
-                !req.body.questionType ||
-                !req.body.answers ||
-                !req.body.key
-            ) {
+            if (!req.body.sentence || !req.body.answers || !req.body.key) {
                 return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
                     message: 'Missing required information',
                 });
             }
-            if (!(req.body.questionType in QUESTION_TYPE))
-                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                    message: 'Invalid question type',
-                });
 
             let question = {
                 sentence: req.body.sentence.trim(),
-                questionType: req.body?.questionType?.toUpperCase(),
-                answers: req.body?.answers,
-                key: req.body?.key,
+                answers: req.body.answers,
+                key: req.body.key,
+                questionType: type,
                 media: req.body?.media,
             };
 
-            const newQuestion = await saveQuestion(question);
+            const newQuestion = await saveSelect(question);
             return makeSuccessResponse(res, StatusCodes.CREATED, {
                 message: 'Question created/updated',
-                data: { ...newQuestion?._doc, r: undefined },
+                data: { ...newQuestion, r: undefined },
             });
         }
     } catch (error) {

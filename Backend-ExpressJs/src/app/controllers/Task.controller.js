@@ -7,12 +7,29 @@ import { TASK_TYPE } from '../../utils/Constants.js';
 
 const getTasks = async (req, res) => {
     const topic = req.query.topic;
+    const type = req.query.type?.toUpperCase();
+
     try {
         let getTasks;
-        if (topic) {
+        if (topic && type) {
             getTasks = await tasks.find(
                 {
                     topic,
+                    taskType: type,
+                },
+                '-r -__v',
+            );
+        } else if (topic) {
+            getTasks = await tasks.find(
+                {
+                    topic,
+                },
+                '-r -__v',
+            );
+        } else if (type) {
+            getTasks = await tasks.find(
+                {
+                    taskType: type,
                 },
                 '-r -__v',
             );
@@ -84,6 +101,12 @@ const deleteTask = async (req, res) => {
 const createTask = async (req, res) => {
     const id = req.query.updateId;
     try {
+        const type = req.body.taskType?.toUpperCase();
+        if (type && !(type in TASK_TYPE))
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Invalid task type',
+            });
+
         if (id) {
             const findTask = await tasks.findOne({ id });
             if (findTask && findTask instanceof tasks) {
@@ -96,9 +119,7 @@ const createTask = async (req, res) => {
                 findTask.topic = req.body?.topic
                     ? req.body.topic.trim()
                     : findTask.topic;
-                findTask.taskType = req.body?.taskType
-                    ? req.body.taskType
-                    : findTask.taskType;
+                findTask.taskType = type ? type : findTask.taskType;
                 findTask.media = req.body?.media
                     ? req.body.media.trim()
                     : findTask.media;
@@ -106,27 +127,22 @@ const createTask = async (req, res) => {
                 await findTask.save();
                 return makeSuccessResponse(res, StatusCodes.OK, {
                     message: `Task updated with id ${id}`,
-                    data: { ...findTask._doc, r: undefined },
+                    data: { ...findTask?._doc, r: undefined },
                 });
             } else
                 return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
                     message: `Task not found with id ${id}`,
                 });
         } else {
-            if (!req.body.task || !req.body.questions) {
+            if (!req.body.task) {
                 return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                    message: 'Missing task or questions',
+                    message: 'Missing task',
                 });
             } else {
-                if (req.body.taskType && !(req.body.taskType in TASK_TYPE))
-                    return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                        message: 'Invalid task type',
-                    });
-
                 let task = {
                     task: req.body.task.trim(),
-                    questions: req.body.questions,
-                    topic: req.body?.topic?.trim(),
+                    questions: req.body?.questions,
+                    topic: req.body?.topic,
                     taskType: req.body?.taskType,
                     media: req.body?.media,
                 };
@@ -134,7 +150,7 @@ const createTask = async (req, res) => {
                 const newTask = await saveTask(task);
                 return makeSuccessResponse(res, StatusCodes.OK, {
                     message: 'Task created/updated',
-                    data: { ...newTask?._doc, r: undefined },
+                    data: { ...newTask, r: undefined },
                 });
             }
         }

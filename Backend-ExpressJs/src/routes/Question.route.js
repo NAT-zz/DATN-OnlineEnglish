@@ -16,7 +16,7 @@ router.post('/create', createQuestion);
 // ?limit = 3
 router.get('/get-random/:type', getRandomQuestions);
 router.post('/check-answers', checkAnswers);
-//essay type?
+//essay type
 
 // verify, authorize
 export default router;

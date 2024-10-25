@@ -17,7 +17,7 @@ const saveLesson = async (lesson) => {
         let getLesson = await lessons.findOne({
             topic: lesson?.topic,
             type: lesson?.type,
-            tasks: lesson?.tasks
+            tasks: lesson?.tasks,
         });
 
         if (getLesson && getLesson instanceof lessons) {
@@ -36,23 +36,25 @@ const saveLesson = async (lesson) => {
             getLesson.type = lesson?.type ? lesson.type : getLesson.type;
 
             await getLesson.save();
-            return getLesson.id;
+            return getLesson._doc;
         } else {
             getLesson = await lessons.create({
                 id: Number((await findMaxId()) + 1),
                 topic: lesson.topic,
-                content: lesson.content,
-                tasks: lesson.tasks,
-                media: lesson.media,
-                publicDate: lesson.publicDate,
-                taskEndDate: lesson.taskEndDate,
-                type: lesson.type,
+                content: lesson?.content,
+                tasks: lesson?.tasks,
+                media: lesson?.media,
+                publicDate: lesson?.publicDate,
+                taskEndDate: lesson?.taskEndDate,
+                type: lesson?.type,
             });
-            if (getLesson && getLesson instanceof lessons) return getLesson.id;
+            if (getLesson && getLesson instanceof lessons)
+                return getLesson._doc;
             throw new Error('Unable to create new Lesson!');
         }
     } catch (err) {
         console.error(err);
+        throw err;
     }
 };
 

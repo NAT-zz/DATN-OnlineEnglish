@@ -1,22 +1,15 @@
 import { makeSuccessResponse } from '../../utils/Response.js';
-import {
-    QUESTION_TYPE,
-    TASK_TYPE,
-    LESSON_TYPE,
-} from '../../utils/Constants.js';
+import { LESSON_TYPE } from '../../utils/Constants.js';
 import { StatusCodes } from 'http-status-codes';
 import lessons from '../../models/lessons.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
 import questions from '../../models/questions.mongo.js';
+import { saveLesson } from '../../models/lessons.model.js';
 import { streamUpload } from '../../models/medias.model.js';
 
 const getLessons = async (req, res) => {
     const topic = req.query.topic;
-    const type = req.query?.type?.toUpperCase();
-    if (type && !(type in LESSON_TYPE))
-        return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-            message: 'Invalid lesson type',
-        });
+    const type = req.query.type?.toUpperCase();
 
     try {
         let getLessons;
@@ -90,114 +83,100 @@ const getLessons = async (req, res) => {
     }
 };
 
-const getTopicById = async (req, res) => {
+const deleteLesson = async (req, res) => {
+    const id = req.params.id;
     try {
-        if (!req.params.id)
+        if (!id)
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Id must be provided',
+                message: 'Missing required data',
             });
-        const reqId = req.params.id;
-        const getTopic = await topics.findOne({ id: reqId }, '-_id -__v -r');
-        if (getTopic instanceof topics && getTopic) {
-            const objBeaty = {
-                name: getTopic.name,
-                preview: getTopic.preview,
-                topicSkill: getTopic.topicSkill,
-                level: getTopic.level,
-                instruction: getTopic.instruction,
-                preparationTask: getTopic?.preparationTask
-                    ? getTopic.preparationTask
-                    : null,
-                tasks: [],
-                medias: [],
-                provider: null,
-            };
-            if (getTopic.preparationTask) {
-                const getPre = await grammars.findOne(
-                    { id: getTopic.preparationTask },
-                    '-_id -__v -r',
-                );
-                if (getPre instanceof grammars && getPre)
-                    objBeaty.preparationTask = getPre;
-            }
-            if (getTopic.tasks.length > 0) {
-                for (const val of getTopic.tasks) {
-                    let getTask = await grammars.findOne(
-                        { id: val },
-                        '-_id -__v -r',
-                    );
-                    if (getTask instanceof grammars && getTask)
-                        objBeaty.tasks.push(getTask);
-                }
-            }
-            if (getTopic.media.length > 0) {
-                for (const val of getTopic.media) {
-                    let getMedia = await medias.findOne(
-                        { id: val },
-                        '-_id -__v -r',
-                    );
-                    if (getMedia instanceof medias && getMedia)
-                        objBeaty.medias.push(getMedia);
-                }
-            }
-            if (getTopic.idProvider) {
-                const getUser = await users.findOne({
-                    id: getTopic.idProvider,
-                });
-                if (getUser instanceof users && getUser)
-                    objBeaty.provider = {
-                        fullname: getUser.fullName,
-                        avatar: getUser.avatar,
-                    };
-            }
+        const deleteCount = (await lessons.deleteOne({ id })).deletedCount;
+        if (deleteCount > 0) {
             return makeSuccessResponse(res, StatusCodes.OK, {
-                data: objBeaty,
+                message: `Lesson deleted with id ${id}`,
+            });
+        } else {
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                message: 'Lesson not found',
             });
         }
-        return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-            message: `Topic not found with id ${reqId}`,
-        });
     } catch (error) {
-        console.log(error);
+        console.log('Error in deleteLesson: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error, please try again later!',
         });
     }
 };
 
-const deleteTopic = async (req, res) => {
+const createLesson = async (req, res) => {
+    const id = req.query.updateId;
     try {
-        if (!req.params.id)
+        const type = req.body.type?.toUpperCase();
+        if (type && !(type in LESSON_TYPE)) {
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Id must be provided',
-            });
-        const reqId = req.params.id;
-        const getTopic = await topics.findOne({ id: reqId });
-        if (getTopic instanceof topics && getTopic) {
-            if (getTopic.media.length > 0) {
-                for (const idMedia of getTopic.media)
-                    await medias.deleteOne({ id: idMedia });
-            }
-            if (getTopic.tasks.length > 0) {
-                for (const idTask of getTopic.tasks)
-                    await grammars.deleteMany({ id: idTask });
-            }
-            if (getTopic.preparationTask)
-                await grammars.deleteOne({ id: getTopic.preparationTask });
-
-            const deletedCount = await getTopic.delete();
-            return makeSuccessResponse(res, StatusCodes.OK, {
-                message: `Topic with id ${reqId} has been deleted successfully`,
+                message: 'Invalid lesson type',
             });
         }
+        if (id) {
+            const findLesson = await lessons.findOne({ id });
+            if (findLesson && findLesson instanceof lessons) {
+                findLesson.topic = req.body?.topic
+                    ? req.body.topic.trim()
+                    : findLesson.topic;
+                findLesson.content = req.body?.content
+                    ? req.body.content.trim()
+                    : findLesson.content;
+                findLesson.tasks = req.body?.tasks
+                    ? req.body.tasks
+                    : findLesson.tasks;
+                findLesson.media = req.body?.media
+                    ? req.body.media
+                    : findLesson.media;
+                findLesson.type = type ? type : findLesson.type;
+                findLesson.publicDate = req.body?.publicDate
+                    ? req.body.publicDate
+                    : findLesson.publicDate;
+                findLesson.taskEndDate = req.body?.taskEndDate
+                    ? req.body.taskEndDate
+                    : findLesson.taskEndDate;
 
-        return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-            message: `Cannot find topic with id ${reqId}`,
-        });
-    } catch (error) {
-        console.log(error.message);
+                await findLesson.save();
+                return makeSuccessResponse(res, StatusCodes.OK, {
+                    message: `Lesson updated with id ${id}`,
+                    data: { ...findLesson._doc, r: undefined },
+                });
+            } else {
+                return makeSuccessResponse(res, StatusCodes.OK, {
+                    message: `Lesson not found with id ${id}`,
+                });
+            }
+        } else {
+            if (!req.body.topic) {
+                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                    message: 'Topic is required',
+                });
+            }
+
+            let lesson = {
+                topic: req.body.topic,
+                content: req.body?.content,
+                tasks: req.body?.tasks,
+                media: req.body?.media,
+                type: type,
+                publicDate: req.body?.publicDate,
+                taskEndDate: req.body?.taskEndDate,
+            };
+
+            const newLesson = await saveLesson(lesson);
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                message: 'Lesson created/updated',
+                data: { ...newLesson, r: undefined },
+            });
+        }
+    } catch (err) {
+        console.log('Error in createLesson: ', err.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
+            message: 'Server error, please try again later!',
         });
     }
 };
@@ -283,107 +262,4 @@ const deleteTopic = async (req, res) => {
 //     }
 // };
 
-const editTopic = async (req, res) => {
-    try {
-    } catch (error) {
-        console.log(error);
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
-        });
-    }
-};
-
-const handleTasks = (task) => {
-    try {
-        if (!(task?.questionType?.toUpperCase() in QUESTION_TYPE))
-            throw new Error('Question type not found');
-        if (!task.sentence || !task.key || !task.answers)
-            throw new Error('Missing required information');
-
-        task.questionType = task.questionType.toUpperCase();
-        Object.assign(task, {
-            grammarType: GRAMMAR_TYPE.ANY,
-            media: null,
-            taskType: TASK_TYPE.FOR_TOPIC,
-        });
-        return { task: task };
-    } catch (error) {
-        console.log(error);
-        return { error: error.message };
-    }
-};
-
-const addTasksToTopic = async (req, res) => {
-    try {
-        if (!req.params.id)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Topic id must be provided',
-            });
-        const id = req.params.id;
-        if (!req.body.data)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'No data found',
-            });
-        const getTopic = await topics.findOne({ id: id });
-        if (!(getTopic instanceof topics && getTopic))
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: `Topic not found with id ${id}`,
-            });
-        const data = req.body.data;
-        if (!data.preparationTask || !data.tasks)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Missing tasks',
-            });
-        const preparationTask = data.preparationTask;
-        const tasks = data.tasks;
-
-        const fixedPreTask = handleTasks(preparationTask);
-        if (fixedPreTask.error)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: fixedPreTask.error,
-            });
-
-        const preTaskId = await saveGrammar(fixedPreTask.task);
-        if (preTaskId) getTopic.preparationTask = preTaskId;
-        else throw new Error(`Cannot save preparation task`);
-
-        for (const val of tasks) {
-            const fixedTask = handleTasks(val);
-            if (fixedTask.error)
-                return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                    message: fixedTask.error,
-                });
-
-            const taskId = await saveGrammar(fixedTask.task);
-            if (!getTopic.tasks.includes(taskId)) getTopic.tasks.push(taskId);
-        }
-        await getTopic.save();
-        return makeSuccessResponse(res, StatusCodes.OK, {
-            message: `Task has been added to topic successfully`,
-        });
-    } catch (error) {
-        console.log(error);
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
-        });
-    }
-};
-
-// rate
-const rate = async (req, res) => {
-    try {
-        if (!req.params.topicId || !req.params.rateCount)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'Missing required params',
-            });
-        const topicId = req.params.topicId;
-        const rateCount = req.params.rateCount;
-    } catch (error) {
-        console.log(error);
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: error.message,
-        });
-    }
-};
-
-export { getLessons };
+export { getLessons, deleteLesson, createLesson };

@@ -14,6 +14,7 @@ const lessonSchema = new mongoose.Schema({
     },
     content: {
         type: String,
+        default: '',
         required: false,
     },
     tasks: {
@@ -28,17 +29,14 @@ const lessonSchema = new mongoose.Schema({
         type: String,
         enum: [LESSON_TYPE.LESSON, LESSON_TYPE.TASKS],
         default: LESSON_TYPE.TASKS,
-        required: true,
     },
     publicDate: {
         type: Date,
         default: Date.now,
-        required: true,
     },
     taskEndDate: {
         type: Date,
         default: Date.now + (24 * 3600 * 1000),
-        required: false,
     }
 });
 lessonSchema.plugin(random, { path: 'r' });

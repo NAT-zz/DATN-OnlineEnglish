@@ -12,13 +12,13 @@ const taskSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    questions: {
-        type: [Number],
-        default: [],
-    },
     topic: {
         type: String,
         default: 'General',
+    },
+    questions: {
+        type: [Number],
+        default: [],
     },
     taskType:{
         type: String,

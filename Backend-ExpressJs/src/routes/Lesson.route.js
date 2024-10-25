@@ -1,13 +1,14 @@
 import express from 'express';
 
-import {getLessons} from '../app/controllers/Lesson.controller.js';
-import { verifyToken, verifyPermission } from './auth.js';
-import { ROLES } from '../utils/Constants.js';
+import {
+    getLessons,
+    deleteLesson,
+    createLesson
+} from '../app/controllers/Lesson.controller.js';
 
 import multer from 'multer';
 const fileUpload = multer();
 const router = express.Router();
-
 
 const cpUpload = fileUpload.fields([
     { name: 'titlePicture', maxCount: 1 },
@@ -17,14 +18,16 @@ const cpUpload = fileUpload.fields([
 
 //CRUD
 router.get('/lessons', getLessons);
-// router.delete('/topic/:id', deleteTopic);
+router.delete('/:id', deleteLesson);
+router.post('/create', createLesson);
+
 // router.post(
 //     '/topic/create',
 //     cpUpload,
 //     verifyToken,
 //     verifyPermission([ROLES.ADMIN, ROLES.TEACHER]),
 //     createTopic,
-// ); // create
+// );
 
 // router.post('/topic/add-tasks/:id', addTasksToTopic);
 
