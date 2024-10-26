@@ -9,46 +9,64 @@ const getTests = async (req, res) => {
     try {
         const getAll = await tests.find();
 
-        let data = await Promise.all(
-            getAll.map(async (test) => {
-                let listTask = [];
-                for (const id of test.tasks) {
-                    let getTask = await tasks.findOne({ id }, '-r -__v');
-                    let dataQuestion = [];
-                    if (getTask && getTask instanceof tasks) {
-                        let listQuestion = [];
-
-                        for (const questionId of getTask.questions) {
-                            let getQuestion = await questions.findOne(
-                                { id: questionId },
-                                '-r -__v',
-                            );
-                            if (
-                                getQuestion &&
-                                getQuestion instanceof questions
-                            ) {
-                                listQuestion.push(getQuestion);
-                            }
-                        }
-                        dataQuestion = {
-                            ...getTask._doc,
-                            questions: listQuestion,
-                        };
-                    }
-                    listTask.push(dataQuestion);
-                }
-                return {
-                    ...test._doc,
-                    tasks: listTask,
-                };
-            }),
-        );
-
         return makeSuccessResponse(res, StatusCodes.OK, {
-            data,
+            data: getAll,
         });
     } catch (error) {
         console.log('Error in getTests: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+
+const getDetail = async (req, res) => {
+    const id = req.params.id;
+    try {
+        if (!id)
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Missing id',
+            });
+
+        const getTest = await tests.findOne({ id }, '-r -__v');
+        if (getTest && getTest instanceof tests) {
+            let listTask = [];
+            for (const id of getTest.tasks) {
+                let getTask = await tasks.findOne({ id }, '-r -__v');
+                let dataQuestion = [];
+                if (getTask && getTask instanceof tasks) {
+                    let listQuestion = [];
+
+                    for (const questionId of getTask.questions) {
+                        let getQuestion = await questions.findOne(
+                            { id: questionId },
+                            '-r -__v',
+                        );
+                        if (getQuestion && getQuestion instanceof questions) {
+                            listQuestion.push(getQuestion);
+                        }
+                    }
+                    dataQuestion = {
+                        ...getTask._doc,
+                        questions: listQuestion,
+                    };
+                }
+                listTask.push(dataQuestion);
+            }
+
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                data: {
+                    ...getTest._doc,
+                    tasks: listTask,
+                },
+            });
+        } else {
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                message: `Test not found with id ${id}`,
+            });
+        }
+    } catch (err) {
+        console.log('Error in getDetail: ', err.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error, please try again later!',
         });
@@ -138,4 +156,4 @@ const createTest = async (req, res) => {
     }
 };
 
-export { getTests, createTest, deleteTest };
+export { getTests, createTest, deleteTest, getDetail };

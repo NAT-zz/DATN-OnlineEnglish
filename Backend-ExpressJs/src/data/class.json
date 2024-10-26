@@ -1,0 +1,20 @@
+{
+    "1": {
+        "name": "A1 course",
+        "description": "Aim to teach english at A1 level",
+        "lessons": [1, 2],
+        "tests": [1]
+    },
+    "2": {
+        "name": "B1 course",
+        "description": "Aim to teach english at B1 level",
+        "lessons": [2],
+        "tests": [2]
+    },
+    "3": {
+        "name": "ASDAKLSF",
+        "description": "ASDAKLSDKADASDASD",
+        "lessons": [1, 2],
+        "tests": [1, 2]
+    }
+}

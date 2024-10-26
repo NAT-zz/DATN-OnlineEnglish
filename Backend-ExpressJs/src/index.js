@@ -6,6 +6,8 @@ import { initDataQuestion } from './models/questions.model.js';
 import { initDataTask } from './models/tasks.model.js';
 import { initDataLesson } from './models/lessons.model.js';
 import { initDataTest } from './models/tests.model.js';
+import { initDataClass } from './models/classes.model.js';
+import { initDataStorage } from './models/storage.model.js';
 
 import { server } from './services/socket.js';
 
@@ -19,7 +21,8 @@ const PORT = process.env.SERVER_PORT;
     await initDataTask();
     await initDataLesson();
     await initDataTest();
-    // await initDataClass();
+    await initDataClass();
+    await initDataStorage();
     
     server.listen(PORT, () => {
         console.log(`Listening on port ${PORT}`);

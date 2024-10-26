@@ -1,26 +1,25 @@
-import { makeSuccessResponse } from '../../utils/Response.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { StatusCodes } from 'http-status-codes';
+import { makeSuccessResponse } from '../../utils/Response.js';
 
-import users from '../../models/users.mongo.js';
-import tokens from '../../models/tokens.mongo.js';
 import conversations from '../../models/conversations.mongo.js';
 import messages from '../../models/messages.mongo.js';
-import { findMaxId } from '../../models/users.model.js';
-import { TOKENS, ROLES } from '../../utils/Constants.js';
-import { saveUser } from '../../models/users.model.js';
-import { streamUpload } from '../../models/medias.model.js';
+import tokens from '../../models/tokens.mongo.js';
+import { findMaxId, saveUser } from '../../models/users.model.js';
+import users from '../../models/users.mongo.js';
+import { streamUpload } from '../../services/fileUpload.js';
+import { ROLES, TOKENS } from '../../utils/Constants.js';
 
-import { validateEmail } from '../../utils/Validate.js';
-import { generateTokenAndSetCookie } from '../../utils/GenerateTokens.js';
 import mongoose from 'mongoose';
 import {
     sendPasswordResetEmail,
     sendVerificationEmail,
 } from '../../services/email.js';
-import { getReceiverSocketId } from '../../services/socket.js';
 import { setValue } from '../../services/redis.js';
+import { getReceiverSocketId } from '../../services/socket.js';
+import { generateTokenAndSetCookie } from '../../utils/GenerateTokens.js';
+import { validateEmail } from '../../utils/Validate.js';
 
 const getAllUsers = async (req, res) => {
     try {
@@ -457,7 +456,7 @@ const editProfile = async (req, res) => {
     // avatar
     // birthdate
     try {
-        if (!req.body || !req.body.email)
+        if (!req.body.email)
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
                 message: 'Email must be provided',
             });
@@ -666,20 +665,20 @@ const getTeachers = async (req, res) => {
 };
 
 export {
+    checkAuth,
+    deleteLastestUser,
+    deleteUser,
+    editProfile,
+    forgotPassword,
+    getAllUsers,
+    getMessages,
     getStudyings,
     getTeachers,
-    registerUser,
     loginUser,
-    verifyAccount,
-    resendLink,
     logoutUser,
-    forgotPassword,
+    registerUser,
+    resendLink,
     resetPassword,
-    editProfile,
-    checkAuth,
-    deleteUser,
-    getAllUsers,
-    deleteLastestUser,
-    getMessages,
     sendMessage,
+    verifyAccount,
 };

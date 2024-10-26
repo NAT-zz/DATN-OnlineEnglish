@@ -1,11 +1,10 @@
-import { makeSuccessResponse } from '../../utils/Response.js';
-import { LESSON_TYPE } from '../../utils/Constants.js';
 import { StatusCodes } from 'http-status-codes';
-import lessons from '../../models/lessons.mongo.js';
-import tasks from '../../models/tasks.mongo.js';
-import questions from '../../models/questions.mongo.js';
 import { saveLesson } from '../../models/lessons.model.js';
-import { streamUpload } from '../../models/medias.model.js';
+import lessons from '../../models/lessons.mongo.js';
+import questions from '../../models/questions.mongo.js';
+import tasks from '../../models/tasks.mongo.js';
+import { LESSON_TYPE } from '../../utils/Constants.js';
+import { makeSuccessResponse } from '../../utils/Response.js';
 
 const getLessons = async (req, res) => {
     const topic = req.query.topic;
@@ -37,46 +36,63 @@ const getLessons = async (req, res) => {
             );
         else getLessons = await lessons.find({}, '-r -__v');
 
-        let data = await Promise.all(
-            getLessons.map(async (lesson) => {
-                let listTask = [];
-                for (const id of lesson.tasks) {
-                    let getTask = await tasks.findOne({ id }, '-r -__v');
-                    let dataQuestion = [];
-                    if (getTask && getTask instanceof tasks) {
-                        let listQuestion = [];
-
-                        for (const questionId of getTask.questions) {
-                            let getQuestion = await questions.findOne(
-                                { id: questionId },
-                                '-r -__v',
-                            );
-                            if (
-                                getQuestion &&
-                                getQuestion instanceof questions
-                            ) {
-                                listQuestion.push(getQuestion);
-                            }
-                        }
-                        dataQuestion = {
-                            ...getTask._doc,
-                            questions: listQuestion,
-                        };
-                    }
-                    listTask.push(dataQuestion);
-                }
-                return {
-                    ...lesson._doc,
-                    tasks: listTask,
-                };
-            }),
-        );
-
         return makeSuccessResponse(res, StatusCodes.OK, {
-            data: data,
+            data: getLessons,
         });
     } catch (error) {
         console.log('Error in getLesson: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+
+const getDetail = async (req, res) => {
+    const id = req.params.id;
+    try {
+        if (!id)
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Missing lesson Id',
+            });
+        const getLesson = await lessons.findOne({ id }, '-r -__v');
+        if (getLesson && getLesson instanceof lessons) {
+            let listTask = [];
+            for (const id of getLesson.tasks) {
+                let getTask = await tasks.findOne({ id }, '-r -__v');
+                let dataQuestion = [];
+                if (getTask && getTask instanceof tasks) {
+                    let listQuestion = [];
+
+                    for (const questionId of getTask.questions) {
+                        let getQuestion = await questions.findOne(
+                            { id: questionId },
+                            '-r -__v',
+                        );
+                        if (getQuestion && getQuestion instanceof questions) {
+                            listQuestion.push(getQuestion);
+                        }
+                    }
+                    dataQuestion = {
+                        ...getTask._doc,
+                        questions: listQuestion,
+                    };
+                }
+                listTask.push(dataQuestion);
+            }
+
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                data: {
+                    ...getLesson._doc,
+                    tasks: listTask,
+                },
+            });
+        } else {
+            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+                message: `Lesson not found with id ${id}`,
+            });
+        }
+    } catch (err) {
+        console.log('Error in getDetail: ', err.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error, please try again later!',
         });
@@ -181,85 +197,4 @@ const createLesson = async (req, res) => {
     }
 };
 
-// const createTopic = async (req, res) => {
-//     try {
-//         if (
-//             !req.body.name ||
-//             !req.body.preview ||
-//             !req.body.topicSkill ||
-//             !req.body.instruction ||
-//             !req.body.level
-//         )
-//             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-//                 message: 'Missing required data',
-//             });
-//         const data = req.body;
-//         if (!(data.topicSkill.toUpperCase() in SKILLS))
-//             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-//                 message: `Skill not found`,
-//             });
-//         if (!(data.level.toUpperCase() in COURSE))
-//             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-//                 message: 'Level not found',
-//             });
-//         if (!req.userData)
-//             return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
-//                 message: 'You must login first',
-//             });
-//         const getUser = await users.findOne({ userName: req.userData.sub });
-//         let idUser = null;
-//         if (getUser instanceof users && getUser) idUser = getUser.id;
-//         else
-//             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-//                 message: 'User not found',
-//             });
-
-//         let titlePictureLink = null,
-//             transcriptLink = null,
-//             audioLink = null,
-//             uploadFile = null;
-//         if (req?.files?.titlePicture) {
-//             uploadFile = await streamUpload(req.files.titlePicture[0]);
-//             if (uploadFile) titlePictureLink = uploadFile.url;
-//         }
-//         if (req?.files?.transcript) {
-//             uploadFile = await streamUpload(req.files.transcript[0]);
-//             if (uploadFile) transcriptLink = uploadFile.url;
-//         }
-//         if (req?.files?.audio) {
-//             uploadFile = await streamUpload(req.files.audio[0]);
-//             if (uploadFile) audioLink = uploadFile.url;
-//         }
-
-//         const mediaId = await saveMedia({
-//             titlePicture: titlePictureLink,
-//             transcript: transcriptLink,
-//             audio: audioLink,
-//         });
-
-//         if (mediaId) {
-//             const topicId = await saveTopic({
-//                 name: data.name,
-//                 preview: data.preview,
-//                 topicSkill: data.topicSkill.toUpperCase(),
-//                 level: data.level.toUpperCase(),
-//                 instruction: data.instruction,
-//                 media: mediaId,
-//                 idProvider: getUser.id,
-//             });
-
-//             if (topicId)
-//                 return makeSuccessResponse(res, StatusCodes.OK, {
-//                     data: topicId,
-//                 });
-//         }
-//         throw new Error('Something went wrong!');
-//     } catch (error) {
-//         console.log(error);
-//         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-//             message: error.message,
-//         });
-//     }
-// };
-
-export { getLessons, deleteLesson, createLesson };
+export { createLesson, deleteLesson, getLessons, getDetail };

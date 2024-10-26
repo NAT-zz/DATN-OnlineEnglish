@@ -54,9 +54,7 @@ router.post('/message/send/:id', verifyToken, sendMessage);
 // users
 router.get('/studyings', verifyToken, getStudyings);
 router.get('/teachers', getTeachers)
-// student choose teacher
-// lesson, questions view for teachers
+// student choose class
 
 // achivements
-// coins
 export default router;
