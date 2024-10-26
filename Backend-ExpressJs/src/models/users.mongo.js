@@ -49,7 +49,6 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     //achivements
-    //coin
 });
 
 export default mongoose.model('User', userSchema);

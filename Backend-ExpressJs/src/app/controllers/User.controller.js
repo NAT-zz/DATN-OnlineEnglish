@@ -446,15 +446,6 @@ const resetPassword = async (req, res) => {
 };
 
 const editProfile = async (req, res) => {
-    // username
-    // fullname
-
-    // current password // required if changing password
-    // password
-    // confirm password
-
-    // avatar
-    // birthdate
     try {
         if (!req.body.email)
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
@@ -469,15 +460,13 @@ const editProfile = async (req, res) => {
                 userName: req.body?.username
                     ? req.body.username
                     : user.userName,
-                fullName: req.body?.fullname
-                    ? req.body.fullname
-                    : user.fullName,
                 birthDate: req.body?.birthdate
                     ? req.body.birthdate
                     : user.birthDate,
-                avatar: req?.file
-                    ? (await streamUpload(req.file)).url
-                    : user.avatar,
+                avatar: req.body?.avatar ? req.body.avatar : user.avatar,
+                description: req.body?.description
+                    ? req.body.description
+                    : user.description,
             });
             if (req.body.password) {
                 if (!req.body.currentpassword)
@@ -505,15 +494,7 @@ const editProfile = async (req, res) => {
             if (updatedUser)
                 return makeSuccessResponse(res, StatusCodes.OK, {
                     message: 'Information updated',
-                    data: {
-                        username: updatedUser.userName,
-                        fullname: updatedUser.fullName,
-                        email: updatedUser.email,
-                        role: updatedUser.role,
-                        avatar: updatedUser.avatar,
-                        coin: updatedUser.coin,
-                        achivement: updatedUser.achivement,
-                    },
+                    data: updatedUser
                 });
             throw new Error('Update failed');
         } else throw new Error('Incorrect user information');

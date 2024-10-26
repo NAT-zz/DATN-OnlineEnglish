@@ -38,7 +38,7 @@ const saveUser = async (user) => {
                 : getUser.studying;
 
             await getUser.save();
-            return getUser;
+            return getUser._doc;
         } else {
             getUser = await users.create({
                 id: Number((await findMaxId()) + 1),
@@ -52,7 +52,7 @@ const saveUser = async (user) => {
                 avatar: user?.avatar ? user.avatar : null,
                 studying: user?.studying? user.studying : [],
             });
-            if (getUser && getUser instanceof user) return getUser;
+            if (getUser && getUser instanceof user) return getUser._doc;
             throw new Error('Unable to create new User');
         }
     } catch (err) {
