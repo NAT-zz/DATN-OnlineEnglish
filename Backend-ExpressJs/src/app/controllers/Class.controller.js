@@ -22,7 +22,7 @@ const getClasses = async (req, res) => {
     }
 };
 
-const getClassAuth = async (req, req) => {
+const getClassAuth = async (req, res) => {
     try {
         const getAll = await classes.find({});
         const data = await filterData(req.userData.id, getAll, 'class');
