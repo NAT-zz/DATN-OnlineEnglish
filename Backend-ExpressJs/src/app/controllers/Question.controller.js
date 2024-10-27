@@ -7,7 +7,7 @@ import {
     saveSelect,
 } from '../../models/questions.model.js';
 
-import { filterData } from '../../utils/Strorage.js'
+import { addToStorage, filterData } from '../../utils/Strorage.js';
 
 const getQuestion = async (req, res) => {
     try {
@@ -193,6 +193,8 @@ const checkQuestionAnswer = async (data) => {
 
 const checkAnswers = async (req, res) => {
     try {
+        const type = req.query.type;
+
         if (!req.body.data || req.body.data.length === 0)
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
                 message: 'No data found',
@@ -204,6 +206,19 @@ const checkAnswers = async (req, res) => {
                 (result.correctResult.length / req.body.data.length) *
                 100
             ).toFixed();
+
+            // const added = await addToStorage(
+            //     req.userData.id,
+            //     {
+            //         id: req.body.id,
+            //         score: result,
+            //     },
+            //     type,
+            // );
+
+            // if (added) console.log('result saved');
+            // else console.log('result saved failed');
+
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: `Total score is ${result.correctResult.length} out of ${req.body.data.length} (${percent}%)`,
                 data: result,

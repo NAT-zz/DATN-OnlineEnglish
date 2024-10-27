@@ -103,23 +103,39 @@ const addToStorage = async (userId, id, type) => {
         const getStorage = await handleStorage(userId);
         switch (type) {
             case 'question':
+                if (getStorage.questions.includes(id)) {
+                    return false;
+                }
                 getStorage.questions.push(id);
                 break;
             case 'task':
+                if (getStorage.tasks.includes(id)) {
+                    return false;
+                }
                 getStorage.tasks.push(id);
                 break;
             case 'lesson':
+                if (getStorage.lessons.includes(id)) {
+                    return false;
+                }
                 getStorage.lessons.push(id);
                 break;
             case 'test':
+                if (getStorage.tests.includes(id)) {
+                    return false;
+                }
                 getStorage.tests.push(id);
                 break;
             case 'class':
+                if (getStorage.classes.includes(id)) {
+                    return false;
+                }
                 getStorage.classes.push(id);
                 break;
         }
 
         await getStorage.save();
+        return true;
     } catch (error) {
         console.error('Error in addToStorage:', error.message);
         throw new Error('Error while adding to storage');

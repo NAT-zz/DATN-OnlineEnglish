@@ -1,11 +1,11 @@
 import { makeSuccessResponse } from '../../utils/Response.js';
 import { StatusCodes } from 'http-status-codes';
 import lessons from '../../models/lessons.mongo.js';
-import tasks from '../../models/tasks.mongo.js';
-import questions from '../../models/questions.mongo.js';
 import classes from '../../models/classes.mongo.js';
 import tests from '../../models/tests.mongo.js';
 import { saveClass } from '../../models/classes.model.js';
+
+import { filterData, addToStorage } from '../../utils/Strorage.js';
 
 const getClasses = async (req, res) => {
     try {
@@ -16,6 +16,22 @@ const getClasses = async (req, res) => {
         });
     } catch (error) {
         console.log('Error in getClasses: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+
+const getClassAuth = async (req, req) => {
+    try {
+        const getAll = await classes.find({});
+        const data = await filterData(req.userData.id, getAll, 'class');
+
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data,
+        });
+    } catch (error) {
+        console.log('Error in getClassAuth: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error, please try again later!',
         });
@@ -151,4 +167,23 @@ const createClass = async (req, res) => {
         });
     }
 };
-export { getClasses, createClass, deleteClass, getDetail };
+
+const studentSignup = async (req, res) => {
+    if (await addToStorage(req.userData.id, req.params.id, 'class')) {
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            message: 'Student has been signed up for the class',
+        });
+    } else {
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Failed to sign up for the class',
+        });
+    }
+};
+export {
+    getClasses,
+    createClass,
+    deleteClass,
+    getDetail,
+    getClassAuth,
+    studentSignup,
+};
