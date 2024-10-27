@@ -24,7 +24,7 @@ const getQuestion = async (req, res) => {
             data = await questions.find({}, '-_id -__v -r');
         }
 
-        data = await filterData(req.userData.id, data, 'question');
+        // data = await filterData(req.userData.id, data, 'question');
 
         return makeSuccessResponse(res, StatusCodes.OK, {
             data,

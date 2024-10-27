@@ -10,7 +10,7 @@ import { verifyPermission, verifyRights, verifyToken } from './auth.js'
 const router = express.Router();
 
 // CRUD
-router.get('/questions', verifyToken ,getQuestion);
+router.get('/questions' ,getQuestion);
 router.delete('/:id',deleteQuestion);
 router.post('/create', createQuestion);
 

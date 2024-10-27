@@ -8,8 +8,9 @@ For now, read package.json for setup detailed
 -   đăng ký class // half done, need testing
 
 -   chấm bài, làm bt, test xong lưu
--   làm sao biết bài test, lesson nào đã làm
+-   lấy kq bài đã làm
 -   kết thúc khóa học => clear hết kq
+
 -   edit/password user not done
 
 -   Config VERIFY , AUTHORIZE to api
