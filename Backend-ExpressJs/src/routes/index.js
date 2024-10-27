@@ -9,6 +9,7 @@ import multer from 'multer';
 import { uploadFile } from '../app/controllers/File.controller.js';
 
 import { mongoDeleteAllDB } from '../services/mongo.js';
+import storages from '../models/storage.mongo.js';
 
 const storage = multer.memoryStorage();
 const fileUpload = multer({ storage });
@@ -27,6 +28,18 @@ function route(app) {
             return res
                 .status(500)
                 .json({ message: 'Error occurred while dropping collections' });
+        }
+    });
+    app.get('/api/storage', async (req, res) => {
+        try {
+            const data = await storages.find();
+            return res.status(200).json({
+                data,
+            });
+        } catch (err) {
+            return res
+                .status(500)
+                .json({ message: 'Error occurred while getting storages' });
         }
     });
 

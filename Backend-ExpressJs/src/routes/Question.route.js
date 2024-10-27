@@ -6,11 +6,12 @@ import {
     getRandomQuestions,
     checkAnswers,
 } from '../app/controllers/Question.controller.js';
+import { verifyPermission, verifyRights, verifyToken } from './auth.js'
 const router = express.Router();
 
 // CRUD
-router.get('/questions', getQuestion);
-router.delete('/:id', deleteQuestion);
+router.get('/questions', verifyToken ,getQuestion);
+router.delete('/:id',deleteQuestion);
 router.post('/create', createQuestion);
 
 // ?limit = 3

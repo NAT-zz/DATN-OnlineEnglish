@@ -1,7 +1,7 @@
 {
     "1": {
         "userId": 2,
-        "questions": [1, 2],
+        "questions": [2],
         "tasks": [1],
         "lessons": [1, 2],
         "tests": [1],

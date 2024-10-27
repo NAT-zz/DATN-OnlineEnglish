@@ -39,7 +39,7 @@ const saveStorage = async (storage) => {
                 : getStorage.classes;
 
             await getStorage.save();
-            return getStorage._doc;
+            return getStorage;
         } else {
             getStorage = await storages.create({
                 id: Number((await findMaxId()) + 1),
@@ -51,8 +51,7 @@ const saveStorage = async (storage) => {
                 classes: storage?.classes,
             });
 
-            if (getStorage && getStorage instanceof storages)
-                return getStorage._doc;
+            if (getStorage && getStorage instanceof storages) return getStorage;
             throw new Error('Unable to create new Storage!');
         }
     } catch (err) {

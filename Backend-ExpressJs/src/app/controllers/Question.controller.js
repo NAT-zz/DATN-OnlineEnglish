@@ -7,25 +7,28 @@ import {
     saveSelect,
 } from '../../models/questions.model.js';
 
+import { filterData } from '../../utils/Strorage.js'
+
 const getQuestion = async (req, res) => {
     try {
         const type = req.query.type?.toUpperCase();
+        let data;
         if (type) {
-            const getQuestion = await questions.find(
+            data = await questions.find(
                 {
                     questionType: type,
                 },
                 '-_id -__v -r',
             );
-            return makeSuccessResponse(res, StatusCodes.OK, {
-                data: getQuestion,
-            });
         } else {
-            const getAllQuestions = await questions.find({}, '-_id -__v -r');
-            return makeSuccessResponse(res, StatusCodes.OK, {
-                data: getAllQuestions,
-            });
+            data = await questions.find({}, '-_id -__v -r');
         }
+
+        data = await filterData(req.userData.id, data, 'question');
+
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data,
+        });
     } catch (error) {
         console.log('Error in getting questions: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
