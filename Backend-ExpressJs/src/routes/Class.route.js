@@ -5,20 +5,36 @@ import {
     createClass,
     getDetail,
     getClassAuth,
-    studentSignup
+    studentSignup,
+    handleSubmit,
 } from '../app/controllers/Class.controller.js';
+
+import { verifyToken, verifyPermission, verifyRights } from './auth.js';
+import { ROLES } from '../utils/Constants.js';
 const router = express.Router();
 
 // CRUD
 router.get('/classes', getClasses);
-router.get('/classes/auth', getClassAuth);
+router.get('/classes/auth', verifyToken, getClassAuth);
 router.get('/detail/:id', getDetail);
+// router.delete('/:id',verifyToken, verifyRights('class'), deleteClass);
 router.delete('/:id', deleteClass);
 router.post('/create', createClass);
 
 //student
-router.get('/signUp', studentSignup);
+router.get(
+    '/signUp/:id',
+    verifyToken,
+    verifyPermission([ROLES.STUDENT]),
+    studentSignup,
+);
 
+router.post(
+    '/submit/:type',
+    verifyToken,
+    verifyPermission([ROLES.STUDENT]),
+    handleSubmit,
+);
 
 // verify, authorize
 export default router;

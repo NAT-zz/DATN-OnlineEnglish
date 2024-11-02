@@ -33,9 +33,6 @@ const saveUser = async (user) => {
             getUser.description = user?.description ? user.description : getUser.description;
             getUser.role = user?.role ? user.role : getUser.role;
             getUser.status = user?.status ? user.status : getUser.status;
-            getUser.studying = user?.studying
-                ? user.studying
-                : getUser.studying;
 
             await getUser.save();
             return getUser._doc;
@@ -50,7 +47,6 @@ const saveUser = async (user) => {
                 birthDate: user?.birthDate ? user.birthDate : null,
                 description: user?.description ? user.description : null,
                 avatar: user?.avatar ? user.avatar : null,
-                studying: user?.studying? user.studying : [],
             });
             if (getUser && getUser instanceof user) return getUser._doc;
             throw new Error('Unable to create new User');

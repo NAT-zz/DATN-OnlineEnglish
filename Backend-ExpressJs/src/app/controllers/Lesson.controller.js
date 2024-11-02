@@ -5,6 +5,7 @@ import questions from '../../models/questions.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
 import { LESSON_TYPE } from '../../utils/Constants.js';
 import { makeSuccessResponse } from '../../utils/Response.js';
+import { getResult } from '../../utils/Strorage.js';
 
 const getLessons = async (req, res) => {
     const topic = req.query.topic;
@@ -79,11 +80,13 @@ const getDetail = async (req, res) => {
                 }
                 listTask.push(dataQuestion);
             }
+            // const result = await getResult(req.userData.id, 'lesson', id);
 
             return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
                 data: {
                     ...getLesson._doc,
                     tasks: listTask,
+                    // result: result ? result : []
                 },
             });
         } else {
@@ -91,6 +94,7 @@ const getDetail = async (req, res) => {
                 message: `Lesson not found with id ${id}`,
             });
         }
+
     } catch (err) {
         console.log('Error in getDetail: ', err.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {

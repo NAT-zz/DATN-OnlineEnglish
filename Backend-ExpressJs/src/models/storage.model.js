@@ -3,25 +3,19 @@ import path from 'path';
 import storages from './storage.mongo.js';
 
 const __dirname = path.resolve();
-const findMaxId = async () => {
-    const lastestStorage = await storages.findOne().sort('-id');
-
-    if (!lastestStorage && !(lastestStorage instanceof storages)) {
-        return 0;
-    }
-    return lastestStorage.id;
-};
 
 const saveStorage = async (storage) => {
     try {
         let getStorage = await storages.findOne({
             userId: storage?.userId,
+            role: storage?.role,
         });
 
         if (getStorage && getStorage instanceof storages) {
             getStorage.userId = storage?.userId
                 ? storage.userId
                 : getStorage.userId;
+            getStorage.role = storage?.role ? storage.role : getStorage.role;
             getStorage.questions = storage?.questions
                 ? storage.questions
                 : getStorage.questions;
@@ -42,8 +36,8 @@ const saveStorage = async (storage) => {
             return getStorage;
         } else {
             getStorage = await storages.create({
-                id: Number((await findMaxId()) + 1),
                 userId: storage.userId,
+                role: storage.role,
                 questions: storage?.questions,
                 tasks: storage?.tasks,
                 lessons: storage?.lessons,
@@ -69,4 +63,4 @@ const initDataStorage = async () => {
     }
 };
 
-export { initDataStorage, findMaxId, saveStorage };
+export { initDataStorage, saveStorage };

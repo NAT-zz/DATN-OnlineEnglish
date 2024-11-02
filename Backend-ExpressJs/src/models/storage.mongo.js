@@ -1,15 +1,15 @@
 import mongoose from 'mongoose';
+import { ROLES } from '../utils/Constants.js';
 
 const storageSchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true,
-    },
     userId: {
         type: String,
         unique: true,
         required: true,
+    },
+    role:{
+        type: String,
+        enum: [ROLES.STUDENT, ROLES.TEACHER]
     },
     questions: {
         type: [Number],
@@ -20,11 +20,11 @@ const storageSchema = new mongoose.Schema({
         default: [],
     },
     lessons: {
-        type: [Number],
+        type: [Object],
         default: [],
     },
     tests: {
-        type: [Number],
+        type: [Object],
         default: [],
     },
     classes: {

@@ -1,5 +1,8 @@
 import storages from '../models/storage.mongo.js';
+import users from '../models/users.mongo.js';
+import classes from '../models/classes.mongo.js';
 import { saveStorage } from '../models/storage.model.js';
+import { ROLES } from './Constants.js';
 
 const handleStorage = async (userId) => {
     const getStorage = await storages.findOne({ userId });
@@ -8,7 +11,10 @@ const handleStorage = async (userId) => {
         if (getStorage && getStorage instanceof storages) {
             return getStorage;
         } else {
-            return await saveStorage({ userId });
+            const getUser = await users.findOne({ id: userId });
+            if (getUser && getUser instanceof users) {
+                return await saveStorage({ userId, role: getUser.role });
+            } else throw new Error('No user found');
         }
     } catch (error) {
         console.error('Error in handleStorage:', error.message);
@@ -19,32 +25,44 @@ const handleStorage = async (userId) => {
 const filterData = async (userId, data, type) => {
     try {
         const getStorage = await handleStorage(userId);
+
         let result = [];
         switch (type) {
             case 'question':
-                result = data.map((val) => {
-                    if (getStorage.questions.includes(val.id)) return val;
+                data.forEach((val) => {
+                    if (getStorage.questions.includes(val.id)) {
+                        result.push(val);
+                    }
                 });
                 break;
             case 'task':
-                result = data.map((val) => {
-                    if (getStorage.tasks.includes(val.id)) return val;
+                data.forEach((val) => {
+                    if (getStorage.tasks.includes(val.id)) {
+                        result.push(val);
+                    }
                 });
                 break;
             case 'lesson':
-                result = data.map((val) => {
-                    if (getStorage.lessons.includes(val.id)) return val;
+                data.forEach((val) => {
+                    if (getStorage.lessons.includes(val.id)) {
+                        result.push(val);
+                    }
                 });
                 break;
             case 'test':
-                result = data.map((val) => {
-                    if (getStorage.tests.includes(val.id)) return val;
+                data.forEach((val) => {
+                    if (getStorage.tests.includes(val.id)) {
+                        result.push(val);
+                    }
                 });
                 break;
             case 'class':
-                result = data.map((val) => {
-                    if (getStorage.classes.includes(val.id)) return val;
+                data.forEach((val) => {
+                    if (getStorage.classes.includes(val.id)) {
+                        result.push(val);
+                    }
                 });
+
                 break;
             default:
                 break;
@@ -60,34 +78,41 @@ const filterData = async (userId, data, type) => {
 const deleteFromStorage = async (userId, id, type) => {
     try {
         const getStorage = await handleStorage(userId);
+
+        const getAllStorage = await storages.find({
+            classes: { $in: [id] },
+        });
+        console.log(getAllStorage);
+
         switch (type) {
             case 'question':
                 getStorage.questions = getStorage.questions.filter(
-                    (questionId) => questionId !== id,
+                    (questionId) => questionId.toString() !== id,
                 );
                 break;
             case 'task':
                 getStorage.tasks = getStorage.tasks.filter(
-                    (taskId) => taskId !== id,
-                );
-                break;
-            case 'lesson':
-                getStorage.lessons = getStorage.lessons.filter(
-                    (lessonId) => lessonId !== id,
-                );
-                break;
-            case 'test':
-                getStorage.tests = getStorage.tests.filter(
-                    (testId) => testId !== id,
-                );
-                break;
-            case 'class':
-                getStorage.classes = getStorage.classes.filter(
-                    (classId) => classId !== id,
+                    (taskId) => taskId.toString() !== id,
                 );
                 break;
 
             default:
+                for (const val of getAllStorage) {
+                    if (type == 'lesson') {
+                        val.lessons = val.lessons.filter(
+                            (lessonId) => lessonId.toString() !== id,
+                        );
+                    } else if (type == 'test') {
+                        val.tests = val.tests.filter(
+                            (testId) => testId.toString() !== id,
+                        );
+                    } else if (type == 'class') {
+                        val.classes = val.classes.filter(
+                            (classId) => classId.toString() !== id,
+                        );
+                    }
+                    await val.save();
+                }
                 break;
         }
 
@@ -101,37 +126,62 @@ const deleteFromStorage = async (userId, id, type) => {
 const addToStorage = async (userId, id, type) => {
     try {
         const getStorage = await handleStorage(userId);
-        switch (type) {
-            case 'question':
-                if (getStorage.questions.includes(id)) {
-                    return false;
-                }
-                getStorage.questions.push(id);
-                break;
-            case 'task':
-                if (getStorage.tasks.includes(id)) {
-                    return false;
-                }
-                getStorage.tasks.push(id);
-                break;
-            case 'lesson':
-                if (getStorage.lessons.includes(id)) {
-                    return false;
-                }
-                getStorage.lessons.push(id);
-                break;
-            case 'test':
-                if (getStorage.tests.includes(id)) {
-                    return false;
-                }
-                getStorage.tests.push(id);
-                break;
-            case 'class':
-                if (getStorage.classes.includes(id)) {
-                    return false;
-                }
-                getStorage.classes.push(id);
-                break;
+        const getUser = await users.findOne({ id: userId });
+
+        if (getUser.role == ROLES.TEACHER) {
+            switch (type) {
+                case 'question':
+                    if (getStorage.questions.includes(id)) {
+                        return false;
+                    }
+                    getStorage.questions.push(id);
+                    break;
+                case 'task':
+                    if (getStorage.tasks.includes(id)) {
+                        return false;
+                    }
+                    getStorage.tasks.push(id);
+                    break;
+                case 'lesson':
+                    if (getStorage.lessons.includes(id)) {
+                        return false;
+                    }
+                    getStorage.lessons.push(id);
+                    break;
+                case 'test':
+                    if (getStorage.tests.includes(id)) {
+                        return false;
+                    }
+                    getStorage.tests.push(id);
+                    break;
+                case 'class':
+                    if (getStorage.classes.includes(id)) {
+                        return false;
+                    }
+                    getStorage.classes.push(id);
+                    break;
+            }
+        } else {
+            switch (type) {
+                case 'lesson':
+                    if (getStorage.lessons.find((val) => val.id === id.id)) {
+                        return false;
+                    }
+                    getStorage.lessons.push(id);
+                    break;
+                case 'test':
+                    if (getStorage.tests.find((val) => val.id === id.id)) {
+                        return false;
+                    }
+                    getStorage.tests.push(id);
+                    break;
+                case 'class':
+                    if (getStorage.classes.includes(id)) {
+                        return false;
+                    }
+                    getStorage.classes.push(id);
+                    break;
+            }
         }
 
         await getStorage.save();
@@ -142,4 +192,30 @@ const addToStorage = async (userId, id, type) => {
     }
 };
 
-export { filterData, deleteFromStorage, addToStorage };
+const getResult = async (userId, type, id) => {
+    const getUser = await users.findOne({ id: userId });
+    if (getUser && getUser instanceof users) {
+        const getStorage = await storages.findOne({
+            userId,
+            role: ROLES.STUDENT,
+        });
+        if (getStorage && getStorage instanceof storages) {
+            let res;
+            if (type == 'lesson') {
+                res = getStorage.lessons.find((val) => {
+                    return val.id == id;
+                });
+            } else if (type == 'test') {
+                res = getStorage.tests.find((val) => {
+                    return val.id == id;
+                });
+            }
+
+            if (res) {
+                return res;
+            } else return false;
+        } else throw new Error('Storage not found');
+    } else throw new Error('User not found');
+};
+
+export { filterData, deleteFromStorage, addToStorage, getResult };

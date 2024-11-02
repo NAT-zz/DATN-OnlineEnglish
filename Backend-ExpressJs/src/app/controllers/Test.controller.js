@@ -4,6 +4,7 @@ import tests from '../../models/tests.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
 import questions from '../../models/questions.mongo.js';
 import { saveTest } from '../../models/tests.model.js';
+import { getResult } from '../../utils/Strorage.js';
 
 const getTests = async (req, res) => {
     try {
@@ -54,10 +55,14 @@ const getDetail = async (req, res) => {
                 listTask.push(dataQuestion);
             }
 
+            // const result = await getResult(req.userData.id, 'test', id);
+
+
             return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
                 data: {
                     ...getTest._doc,
                     tasks: listTask,
+                    // result: result ? result : []
                 },
             });
         } else {

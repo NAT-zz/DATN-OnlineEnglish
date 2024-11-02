@@ -159,86 +159,9 @@ const getRandomQuestions = async (req, res) => {
     }
 };
 
-const checkQuestionAnswer = async (data) => {
-    // {
-    //     "data": [
-    //         {
-    //             "id": 4,
-    //             "answer": "I'm fine"
-    //         },
-    //         {
-    //             "id": 5,
-    //             "answer": "I'm fine"
-    //         }
-    //     ]
-    // }
-    const correctResult = [],
-        wrongResult = [];
-    for (const val of data) {
-        const getSentence = await questions.findOne({
-            id: val.id,
-        });
-
-        if (getSentence && getSentence instanceof questions) {
-            if (getSentence.key === val.answer.trim())
-                correctResult.push(val.id);
-            else wrongResult.push(val.id);
-        }
-    }
-    return {
-        correctResult,
-        wrongResult,
-    };
-};
-
-const checkAnswers = async (req, res) => {
-    try {
-        const type = req.query.type;
-
-        if (!req.body.data || req.body.data.length === 0)
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'No data found',
-            });
-        const result = await checkQuestionAnswer(req.body.data);
-        // Total score is 1 out of 8 (13%)
-        if (result) {
-            const percent = (
-                (result.correctResult.length / req.body.data.length) *
-                100
-            ).toFixed();
-
-            // const added = await addToStorage(
-            //     req.userData.id,
-            //     {
-            //         id: req.body.id,
-            //         score: result,
-            //     },
-            //     type,
-            // );
-
-            // if (added) console.log('result saved');
-            // else console.log('result saved failed');
-
-            return makeSuccessResponse(res, StatusCodes.OK, {
-                message: `Total score is ${result.correctResult.length} out of ${req.body.data.length} (${percent}%)`,
-                data: result,
-            });
-        } else
-            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
-                message: 'No result',
-            });
-    } catch (err) {
-        console.log('Error in checkAnswers: ', err.message);
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: 'Server error, please try again later!',
-        });
-    }
-};
-
 export {
     getQuestion,
     createQuestion,
     deleteQuestion,
     getRandomQuestions,
-    checkAnswers,
 };

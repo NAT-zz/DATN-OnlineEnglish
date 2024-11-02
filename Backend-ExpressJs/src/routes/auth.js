@@ -21,7 +21,6 @@ const verifyToken = async (req, res, next) => {
         //     iat: 1726934806,
         //     exp: 1726935106
         //   }
-        console.log(decoded);
 
         if (!decoded || (await getValue(req.cookies.token))) {
             return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
@@ -40,6 +39,7 @@ const verifyToken = async (req, res, next) => {
             ...decoded,
             id: user.id,
         };
+        console.log(req.userData);
 
         next();
     } catch (error) {
@@ -76,6 +76,8 @@ const verifyRights = (type) => {
     return async (req, res, next) => {
         const userId = req?.userData?.id;
         const id = req.params.id || req.query.id;
+
+        console.log(req.userData);
 
         if (userId) {
             const getStorage = await storages.findOne({ userId: userId });

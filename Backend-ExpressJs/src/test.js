@@ -99,23 +99,9 @@
 // // console.log(words);
 // console.log(final);
 
+let arr = [1, 2, 3, 4];
+const value = 2;
 
-const arr = [
-    {
-        name: 'nat',
-        age: '1'
-    },
-    {
-        name: 'tuan',
-        age: '2'
-    }
-]
+arr = arr.filter((val) => val !== value)
 
-const temp= {
-    name: 'nat',
-    age: '1'
-}
-
-console.log(
-    arr.includes(temp)
-)
+console.log(arr);
