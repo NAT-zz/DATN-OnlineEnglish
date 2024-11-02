@@ -36,18 +36,18 @@ const getTeacherOfClass = async (classId) => {
 const getClasses = async (req, res) => {
     try {
         const getAll = await classes.find({});
-        const data = await Promise.all(
-            getAll.map(async (val) => {
-                const getTeacher = await getTeacherOfClass(val.id);
-                return {
-                    ...val._doc,
-                    teacher: getTeacher,
-                };
-            }),
-        );
+        // const data = await Promise.all(
+        //     getAll.map(async (val) => {
+        //         const getTeacher = await getTeacherOfClass(val.id);
+        //         return {
+        //             ...val._doc,
+        //             teacher: getTeacher,
+        //         };
+        //     }),
+        // );
 
         return makeSuccessResponse(res, StatusCodes.OK, {
-            data,
+            data: getAll,
         });
     } catch (error) {
         console.log('Error in getClasses: ', error.message);
@@ -134,7 +134,7 @@ const deleteClass = async (req, res) => {
             });
         } else {
             const deleteCount = (await classes.deleteOne({ id })).deletedCount;
-            await deleteFromStorage(req.userData.id, id, 'class');
+            // await deleteFromStorage(req.userData.id, id, 'class');
 
             if (deleteCount > 0) {
                 return makeSuccessResponse(res, StatusCodes.OK, {
