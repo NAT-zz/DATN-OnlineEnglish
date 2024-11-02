@@ -3,7 +3,7 @@ import { saveLesson } from '../../models/lessons.model.js';
 import lessons from '../../models/lessons.mongo.js';
 import questions from '../../models/questions.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
-import { LESSON_TYPE } from '../../utils/Constants.js';
+import { LESSON_TYPE, ROLES } from '../../utils/Constants.js';
 import { makeSuccessResponse } from '../../utils/Response.js';
 import { getResult } from '../../utils/Strorage.js';
 
@@ -80,6 +80,7 @@ const getDetail = async (req, res) => {
                 }
                 listTask.push(dataQuestion);
             }
+            // if(req.userData.role == ROLES.STUDENT)
             // const result = await getResult(req.userData.id, 'lesson', id);
 
             return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {

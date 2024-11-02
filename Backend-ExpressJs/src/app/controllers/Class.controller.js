@@ -15,6 +15,7 @@ import {
     deleteFromStorage,
 } from '../../utils/Strorage.js';
 import { ROLES, TASK_TYPE } from '../../utils/Constants.js';
+import { saveStorage } from '../../models/storage.model.js';
 
 const getTeacherOfClass = async (classId) => {
     const getStorage = await storages.findOne({
@@ -243,7 +244,11 @@ const checkQuestionAnswer = async (data) => {
     //         {
     //             "id": 5,
     //             "answer": "I'm fine"
-    //         }
+    //         },
+    // {
+    //      "idEssayTask": 3,
+    //      "content": "this is my essay............"
+    // }
     //     ]
     // }
     const correctResult = [],
@@ -286,7 +291,6 @@ const getAmountQuestion = async (id, type) => {
     }
 
     for (const task of getType.tasks) {
-        console.log(task);
         const getTask = await tasks.findOne({
             id: task,
         });
@@ -331,9 +335,17 @@ const handleSubmit = async (req, res) => {
                 },
             };
             if (amount.essay > 0) {
-                savedResult.essay = {
-                    score: 'waiting',
-                };
+                let dataEssay = [];
+                req.body.data.forEach((val) => {
+                    if (val.idEssayTask) {
+                        dataEssay.push({
+                            idTask: val.idEssayTask,
+                            score: 'waiting',
+                            content: val.content,
+                        });
+                    }
+                });
+                savedResult.essays = dataEssay;
             }
 
             const added = await addToStorage(
@@ -368,6 +380,114 @@ const handleSubmit = async (req, res) => {
         });
     }
 };
+
+const getSubmitted = async (req, res) => {
+    const classId = req.params.classId;
+    const type = req.params.type;
+    const typeId = req.params.typeId;
+
+    try {
+        if (!classId || !type || !typeId) {
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Missing type or id',
+            });
+        }
+        let getResult = {
+            submitted: [],
+            unsubmitted: [],
+        };
+        const getStudents = await storages.find({
+            classes: { $in: [classId] },
+            role: ROLES.STUDENT,
+        });
+        let lessonRes;
+
+        for (const student of getStudents) {
+            if (type == 'lesson') {
+                lessonRes = student.lessons.find((val) => val.id == typeId);
+            } else if (type == 'test') {
+                lessonRes = student.tests.find((val) => val.id == typeId);
+            }
+
+            const getUser = await users
+                .findOne({ id: student.userId })
+                .select('userName avatar id');
+            if (lessonRes) {
+                getResult.submitted.push({
+                    student: getUser,
+                    result: lessonRes,
+                });
+            } else {
+                getResult.unsubmitted.push({
+                    name: getUser,
+                });
+            }
+        }
+
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data: getResult,
+        });
+    } catch (error) {
+        console.log('Error in getSubmitted: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+
+const markingEssay = async (req, res) => {
+    // {
+    //     "studentId": 4,
+    //     "taskId": 3,
+    //     "score": 8
+    // }
+    if (
+        !req.body?.studentId ||
+        !req.body?.taskId ||
+        !req.body?.type ||
+        !req.body?.score
+    )
+        return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+            message: 'Missing required data',
+        });
+    try {
+        const getStorage = await storages.findOne({
+            userId: req.body.studentId,
+        });
+        if (getStorage && getStorage instanceof storages) {
+            if (req.body.type == 'lesson') {
+                for (const val of getStorage.lessons) {
+                    const getEssay = val?.essays.find(
+                        (essayVal) => essayVal.idTask == req.body.taskId,
+                    );
+                    if (getEssay) {
+                        getEssay.score = req.body.score;
+                        break;
+                    }
+                }
+            } else if (req.body.type == 'test') {
+                for (const val of getStorage.tests) {
+                    const getEssay = val?.essays.find(
+                        (essayVal) => essayVal.idTask == req.body.taskId,
+                    );
+                    if (getEssay) {
+                        getEssay.score = req.body.score;
+                        break;
+                    }
+                }
+            }
+
+            await saveStorage(getStorage);
+        }
+        return makeSuccessResponse(res, StatusCodes.OK, {});
+    } catch (error) {
+        console.log('Error in markingEssay: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+
 export {
     getClasses,
     createClass,
@@ -376,4 +496,6 @@ export {
     getClassAuth,
     studentSignup,
     handleSubmit,
+    getSubmitted,
+    markingEssay,
 };

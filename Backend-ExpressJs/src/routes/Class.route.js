@@ -7,6 +7,8 @@ import {
     getClassAuth,
     studentSignup,
     handleSubmit,
+    getSubmitted,
+    markingEssay,
 } from '../app/controllers/Class.controller.js';
 
 import { verifyToken, verifyPermission, verifyRights } from './auth.js';
@@ -34,6 +36,20 @@ router.post(
     verifyToken,
     verifyPermission([ROLES.STUDENT]),
     handleSubmit,
+);
+
+router.get(
+    '/submitted/:classId/:type/:typeId',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    getSubmitted,
+);
+
+router.post(
+    '/marking',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    markingEssay,
 );
 
 // verify, authorize

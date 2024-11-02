@@ -55,14 +55,14 @@ const getDetail = async (req, res) => {
                 listTask.push(dataQuestion);
             }
 
+            // if(req.userData.role == ROLES.STUDENT)
             // const result = await getResult(req.userData.id, 'test', id);
-
 
             return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
                 data: {
                     ...getTest._doc,
                     tasks: listTask,
-                    // result: result ? result : []
+                    // result: result ? result : [],
                 },
             });
         } else {
