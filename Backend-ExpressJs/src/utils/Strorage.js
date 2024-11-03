@@ -160,19 +160,19 @@ const addToStorage = async (userId, id, type) => {
             }
         } else {
             switch (type) {
-                case 'lesson':
+                case RIGHT_TYPE.lesson:
                     if (getStorage.lessons.find((val) => val.id === id.id)) {
                         return false;
                     }
                     getStorage.lessons.push(id);
                     break;
-                case 'test':
+                case RIGHT_TYPE.test:
                     if (getStorage.tests.find((val) => val.id === id.id)) {
                         return false;
                     }
                     getStorage.tests.push(id);
                     break;
-                case 'class':
+                case RIGHT_TYPE.class:
                     if (getStorage.classes.includes(id)) {
                         return false;
                     }
@@ -198,11 +198,11 @@ const getResult = async (userId, type, id) => {
         });
         if (getStorage && getStorage instanceof storages) {
             let res;
-            if (type == 'lesson') {
+            if (type == RIGHT_TYPE.lesson) {
                 res = getStorage.lessons.find((val) => {
                     return val.id == id;
                 });
-            } else if (type == 'test') {
+            } else if (type == RIGHT_TYPE.test) {
                 res = getStorage.tests.find((val) => {
                     return val.id == id;
                 });

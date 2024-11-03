@@ -56,7 +56,7 @@ function route(app) {
                     data = await tasks.find({}, '-r');
                     break;
                 case 'lesson':
-                    data = await lessons.find();
+                    data = await lessons.find({}, '-r');
                     break;
                 case 'test':
                     data = await tests.find();

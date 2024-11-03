@@ -5,13 +5,28 @@ import {
     deleteTest,
     getDetail,
 } from '../app/controllers/Test.controller.js';
-import { verifyPermission, verifyToken } from './auth.js';
-import { ROLES } from '../utils/Constants.js';
+import { verifyPermission, verifyRights, verifyToken } from './auth.js';
+import { RIGHT_TYPE, ROLES } from '../utils/Constants.js';
 
 const router = express.Router();
 
 // CRUD
-router.get('/tests', getTests);
+router.get('/tests', verifyToken, verifyPermission([ROLES.TEACHER]), getTests);
+router.delete(
+    '/:id',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.test),
+    deleteTest,
+);
+router.post(
+    '/create',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.test),
+    createTest,
+);
+
 router.get('/detail/:id', getDetail);
 
 // retrieve rulst for student
@@ -21,8 +36,5 @@ router.get('/detail/:id', getDetail);
 //     verifyPermission([ROLES.TEACHER, ROLES.STUDENT]),
 //     getDetail,
 // );
-
-router.delete('/:id', deleteTest);
-router.post('/create', createTest);
 
 export default router;

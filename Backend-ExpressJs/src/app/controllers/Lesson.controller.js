@@ -1,11 +1,15 @@
 import { StatusCodes } from 'http-status-codes';
-import { saveLesson } from '../../models/lessons.model.js';
+import { findMaxId } from '../../models/lessons.model.js';
 import lessons from '../../models/lessons.mongo.js';
 import questions from '../../models/questions.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
-import { LESSON_TYPE, ROLES } from '../../utils/Constants.js';
+import { LESSON_TYPE, RIGHT_TYPE } from '../../utils/Constants.js';
 import { makeSuccessResponse } from '../../utils/Response.js';
-import { getResult } from '../../utils/Strorage.js';
+import {
+    addToStorage,
+    deleteFromStorage,
+    filterData,
+} from '../../utils/Strorage.js';
 
 const getLessons = async (req, res) => {
     const topic = req.query.topic;
@@ -37,8 +41,14 @@ const getLessons = async (req, res) => {
             );
         else getLessons = await lessons.find({}, '-r -__v');
 
+        const data = await filterData(
+            req.userData.id,
+            getLessons,
+            RIGHT_TYPE.lesson,
+        );
+
         return makeSuccessResponse(res, StatusCodes.OK, {
-            data: getLessons,
+            data,
         });
     } catch (error) {
         console.log('Error in getLesson: ', error.message);
@@ -95,7 +105,6 @@ const getDetail = async (req, res) => {
                 message: `Lesson not found with id ${id}`,
             });
         }
-
     } catch (err) {
         console.log('Error in getDetail: ', err.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -113,6 +122,7 @@ const deleteLesson = async (req, res) => {
             });
         const deleteCount = (await lessons.deleteOne({ id })).deletedCount;
         if (deleteCount > 0) {
+            await deleteFromStorage(req.userData.id, id, RIGHT_TYPE.lesson);
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: `Lesson deleted with id ${id}`,
             });
@@ -188,10 +198,28 @@ const createLesson = async (req, res) => {
                 taskEndDate: req.body?.taskEndDate,
             };
 
-            const newLesson = await saveLesson(lesson);
+            const newLesson = await lessons.create({
+                id: Number((await findMaxId()) + 1),
+                topic: lesson.topic,
+                content: lesson?.content,
+                tasks: lesson?.tasks,
+                media: lesson?.media,
+                publicDate: lesson?.publicDate,
+                taskEndDate: lesson?.taskEndDate,
+                type: lesson?.type,
+            });
+            if (!(newLesson && newLesson instanceof lessons))
+                throw new Error('Unable to create new Lesson!');
+
+            await addToStorage(
+                req.userData.id,
+                newLesson.id,
+                RIGHT_TYPE.lesson,
+            );
+
             return makeSuccessResponse(res, StatusCodes.OK, {
-                message: 'Lesson created/updated',
-                data: { ...newLesson, r: undefined },
+                message: 'Lesson created',
+                data: { ...newLesson._doc, r: undefined },
             });
         }
     } catch (err) {

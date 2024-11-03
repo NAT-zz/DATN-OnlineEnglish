@@ -7,14 +7,14 @@ import users from '../../models/users.mongo.js';
 import storages from '../../models/storage.mongo.js';
 import questions from '../../models/questions.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
-import { saveClass } from '../../models/classes.model.js';
+import { findMaxId, saveClass } from '../../models/classes.model.js';
 
 import {
     filterData,
     addToStorage,
     deleteFromStorage,
 } from '../../utils/Strorage.js';
-import { ROLES, TASK_TYPE } from '../../utils/Constants.js';
+import { RIGHT_TYPE, ROLES, TASK_TYPE } from '../../utils/Constants.js';
 import { saveStorage } from '../../models/storage.model.js';
 
 const getTeacherOfClass = async (classId) => {
@@ -36,18 +36,18 @@ const getTeacherOfClass = async (classId) => {
 const getClasses = async (req, res) => {
     try {
         const getAll = await classes.find({});
-        // const data = await Promise.all(
-        //     getAll.map(async (val) => {
-        //         const getTeacher = await getTeacherOfClass(val.id);
-        //         return {
-        //             ...val._doc,
-        //             teacher: getTeacher,
-        //         };
-        //     }),
-        // );
+        const data = await Promise.all(
+            getAll.map(async (val) => {
+                const getTeacher = await getTeacherOfClass(val.id);
+                return {
+                    ...val._doc,
+                    teacher: getTeacher,
+                };
+            }),
+        );
 
         return makeSuccessResponse(res, StatusCodes.OK, {
-            data: getAll,
+            data,
         });
     } catch (error) {
         console.log('Error in getClasses: ', error.message);
@@ -60,7 +60,7 @@ const getClasses = async (req, res) => {
 const getClassAuth = async (req, res) => {
     try {
         const getAll = await classes.find({});
-        let data = await filterData(req.userData.id, getAll, 'class');
+        let data = await filterData(req.userData.id, getAll, RIGHT_TYPE.class);
 
         data = await Promise.all(
             data.map(async (val) => {
@@ -134,7 +134,7 @@ const deleteClass = async (req, res) => {
             });
         } else {
             const deleteCount = (await classes.deleteOne({ id })).deletedCount;
-            // await deleteFromStorage(req.userData.id, id, 'class');
+            await deleteFromStorage(req.userData.id, id, RIGHT_TYPE.class);
 
             if (deleteCount > 0) {
                 return makeSuccessResponse(res, StatusCodes.OK, {
@@ -201,10 +201,23 @@ const createClass = async (req, res) => {
                 endDate: req.body?.endDate,
             };
 
-            newClass = await saveClass(newClass);
+            newClass = await classes.create({
+                id: Number((await findMaxId()) + 1),
+                name: newClass.name,
+                description: newClass?.description,
+                lessons: newClass?.lessons,
+                tests: newClass?.tests,
+                startDate: newClass?.startDate,
+                endDate: newClass?.endDate,
+            });
+
+            if (!(newClass && newClass instanceof classes))
+                throw new Error('Unable to create new Lesson!');
+
+            await addToStorage(req.userData.id, newClass.id, RIGHT_TYPE.class);
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: 'Class created',
-                data: newClass,
+                data: newClass._doc,
             });
         }
     } catch (error) {

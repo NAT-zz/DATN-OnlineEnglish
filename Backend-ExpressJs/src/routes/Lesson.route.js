@@ -6,13 +6,33 @@ import {
     createLesson,
     getDetail,
 } from '../app/controllers/Lesson.controller.js';
-import { verifyPermission, verifyToken } from './auth.js';
-import { ROLES } from '../utils/Constants.js';
+import { verifyPermission, verifyRights, verifyToken } from './auth.js';
+import { RIGHT_TYPE, ROLES } from '../utils/Constants.js';
 
 const router = express.Router();
 
 //CRUD
-router.get('/lessons', getLessons);
+router.get(
+    '/lessons',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    getLessons,
+);
+router.delete(
+    '/:id',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.lesson),
+    deleteLesson,
+);
+router.post(
+    '/create',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.lesson),
+    createLesson,
+);
+
 router.get('/detail/:id', getDetail);
 
 // retrive results for student
@@ -22,8 +42,5 @@ router.get('/detail/:id', getDetail);
 //     verifyPermission([ROLES.TEACHER, ROLES.STUDENT]),
 //     getDetail,
 // );
-
-router.delete('/:id', deleteLesson);
-router.post('/create', createLesson);
 
 export default router;

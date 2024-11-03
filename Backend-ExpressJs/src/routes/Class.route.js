@@ -12,16 +12,35 @@ import {
 } from '../app/controllers/Class.controller.js';
 
 import { verifyToken, verifyPermission, verifyRights } from './auth.js';
-import { ROLES } from '../utils/Constants.js';
+import { RIGHT_TYPE, ROLES } from '../utils/Constants.js';
 const router = express.Router();
 
 // CRUD
 router.get('/classes', getClasses);
-router.get('/classes/auth', verifyToken, getClassAuth);
+
+// teacher/student
+router.get(
+    '/classes/auth',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER, ROLES.STUDENT]),
+    getClassAuth,
+);
+router.delete(
+    '/:id',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.class),
+    deleteClass,
+);
+router.post(
+    '/create',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.class),
+    createClass,
+);
+
 router.get('/detail/:id', getDetail);
-// router.delete('/:id',verifyToken, verifyRights('class'), deleteClass);
-router.delete('/:id', deleteClass);
-router.post('/create', createClass);
 
 //student
 router.get(
@@ -38,6 +57,7 @@ router.post(
     handleSubmit,
 );
 
+// teacher
 router.get(
     '/submitted/:classId/:type/:typeId',
     verifyToken,

@@ -3,15 +3,22 @@ import { StatusCodes } from 'http-status-codes';
 import tests from '../../models/tests.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
 import questions from '../../models/questions.mongo.js';
-import { saveTest } from '../../models/tests.model.js';
-import { getResult } from '../../utils/Strorage.js';
+import { findMaxId, saveTest } from '../../models/tests.model.js';
+import {
+    addToStorage,
+    deleteFromStorage,
+    filterData,
+    getResult,
+} from '../../utils/Strorage.js';
+import { RIGHT_TYPE } from '../../utils/Constants.js';
 
 const getTests = async (req, res) => {
     try {
         const getAll = await tests.find();
+        const data = await filterData(req.userData.id, getAll, RIGHT_TYPE.test);
 
         return makeSuccessResponse(res, StatusCodes.OK, {
-            data: getAll,
+            data,
         });
     } catch (error) {
         console.log('Error in getTests: ', error.message);
@@ -88,6 +95,7 @@ const deleteTest = async (req, res) => {
         const deleteCount = (await tests.deleteOne({ id })).deletedCount;
 
         if (deleteCount > 0) {
+            await deleteFromStorage(req.userData.id, id, RIGHT_TYPE.test);
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: `Test ${id} deleted `,
             });
@@ -147,10 +155,23 @@ const createTest = async (req, res) => {
                 time: req.body?.time,
             };
 
-            newTest = await saveTest(newTest);
+            newTest = await tests.create({
+                id: Number((await findMaxId()) + 1),
+                name: newTest.name,
+                tasks: newTest?.tasks,
+                publicDate: newTest?.publicDate,
+                endDate: newTest?.endDate,
+                time: newTest?.time,
+            });
+
+            if (!(newTest && newTest instanceof tests))
+                throw new Error('Unable to create new Test!');
+
+            await addToStorage(req.userData.id, newTest.id, RIGHT_TYPE.test);
+
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: 'Test created',
-                data: newTest,
+                data: newTest._doc,
             });
         }
     } catch (error) {
