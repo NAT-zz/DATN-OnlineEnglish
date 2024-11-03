@@ -26,7 +26,7 @@ const ROLES = {
 const QUESTION_TYPE = {
     SELECT: 'SELECT',
     FILL: 'FILL',
-    LISTEN: 'LISTEN'
+    LISTEN: 'LISTEN',
 };
 
 const TASK_TYPE = {
@@ -36,8 +36,16 @@ const TASK_TYPE = {
 
 const LESSON_TYPE = {
     LESSON: 'LESSON',
-    TASKS: 'TASKS'
-}
+    TASKS: 'TASKS',
+};
+
+const RIGHT_TYPE = {
+    question: 'question',
+    task: 'task',
+    lesson: 'lesson',
+    test: 'test',
+    class: 'class',
+};
 
 ////////////////////////////////
 
@@ -66,5 +74,6 @@ export {
     COURSE,
     QUESTION_TYPE,
     TASK_TYPE,
-    LESSON_TYPE
+    LESSON_TYPE,
+    RIGHT_TYPE,
 };

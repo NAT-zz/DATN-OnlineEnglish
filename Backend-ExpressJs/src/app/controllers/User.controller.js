@@ -21,20 +21,6 @@ import { getReceiverSocketId } from '../../services/socket.js';
 import { generateTokenAndSetCookie } from '../../utils/GenerateTokens.js';
 import { validateEmail } from '../../utils/Validate.js';
 
-const getAllUsers = async (req, res) => {
-    try {
-        const getUsers = await users.find({});
-        return makeSuccessResponse(res, StatusCodes.OK, {
-            data: getUsers,
-        });
-    } catch (error) {
-        console.log('Error in getting users: ', error.message);
-        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: 'Error in getting users.',
-        });
-    }
-};
-
 const deleteUser = async (req, res, next) => {
     const { id } = req.params;
 
@@ -651,7 +637,6 @@ export {
     deleteUser,
     editProfile,
     forgotPassword,
-    getAllUsers,
     getMessages,
     getStudyings,
     getTeachers,

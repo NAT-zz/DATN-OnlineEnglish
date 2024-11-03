@@ -1,21 +1,16 @@
 import express from 'express';
 import {
-    registerUser,
-    getAllUsers,
-    loginUser,
+    registerUser, loginUser,
     verifyAccount,
     resendLink,
     logoutUser,
     forgotPassword,
     resetPassword,
     editProfile,
-    checkAuth,
-    deleteUser,
-    deleteLastestUser,
-    getMessages,
+    checkAuth, getMessages,
     sendMessage,
-    getStudyings, 
-    getTeachers,
+    getStudyings,
+    getTeachers
 } from '../app/controllers/User.controller.js';
 import multer from 'multer';
 import { verifyToken, verifyPermission } from './auth.js';
@@ -23,10 +18,6 @@ import { ROLES } from '../utils/Constants.js';
 
 const router = express.Router();
 const fileUpload = multer();
-// for dev
-router.get('/users', getAllUsers);
-router.delete('/:id', deleteUser);
-router.post('/deleteLastest', deleteLastestUser);
 
 // auth
 router.get('/check-auth', verifyToken, checkAuth);

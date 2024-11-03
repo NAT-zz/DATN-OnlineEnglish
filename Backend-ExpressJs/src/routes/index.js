@@ -7,16 +7,22 @@ import classRoute from './Class.route.js';
 
 import multer from 'multer';
 import { uploadFile } from '../app/controllers/File.controller.js';
-
 import { mongoDeleteAllDB } from '../services/mongo.js';
+
 import storages from '../models/storage.mongo.js';
+import questions from '../models/questions.mongo.js';
+import tasks from '../models/tasks.mongo.js';
+import lessons from '../models/lessons.mongo.js';
+import tests from '../models/tests.mongo.js';
+import classes from '../models/classes.mongo.js';
+import users from '../models/users.mongo.js';
+import {
+    deleteLastestUser,
+    deleteUser,
+} from '../app/controllers/User.controller.js';
 
 const storage = multer.memoryStorage();
 const fileUpload = multer({ storage });
-const cpUpload = fileUpload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'audio', maxCount: 1 },
-]);
 
 function route(app) {
     // for dev
@@ -30,9 +36,38 @@ function route(app) {
                 .json({ message: 'Error occurred while dropping collections' });
         }
     });
-    app.get('/api/storage', async (req, res) => {
+    app.delete('/:id', deleteUser);
+    app.post('/deleteLastest', deleteLastestUser);
+    app.get('/api', async (req, res) => {
         try {
-            const data = await storages.find();
+            let data = null;
+            const type = req.query.type;
+            switch (type) {
+                case 'user':
+                    data = await users.find();
+                    break;
+                case 'storage':
+                    data = await storages.find();
+                    break;
+                case 'question':
+                    data = await questions.find({}, '-r');
+                    break;
+                case 'task':
+                    data = await tasks.find({}, '-r');
+                    break;
+                case 'lesson':
+                    data = await lessons.find();
+                    break;
+                case 'test':
+                    data = await tests.find();
+                    break;
+                case 'class':
+                    data = await classes.find();
+                    break;
+                default:
+                    break;
+            }
+
             return res.status(200).json({
                 data,
             });

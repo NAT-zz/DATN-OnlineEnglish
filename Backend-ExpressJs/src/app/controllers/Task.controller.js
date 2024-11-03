@@ -2,8 +2,14 @@ import { makeSuccessResponse } from '../../utils/Response.js';
 import { StatusCodes } from 'http-status-codes';
 import tasks from '../../models/tasks.mongo.js';
 import questions from '../../models/questions.mongo.js';
-import { saveTask } from '../../models/tasks.model.js';
-import { TASK_TYPE } from '../../utils/Constants.js';
+import { findMaxId, saveTask } from '../../models/tasks.model.js';
+import { RIGHT_TYPE, TASK_TYPE } from '../../utils/Constants.js';
+
+import {
+    addToStorage,
+    deleteFromStorage,
+    filterData,
+} from '../../utils/Strorage.js';
 
 const getTasks = async (req, res) => {
     const topic = req.query.topic;
@@ -39,8 +45,6 @@ const getTasks = async (req, res) => {
 
         let data = await Promise.all(
             getTasks.map(async (task) => {
-                // console.log(task);
-
                 let listQuestion = [];
                 for (const id of task.questions) {
                     let getQuestion = await questions.findOne(
@@ -57,6 +61,8 @@ const getTasks = async (req, res) => {
                 };
             }),
         );
+
+        data = await filterData(req.userData.id, data, RIGHT_TYPE.task);
 
         return makeSuccessResponse(res, StatusCodes.OK, {
             data,
@@ -83,6 +89,7 @@ const deleteTask = async (req, res) => {
             })
         ).deletedCount;
         if (deleteTask) {
+            await deleteFromStorage(req.userData.id, id, RIGHT_TYPE.task);
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: `Task deleted with id ${id}`,
             });
@@ -147,10 +154,26 @@ const createTask = async (req, res) => {
                     media: req.body?.media,
                 };
 
-                const newTask = await saveTask(task);
+                const newTask = await tasks.create({
+                    id: Number((await findMaxId()) + 1),
+                    task: task.task,
+                    topic: task?.topic,
+                    questions: task?.questions,
+                    taskType: task?.taskType,
+                    media: task?.media,
+                });
+                if (!(newTask && newTask instanceof tasks))
+                    throw new Error('Unable to create new Task!');
+
+                await addToStorage(
+                    req.userData.id,
+                    newTask.id,
+                    RIGHT_TYPE.task,
+                );
+
                 return makeSuccessResponse(res, StatusCodes.OK, {
-                    message: 'Task created/updated',
-                    data: { ...newTask, r: undefined },
+                    message: 'Task created',
+                    data: { ...newTask._doc, r: undefined },
                 });
             }
         }

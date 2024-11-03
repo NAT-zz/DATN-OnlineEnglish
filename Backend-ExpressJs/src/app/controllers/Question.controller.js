@@ -1,13 +1,17 @@
 import { makeSuccessResponse } from '../../utils/Response.js';
 import questions from '../../models/questions.mongo.js';
-import { QUESTION_TYPE } from '../../utils/Constants.js';
+import { QUESTION_TYPE, RIGHT_TYPE } from '../../utils/Constants.js';
 import { StatusCodes } from 'http-status-codes';
 import {
-    findRandomQuestions,
-    saveSelect,
+    findMaxId,
+    findRandomQuestions
 } from '../../models/questions.model.js';
 
-import { addToStorage, filterData } from '../../utils/Strorage.js';
+import {
+    addToStorage,
+    deleteFromStorage,
+    filterData,
+} from '../../utils/Strorage.js';
 
 const getQuestion = async (req, res) => {
     try {
@@ -24,7 +28,7 @@ const getQuestion = async (req, res) => {
             data = await questions.find({}, '-_id -__v -r');
         }
 
-        // data = await filterData(req.userData.id, data, 'question');
+        data = await filterData(req.userData.id, data, RIGHT_TYPE.question);
 
         return makeSuccessResponse(res, StatusCodes.OK, {
             data,
@@ -47,11 +51,12 @@ const deleteQuestion = async (req, res) => {
         }
         const deletedCount = (await questions.deleteOne({ id: id }))
             .deletedCount;
-        if (deletedCount)
+        if (deletedCount) {
+            await deleteFromStorage(req.userData.id, id, RIGHT_TYPE.question);
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: `Question deleted with id ${id}`,
             });
-        else
+        } else
             return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
                 message: `No question found with id: ${id}`,
             });
@@ -92,7 +97,7 @@ const createQuestion = async (req, res) => {
 
                 await findQuestion.save();
                 return makeSuccessResponse(res, StatusCodes.OK, {
-                    message: `Question updated with id {id}`,
+                    message: `Question updated with id ${id}`,
                     data: { ...findQuestion._doc, r: undefined },
                 });
             } else {
@@ -101,9 +106,6 @@ const createQuestion = async (req, res) => {
                 });
             }
         } else {
-            // create
-            // add teacher id
-
             if (!req.body.sentence || !req.body.answers || !req.body.key) {
                 return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
                     message: 'Missing required information',
@@ -118,10 +120,26 @@ const createQuestion = async (req, res) => {
                 media: req.body?.media,
             };
 
-            const newQuestion = await saveSelect(question);
+            const newQuestion = await questions.create({
+                id: Number((await findMaxId()) + 1),
+                sentence: question.sentence,
+                key: question.key,
+                answers: question.answers,
+                questionType: question?.questionType,
+                media: question.media,
+            });
+            if (!(newQuestion && newQuestion instanceof questions))
+                throw new Error('Unable to create new Question!');
+
+            await addToStorage(
+                req.userData.id,
+                newQuestion.id,
+                RIGHT_TYPE.question,
+            );
+
             return makeSuccessResponse(res, StatusCodes.CREATED, {
-                message: 'Question created/updated',
-                data: { ...newQuestion, r: undefined },
+                message: 'Question created',
+                data: { ...newQuestion._doc, r: undefined },
             });
         }
     } catch (error) {
@@ -159,9 +177,4 @@ const getRandomQuestions = async (req, res) => {
     }
 };
 
-export {
-    getQuestion,
-    createQuestion,
-    deleteQuestion,
-    getRandomQuestions,
-};
+export { getQuestion, createQuestion, deleteQuestion, getRandomQuestions };

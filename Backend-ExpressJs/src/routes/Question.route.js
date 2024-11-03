@@ -5,17 +5,32 @@ import {
     deleteQuestion,
     getRandomQuestions,
 } from '../app/controllers/Question.controller.js';
-import { verifyPermission, verifyRights, verifyToken } from './auth.js'
+import { verifyPermission, verifyRights, verifyToken } from './auth.js';
+import { ROLES, RIGHT_TYPE } from '../utils/Constants.js';
 const router = express.Router();
 
 // CRUD
-router.get('/questions', getQuestion);
-router.delete('/:id',deleteQuestion);
-router.post('/create', createQuestion);
+router.get(
+    '/questions',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    getQuestion,
+);
+router.delete(
+    '/:id',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.question),
+    deleteQuestion,
+);
+router.post(
+    '/create',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.question),
+    createQuestion,
+);
 
-// ?limit = 3
 router.get('/get-random/:type', getRandomQuestions);
-//essay type
 
-// verify, authorize
 export default router;

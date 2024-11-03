@@ -2,7 +2,7 @@ import storages from '../models/storage.mongo.js';
 import users from '../models/users.mongo.js';
 import classes from '../models/classes.mongo.js';
 import { saveStorage } from '../models/storage.model.js';
-import { ROLES } from './Constants.js';
+import { RIGHT_TYPE, ROLES } from './Constants.js';
 
 const handleStorage = async (userId) => {
     const getStorage = await storages.findOne({ userId });
@@ -28,35 +28,35 @@ const filterData = async (userId, data, type) => {
 
         let result = [];
         switch (type) {
-            case 'question':
+            case RIGHT_TYPE.question:
                 data.forEach((val) => {
                     if (getStorage.questions.includes(val.id)) {
                         result.push(val);
                     }
                 });
                 break;
-            case 'task':
+            case RIGHT_TYPE.task:
                 data.forEach((val) => {
                     if (getStorage.tasks.includes(val.id)) {
                         result.push(val);
                     }
                 });
                 break;
-            case 'lesson':
+            case RIGHT_TYPE.lesson:
                 data.forEach((val) => {
                     if (getStorage.lessons.includes(val.id)) {
                         result.push(val);
                     }
                 });
                 break;
-            case 'test':
+            case RIGHT_TYPE.test:
                 data.forEach((val) => {
                     if (getStorage.tests.includes(val.id)) {
                         result.push(val);
                     }
                 });
                 break;
-            case 'class':
+            case RIGHT_TYPE.class:
                 data.forEach((val) => {
                     if (getStorage.classes.includes(val.id)) {
                         result.push(val);
@@ -82,15 +82,14 @@ const deleteFromStorage = async (userId, id, type) => {
         const getAllStorage = await storages.find({
             classes: { $in: [id] },
         });
-        console.log(getAllStorage);
 
         switch (type) {
-            case 'question':
+            case RIGHT_TYPE.question:
                 getStorage.questions = getStorage.questions.filter(
                     (questionId) => questionId.toString() !== id,
                 );
                 break;
-            case 'task':
+            case RIGHT_TYPE.task:
                 getStorage.tasks = getStorage.tasks.filter(
                     (taskId) => taskId.toString() !== id,
                 );
@@ -98,15 +97,15 @@ const deleteFromStorage = async (userId, id, type) => {
 
             default:
                 for (const val of getAllStorage) {
-                    if (type == 'lesson') {
+                    if (type == RIGHT_TYPE.lesson) {
                         val.lessons = val.lessons.filter(
                             (lessonId) => lessonId.toString() !== id,
                         );
-                    } else if (type == 'test') {
+                    } else if (type == RIGHT_TYPE.test) {
                         val.tests = val.tests.filter(
                             (testId) => testId.toString() !== id,
                         );
-                    } else if (type == 'class') {
+                    } else if (type == RIGHT_TYPE.class) {
                         val.classes = val.classes.filter(
                             (classId) => classId.toString() !== id,
                         );
@@ -130,31 +129,29 @@ const addToStorage = async (userId, id, type) => {
 
         if (getUser.role == ROLES.TEACHER) {
             switch (type) {
-                case 'question':
-                    if (getStorage.questions.includes(id)) {
-                        return false;
+                case RIGHT_TYPE.question:
+                    if (!getStorage.questions.includes(id)) {
+                        getStorage.questions.push(id);
                     }
-                    getStorage.questions.push(id);
                     break;
-                case 'task':
-                    if (getStorage.tasks.includes(id)) {
-                        return false;
+                case RIGHT_TYPE.task:
+                    if (!getStorage.tasks.includes(id)) {
+                        getStorage.tasks.push(id);
                     }
-                    getStorage.tasks.push(id);
                     break;
-                case 'lesson':
+                case RIGHT_TYPE.lesson:
                     if (getStorage.lessons.includes(id)) {
                         return false;
                     }
                     getStorage.lessons.push(id);
                     break;
-                case 'test':
+                case RIGHT_TYPE.test:
                     if (getStorage.tests.includes(id)) {
                         return false;
                     }
                     getStorage.tests.push(id);
                     break;
-                case 'class':
+                case RIGHT_TYPE.class:
                     if (getStorage.classes.includes(id)) {
                         return false;
                     }
