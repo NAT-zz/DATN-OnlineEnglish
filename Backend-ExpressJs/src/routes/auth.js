@@ -7,7 +7,7 @@ import storages from '../models/storage.mongo.js';
 import users from '../models/users.mongo.js';
 
 const verifyToken = async (req, res, next) => {
-    const token = req.cookies.token || req.token;
+    const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
     if (!token) {
         return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
             message: 'No token provided',
@@ -22,7 +22,7 @@ const verifyToken = async (req, res, next) => {
         //     exp: 1726935106
         //   }
 
-        if (!decoded || (await getValue(req.cookies.token))) {
+        if (!decoded || (await getValue(token))) {
             return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
                 message: 'Token is invalid or expired',
             });
@@ -38,12 +38,13 @@ const verifyToken = async (req, res, next) => {
         req.userData = {
             ...decoded,
             id: user.id,
+            token
         };
         console.log(req.userData);
 
         next();
     } catch (error) {
-        console.log('Error is verifying token: ', error.message);
+        console.log('Error is verifying token: ', error);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error',
         });

@@ -334,7 +334,7 @@ const resendLink = async (req, res) => {
 
 const logoutUser = async (req, res) => {
     // if token is till valid => blacklist the current token
-    setValue(req.cookies.token, 'BL');
+    setValue(req.userData.token, 'BL');
     res.clearCookie('token');
 
     return makeSuccessResponse(res, StatusCodes.OK, {
