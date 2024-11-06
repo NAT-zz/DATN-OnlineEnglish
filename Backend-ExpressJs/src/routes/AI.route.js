@@ -1,9 +1,9 @@
 import express from 'express';
-import { generate } from '../app/controllers/AI.controller.js';
+import { generateChat } from '../app/controllers/AI.controller.js';
 
 const router = express.Router();
 
 // CRUD
-router.post('/generate', generate);
+router.post('/chat', generateChat);
 
 export default router;
