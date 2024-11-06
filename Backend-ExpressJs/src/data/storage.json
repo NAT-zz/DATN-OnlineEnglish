@@ -2,10 +2,19 @@
     "1": {
         "userId": 2,
         "role": "TEACHER",
-        "questions": [2],
-        "tasks": [1],
-        "lessons": [1, 2],
-        "tests": [1],
-        "classes": [1, 2, 3]
+        "questions": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "tasks": [2, 3, 4],
+        "lessons": [2, 3, 4],
+        "tests": [2, 3],
+        "classes": [2, 3, 4]
+    },
+    "2": {
+        "userId": 3,
+        "role": "STUDENT",
+        "questions": [],
+        "tasks": [],
+        "lessons": [],
+        "tests": [],
+        "classes": [2]
     }
 }

@@ -2,21 +2,21 @@
     "1": {
         "topic": "Preposition",
         "content": "Sunlight whispers through abstract galaxies, bouncing softly on curious hummingbirds as they paint melodies of timeless echoes. Crystals grow beneath ancient waterfalls, while moonlit shadows dance across forgotten maps, weaving stories of invisible ships and drifting dreams. The clock hums in a silent rhythm, scattering petals of thought into the wind, where oceans of stardust and laughter collide in a symphony of color",
-        "tasks": [1, 2, 3],
+        "tasks": [2, 4],
         "taskEndDate": "2024-12-12",
         "type": "LESSON"
     },
     "2": {
         "topic": "Idiom",
         "content": "12Roventus claria dimare loremip fringilla nec tortor malesuada ipsum magna. Pellentesque dignissim nunc viverra euismod convallis tempus nulla cras interdum. Fusce ornare dapibus velit porttitor felis ultricies blandit metus vehicula. Etiam sagittis nisi cursus auctor aliquet curabitur vestibulum volutpat mi. Donec pharetra ornare vestibulum lacinia integer placerat sed fringilla. In lobortis purus magna pulvinar turpis dictum ultricies arcu.",
-        "tasks": [2, 3],
+        "tasks": [3, 4],
         "taskEndDate": "2024-12-15",
         "type": "LESSON"
     },
-    "3":{
+    "3": {
         "topic": "Quick Test",
-        "content": "Read and pay attention to the task",
-        "tasks": [2, 3],
+        "content": "Read and pay attention to the tasks",
+        "tasks": [2, 3, 4],
         "taskEndDate": "2024-12-15",
         "type": "TASKS"
     }

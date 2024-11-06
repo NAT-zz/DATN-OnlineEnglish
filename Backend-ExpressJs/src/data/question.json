@@ -1,20 +1,73 @@
 {
     "1": {
-        "sentence": "How are you ?",
-        "answers": [ "I'm fine", "Thank you!", "No worry!", "What's about you?" ],
-        "key": "I'm fine",
+        "sentence": "You're not supposed to see this",
+        "answers": [],
+        "key": "none",
         "questionType": "SELECT"
     },
     "2": {
-        "sentence": "How are you ? 1",
-        "answers": [ "I'm fine", "Thank you!", "No worry!", "What's about you?" ],
+        "sentence": "How are you ?",
+        "answers": ["I'm fine", "Thank you!", "No worry!", "What's about you?"],
         "key": "I'm fine",
         "questionType": "SELECT"
     },
     "3": {
-        "sentence": "How _____ you ?",
-        "answers": [ "Are", "Is", "Am", "Does" ],
-        "key": "Are",
+        "sentence": "When she is faced with a problem, Cathy Williams always tries to solve _____ without asking for any help from others.",
+        "answers": ["them", "it", "herself", "this"],
+        "key": "it",
+        "questionType": "FILL"
+    },
+    "4": {
+        "sentence": "_____ the storm, the ship couldn't reach its destination on time",
+        "answers": ["In case of", "In spite of", "Because of", "But for"],
+        "key": "Because of",
+        "questionType": "FILL"
+    },
+    "5": {
+        "sentence": "Millions of tourists who ---------- Paris every year spend a lot of money in this city.",
+        "answers": ["visit", "visits", "visiting", "to visit"],
+        "key": "visit",
+        "questionType": "FILL"
+    },
+    "6": {
+        "sentence": "58% of the population --------- English as their first language",
+        "answers": ["speak", "have", "say", "talk"],
+        "key": "speak",
+        "questionType": "FILL"
+    },
+    "7": {
+        "sentence": "2.5 billion people in the world --------- the Internet and 5 billion people have mobile-phone.",
+        "answers": ["speak", "make", "have", "use"],
+        "key": "use",
+        "questionType": "FILL"
+    },
+    "8": {
+        "sentence": "These --------- zones are areas for people, bicycles and public transport only.",
+        "answers": ["not car", "no cars", "none car", "no-car"],
+        "key": "no-car",
+        "questionType": "FILL"
+    },
+    "9": {
+        "sentence": "The city center is very nosy with hundreds of cars, buses and taxis, but there are also a lot of --------- parks with free music concerts.",
+        "answers": ["beautify", "beautiful", "beauty", "beautifully"],
+        "key": "beautiful",
+        "questionType": "FILL"
+    },
+    "10": {
+        "sentence": "Bourke Street is --------- because there are lots of great shops and no cars.",
+        "answers": ["popular", "modern", "crowded", "enjoyable"],
+        "key": "popular",
+        "questionType": "FILL"
+    },
+    "11": {
+        "sentence": "He has an office, but he prefers working in the pyramids with other---------.",
+        "answers": [
+            "archaeology",
+            "archaeological",
+            "archaeologies",
+            "archaeologists"
+        ],
+        "key": "archaeologists",
         "questionType": "FILL"
     }
 }

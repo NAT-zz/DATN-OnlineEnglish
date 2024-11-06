@@ -24,13 +24,5 @@
         "birthDate": "2001-10-13",
         "description": "Student Tuan Nguyen's description",
         "status": true
-    },
-    "4": {
-        "userName": "Tuan Nguyen 1",
-        "passWord": "tuan123",
-        "email": "tuan123@gmail.com",
-        "birthDate": "2001-10-13",
-        "description": "Student Tuan Nguyen's description 1",
-        "status": true
     }
 }

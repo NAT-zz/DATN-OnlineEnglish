@@ -1,10 +1,14 @@
 {
     "1": {
-        "name": "Test 01",
-        "tasks": [1, 2, 3]
+        "name": "You're not supposed to see this",
+        "tasks": []
     },
     "2": {
+        "name": "Test 01",
+        "tasks": [2, 3, 4]
+    },
+    "3": {
         "name": "Test 02",
-        "tasks": [1, 2]
+        "tasks": [2, 3]
     }
 }

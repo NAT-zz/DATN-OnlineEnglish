@@ -480,7 +480,7 @@ const editProfile = async (req, res) => {
             if (updatedUser)
                 return makeSuccessResponse(res, StatusCodes.OK, {
                     message: 'Information updated',
-                    data: updatedUser
+                    data: updatedUser,
                 });
             throw new Error('Update failed');
         } else throw new Error('Incorrect user information');
@@ -500,7 +500,7 @@ const getMessages = async (req, res, next) => {
         }
 
         const { id: userToChatId } = req.params;
-        const senderId = req.userData.user._id;
+        const senderId = req.userData.id;
 
         const conversation = await conversations
             .findOne({
