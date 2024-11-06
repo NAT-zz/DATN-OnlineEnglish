@@ -228,21 +228,52 @@ const createClass = async (req, res) => {
     }
 };
 
+const getStudents = async (req, res) => {
+    const classId = req.params.id;
+
+    if (!classId) {
+        return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+            message: 'Class ID is required.',
+        });
+    }
+    const getUsers = await storages.find({
+        classes: { $in: classId },
+        role: ROLES.STUDENT,
+    });
+    let data = [];
+    for (const student of getUsers) {
+        const user = await users.findOne({ id: student.userId }, '-passWord');
+        if (user && user instanceof users) {
+            data.push(user);
+        }
+    }
+    return makeSuccessResponse(res, StatusCodes.OK, {
+        data: data,
+    });
+};
+
 const studentSignup = async (req, res) => {
-    if (!req.userData || !req.params.id) {
+    if (!req.userData.id || !req.params.id) {
         return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
             message: 'Invalid request, userData or classId is required.',
         });
     }
-
-    // add to teacher studying
-    if (await addToStorage(req.userData.id, req.params.id, 'class')) {
-        return makeSuccessResponse(res, StatusCodes.OK, {
-            message: 'Student has been signed up for the class',
-        });
-    } else {
+    try {
+        if (
+            await addToStorage(req.userData.id, req.params.id, RIGHT_TYPE.class)
+        ) {
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                message: 'Student has been signed up for the class',
+            });
+        } else {
+            return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+                message: 'Failed to sign up for the class',
+            });
+        }
+    } catch (error) {
+        console.log('Error in studentSignup: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: 'Failed to sign up for the class',
+            message: 'Server error, try again later!',
         });
     }
 };
@@ -511,4 +542,5 @@ export {
     handleSubmit,
     getSubmitted,
     markingEssay,
+    getStudents,
 };

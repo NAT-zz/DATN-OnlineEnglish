@@ -1,6 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+const AI = {
+    GENERATE: `${process.env.DOMAIN_AI}/api/generate`,
+}
+
 const CONFIG = {
     URL_MONGO: process.env.URL_MONGO,
     JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
@@ -76,4 +80,5 @@ export {
     TASK_TYPE,
     LESSON_TYPE,
     RIGHT_TYPE,
+    AI
 };

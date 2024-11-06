@@ -1,6 +1,5 @@
 import storages from '../models/storage.mongo.js';
 import users from '../models/users.mongo.js';
-import classes from '../models/classes.mongo.js';
 import { saveStorage } from '../models/storage.model.js';
 import { RIGHT_TYPE, ROLES } from './Constants.js';
 
@@ -13,7 +12,10 @@ const handleStorage = async (userId) => {
         } else {
             const getUser = await users.findOne({ id: userId });
             if (getUser && getUser instanceof users) {
-                return await saveStorage({ userId, role: getUser.role });
+                return await saveStorage({
+                    userId,
+                    role: getUser.role,
+                });
             } else throw new Error('No user found');
         }
     } catch (error) {

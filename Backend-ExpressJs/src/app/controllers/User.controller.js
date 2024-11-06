@@ -533,7 +533,7 @@ const sendMessage = async (req, res, next) => {
 
         const { message } = req.body;
         const { id: receiverId } = req.params;
-        const senderId = req.userData.userId;
+        const senderId = req.userData.id;
 
         let conversation = await conversations.findOne({
             participants: { $all: [senderId, receiverId] },

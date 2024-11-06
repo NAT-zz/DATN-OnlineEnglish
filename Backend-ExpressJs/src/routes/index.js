@@ -4,6 +4,7 @@ import taskRoute from './Task.route.js';
 import lessonRoute from './Lesson.route.js';
 import testRoute from './Test.route.js';
 import classRoute from './Class.route.js';
+import aiRoute from './AI.route.js';
 
 import multer from 'multer';
 import { uploadFile } from '../app/controllers/File.controller.js';
@@ -87,6 +88,8 @@ function route(app) {
     app.use('/api/lesson', lessonRoute);
     app.use('/api/test', testRoute);
     app.use('/api/class', classRoute);
+
+    app.use('/api/ai', aiRoute);
 }
 
 export default route;

@@ -49,7 +49,7 @@ const saveStorage = async (storage) => {
             throw new Error('Unable to create new Storage!');
         }
     } catch (err) {
-        console.error(err);
+        console.error('Error in saveStorage:', err.message);
         throw err;
     }
 };

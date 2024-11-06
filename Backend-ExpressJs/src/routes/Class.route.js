@@ -9,6 +9,7 @@ import {
     handleSubmit,
     getSubmitted,
     markingEssay,
+    getStudents,
 } from '../app/controllers/Class.controller.js';
 
 import { verifyToken, verifyPermission, verifyRights } from './auth.js';
@@ -58,6 +59,14 @@ router.post(
 );
 
 // teacher
+router.get(
+    '/students/:id',
+    // verifyToken,
+    // verifyPermission([ROLES.TEACHER]),
+    // verifyRights(RIGHT_TYPE.class),
+    getStudents,
+);
+
 router.get(
     '/submitted/:classId/:type/:typeId',
     verifyToken,
