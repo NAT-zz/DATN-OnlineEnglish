@@ -1,9 +1,9 @@
 import { makeSuccessResponse } from '../../utils/Response.js';
 import { StatusCodes } from 'http-status-codes';
+import { getReceiverSocketId, io } from '../../services/socket.js';
 import ollama from 'ollama';
 
-// const model = 'Ebot_v1:latest';
-const model = 'llama3.2:1b';
+const model = 'Ebot_v1:latest';
 let messages = [];
 
 const generateChat = async (req, res) => {
@@ -17,13 +17,22 @@ const generateChat = async (req, res) => {
             stream: true,
         });
 
+        // const receiverSocketId = getReceiverSocketId(receiverId);
+        // if (receiverSocketId) {
+        //     for await (const part of response) {
+        //         process.stdout.write(part.message?.content);
+        //         io.to(receiverSocketId).emit(
+        //             'newMessage',
+        //             part.message?.content,
+        //         );
+        //     }
+        // }
+
         for await (const part of response) {
             process.stdout.write(part.message?.content);
+            io.emit('newMessage', part.message?.content);
         }
-
-        return makeSuccessResponse(res, StatusCodes.OK, {
-            data: response.message.content,
-        });
+        return makeSuccessResponse(res, StatusCodes.OK, {});
     } catch (error) {
         console.log('Error in generate: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {

@@ -70,7 +70,6 @@
 
             const socket = io('http://localhost:5001', {
                 query: {
-                    // userId: authUser.id,
                     userId: 3,
                 },
             });
@@ -83,6 +82,8 @@
             });
 
             socket.on('newMessage', (msg) => {
+                console.log(msg);
+
                 const item = document.createElement('li');
                 item.textContent = msg.message;
                 messages.appendChild(item);
