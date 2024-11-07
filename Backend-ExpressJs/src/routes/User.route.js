@@ -45,7 +45,5 @@ router.post('/message/send/:id', verifyToken, sendMessage);
 // users
 router.get('/studyings', verifyToken, getStudyings);
 router.get('/teachers', getTeachers)
-// student choose class
 
-// achivements
 export default router;

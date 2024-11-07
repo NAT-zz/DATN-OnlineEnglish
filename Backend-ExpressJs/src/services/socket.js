@@ -20,10 +20,10 @@ const userSocketMap = {}; // {userId: socketId}
 io.on('connection', (socket) => {
     console.log('a user connected', socket.id);
 
-    socket.on('chat message', (msg) => {
-        console.log('message: ' + msg);
-        io.emit('chat message', msg);
-    });
+    // socket.on('chat message', (msg) => {
+    //     console.log('message: ' + msg);
+    //     io.emit('chat message', msg);
+    // });
 
     const userId = socket.handshake.query.userId;
     if (userId != 'undefined') userSocketMap[userId] = socket.id;

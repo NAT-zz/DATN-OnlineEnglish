@@ -64,17 +64,22 @@
 
         <script src="/socket.io/socket.io.js"></script>
         <script>
-            const socket = io();
             const form = document.getElementById('form');
             const input = document.getElementById('input');
             const messages = document.getElementById('messages');
 
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                if (input.value) {
-                    socket.emit('chat message', input.value);
-                    input.value = '';
-                }
+            const socket = io('http://localhost:5001', {
+                query: {
+                    // userId: authUser.id,
+                    userId: 3,
+                },
+            });
+
+            // call api sendMessage
+
+            // get who is online
+            socket.on('getOnlineUsers', (users) => {
+                console.log('online users: ', users);
             });
 
             socket.on('newMessage', (msg) => {

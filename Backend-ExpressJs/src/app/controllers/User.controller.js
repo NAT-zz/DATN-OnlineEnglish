@@ -566,12 +566,10 @@ const sendMessage = async (req, res, next) => {
 
         await Promise.all([conversation.save(), newMessage.save()]);
 
-        io.emit('newMessage', newMessage); // send events to specific client
-
-        // const receiverSocketId = getReceiverSocketId(receiverId);
-        // if (receiverSocketId) {
-        //     io.to(receiverSocketId).emit('newMessage', newMessage); // send events to specific client
-        // }
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('newMessage', newMessage); // send events to specific client
+        }
 
         return makeSuccessResponse(res, StatusCodes.CREATED, {
             data: {
