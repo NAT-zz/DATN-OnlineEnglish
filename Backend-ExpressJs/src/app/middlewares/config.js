@@ -32,9 +32,11 @@ app.use(cookieParser());
 //     });
 // }
 
-// app.get('/*', (req, res) => {
-//     res.sendFile(path.join(__dirname, '..', '..', '..', 'public', 'index.html'))
-// })
+app.get('/test/chat/*', (req, res) => {
+    res.sendFile(
+        path.resolve(path.join(__dirname, 'src', 'test index.html')),
+    );
+});
 
 route(app);
 export default app;

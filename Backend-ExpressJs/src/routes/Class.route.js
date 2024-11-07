@@ -59,7 +59,7 @@ router.post(
 );
 
 // teacher
-router.get(
+router.get( 
     '/students/:id',
     // verifyToken,
     // verifyPermission([ROLES.TEACHER]),

@@ -1,7 +1,22 @@
 {
     "1": {
-        "senderId": "",
-        "receiverId": "",
-        "message": ""
+        "senderId": "2",
+        "receiverId": "3",
+        "message": "First message from teacher"
+    },
+    "2": {
+        "senderId": "3",
+        "receiverId": "2",
+        "message": "First message from student"
+    },
+    "3": {
+        "senderId": "2",
+        "receiverId": "3",
+        "message": "Second message from teacher"
+    },
+    "4": {
+        "senderId": "3",
+        "receiverId": "2",
+        "message": "Second message from student"
     }
 }

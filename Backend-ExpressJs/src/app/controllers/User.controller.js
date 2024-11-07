@@ -7,6 +7,7 @@ import conversations from '../../models/conversations.mongo.js';
 import messages from '../../models/messages.mongo.js';
 import tokens from '../../models/tokens.mongo.js';
 import { findMaxId, saveUser } from '../../models/users.model.js';
+import { findMaxId as findMaxIdMessage } from '../../models/messages.model.js';
 import users from '../../models/users.mongo.js';
 import { streamUpload } from '../../services/fileUpload.js';
 import { ROLES, TOKENS } from '../../utils/Constants.js';
@@ -18,6 +19,7 @@ import {
 } from '../../services/email.js';
 import { setValue } from '../../services/redis.js';
 import { getReceiverSocketId } from '../../services/socket.js';
+import { io } from '../../services/socket.js';
 import { generateTokenAndSetCookie } from '../../utils/GenerateTokens.js';
 import { validateEmail } from '../../utils/Validate.js';
 
@@ -502,21 +504,27 @@ const getMessages = async (req, res, next) => {
         const { id: userToChatId } = req.params;
         const senderId = req.userData.id;
 
-        const conversation = await conversations
-            .findOne({
-                participants: { $all: [senderId, userToChatId] },
-            })
-            .populate('messages'); // NOT REFERENCE BUT ACTUAL MESSAGES
+        const conversation = await conversations.findOne({
+            participants: { $all: [senderId, userToChatId] },
+        });
 
         if (!conversation) return makeSuccessResponse(res, StatusCodes.OK, {});
-
-        const messages = conversation.messages;
+        let messageData = [];
+        for (const messageId of conversation.messages) {
+            const getMessage = await messages.findOne(
+                { id: messageId },
+                '-_id -__v',
+            );
+            if (getMessage && getMessage instanceof messages) {
+                messageData.push(getMessage);
+            }
+        }
 
         return makeSuccessResponse(res, StatusCodes.OK, {
-            data: messages,
+            data: messageData,
         });
     } catch (error) {
-        console.log('Error in getMessages: ', error.message);
+        console.log('Error in getMessages: ', error);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error, please try again later!',
         });
@@ -546,21 +554,24 @@ const sendMessage = async (req, res, next) => {
         }
 
         const newMessage = new messages({
+            id: Number((await findMaxIdMessage()) + 1),
             senderId,
             receiverId,
             message,
         });
 
         if (newMessage) {
-            conversation.messages.push(newMessage._id);
+            conversation.messages.push(newMessage.id);
         }
 
         await Promise.all([conversation.save(), newMessage.save()]);
 
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if (receiverSocketId) {
-            io.to(receiverSocketId).emit('newMessage', newMessage); // send events to specific client
-        }
+        io.emit('newMessage', newMessage); // send events to specific client
+
+        // const receiverSocketId = getReceiverSocketId(receiverId);
+        // if (receiverSocketId) {
+        //     io.to(receiverSocketId).emit('newMessage', newMessage); // send events to specific client
+        // }
 
         return makeSuccessResponse(res, StatusCodes.CREATED, {
             data: {

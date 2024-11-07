@@ -10,6 +10,8 @@ import { initDataClass } from './models/classes.model.js';
 import { initDataStorage } from './models/storage.model.js';
 
 import { server } from './services/socket.js';
+import { initDataMessage } from './models/messages.model.js';
+import { initDataConversation } from './models/conversations.model.js';
 
 const PORT = process.env.SERVER_PORT;
 (async function startServer() {
@@ -23,7 +25,10 @@ const PORT = process.env.SERVER_PORT;
     await initDataTest();
     await initDataClass();
     await initDataStorage();
-    
+
+    await initDataConversation();
+    await initDataMessage();
+
     server.listen(PORT, () => {
         console.log(`Listening on port ${PORT}`);
     });
