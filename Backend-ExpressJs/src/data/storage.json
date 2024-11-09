@@ -6,7 +6,7 @@
         "tasks": [2, 3, 4],
         "lessons": [2, 3, 4],
         "tests": [2, 3],
-        "classes": [2, 3, 4]
+        "classes": [1, 2, 3]
     },
     "2": {
         "userId": 3,

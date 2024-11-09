@@ -1,23 +1,17 @@
 {
     "1": {
-        "name": "None course",
-        "description": "You're not supposed to see this",
-        "lessons": [],
-        "tests": []
-    },
-    "2": {
         "name": "A1 course",
         "description": "Aim to teach english at A1 level",
         "lessons": [2],
         "tests": [2]
     },
-    "3": {
+    "2": {
         "name": "B1 course",
         "description": "Aim to teach english at B1 level",
         "lessons": [3],
         "tests": [3]
     },
-    "4": {
+    "3": {
         "name": "C1 course",
         "description": "Aim to teach english at C1 level",
         "lessons": [3, 4],
