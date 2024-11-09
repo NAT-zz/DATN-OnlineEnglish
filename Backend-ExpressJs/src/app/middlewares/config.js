@@ -17,6 +17,7 @@ app.use(
 );
 app.use(morgan('combined'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
@@ -32,9 +33,9 @@ app.use(cookieParser());
 //     });
 // }
 
-app.get('/test/chat/*', (req, res) => {
+app.get('/test/chat', (req, res) => {
     res.sendFile(
-        path.resolve(path.join(__dirname, 'src', 'test index.html')),
+        path.resolve(path.join(__dirname, 'src', 'test index 2.html')),
     );
 });
 

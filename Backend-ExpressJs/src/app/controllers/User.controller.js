@@ -9,8 +9,7 @@ import tokens from '../../models/tokens.mongo.js';
 import { findMaxId, saveUser } from '../../models/users.model.js';
 import { findMaxId as findMaxIdMessage } from '../../models/messages.model.js';
 import users from '../../models/users.mongo.js';
-import { streamUpload } from '../../services/fileUpload.js';
-import { ROLES, TOKENS } from '../../utils/Constants.js';
+import { ROLES, TOKENS, CONFIG } from '../../utils/Constants.js';
 
 import mongoose from 'mongoose';
 import {
@@ -22,6 +21,8 @@ import { getReceiverSocketId } from '../../services/socket.js';
 import { io } from '../../services/socket.js';
 import { generateTokenAndSetCookie } from '../../utils/GenerateTokens.js';
 import { validateEmail } from '../../utils/Validate.js';
+
+import fetch from 'node-fetch';
 
 const deleteUser = async (req, res, next) => {
     const { id } = req.params;
@@ -640,6 +641,66 @@ const getTeachers = async (req, res) => {
     }
 };
 
+///////////////////////////////////////
+
+const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer ' + CONFIG.DAILY_API_KEY,
+};
+
+const getRoom = async (room) => {
+    return (
+        await fetch(`https://api.daily.co/v1/rooms/${room}`, {
+            method: 'GET',
+            headers,
+        })
+    ).json();
+};
+
+const createRoom = async (room) => {
+    return (
+        await fetch('https://api.daily.co/v1/rooms', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                name: room,
+                properties: {
+                    enable_screenshare: true,
+                    enable_chat: true,
+                    start_video_off: true,
+                    start_audio_off: false,
+                    lang: 'en',
+                },
+            }),
+        })
+    ).json();
+};
+
+const videoCallHandler = async (req, res) => {
+    try {
+        if (!req.params.id) {
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Missing required information',
+            });
+        }
+        const roomId = req.params.id;
+        let room = await getRoom(roomId);
+
+        if (room.error) {
+            room = await createRoom(roomId);
+        }
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data: room,
+        });
+    } catch (error) {
+        console.error('Error in videoCallHandler: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later',
+        });
+    }
+};
+
 export {
     checkAuth,
     deleteLastestUser,
@@ -656,4 +717,5 @@ export {
     resetPassword,
     sendMessage,
     verifyAccount,
+    videoCallHandler,
 };

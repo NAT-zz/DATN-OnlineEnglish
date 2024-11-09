@@ -1,16 +1,19 @@
 import express from 'express';
 import {
-    registerUser, loginUser,
+    registerUser,
+    loginUser,
     verifyAccount,
     resendLink,
     logoutUser,
     forgotPassword,
     resetPassword,
     editProfile,
-    checkAuth, getMessages,
+    checkAuth,
+    getMessages,
     sendMessage,
     getStudyings,
-    getTeachers
+    getTeachers,
+    videoCallHandler
 } from '../app/controllers/User.controller.js';
 import multer from 'multer';
 import { verifyToken, verifyPermission } from './auth.js';
@@ -42,8 +45,11 @@ router.post(
 router.get('/message/:id', verifyToken, getMessages);
 router.post('/message/send/:id', verifyToken, sendMessage);
 
+// video call
+router.get('/video-call/:id', videoCallHandler);
+
 // users
 router.get('/studyings', verifyToken, getStudyings);
-router.get('/teachers', getTeachers)
+router.get('/teachers', getTeachers);
 
 export default router;

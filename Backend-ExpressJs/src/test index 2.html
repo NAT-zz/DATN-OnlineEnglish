@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <meta
+            name="description"
+            content="Web site created using create-react-app"
+        />
+        <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+        <title>React App</title>
+    </head>
+    <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+
+        <form id="form" action="">
+            <input id="input" autocomplete="off" /><button>Submit</button>
+        </form>
+
+        <script>
+            const form = document.getElementById('form');
+            const input = document.getElementById('input');
+
+            const domain = 'https://natvideocall.daily.co/';
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (input.value) {
+                    const id = input.value;
+
+                    fetch(`/api/user/video-call/${id}`, {
+                        method: 'GET',
+                    })
+                        .then((res) => {
+                            if (res.status === 200) {
+                                const script = document.createElement('script');
+                                script.innerHTML = `window.DailyIframe.createFrame({
+                                    iframeStyle: {
+                                    position: "fixed",
+                                    width: "100%",
+                                    height: "100%",
+                                    border: "0",
+                                    zIndex: 9999
+                                },
+                                showLeaveButton: true,
+                                showFullscreenButton: true,
+                                }).join({
+                                    url: "${domain}${id}",
+                                });`;
+
+                                document.body.appendChild(script);
+                            }
+                        })
+                        .catch((err) => console.log(err));
+                }
+            });
+        </script>
+    </body>
+</html>

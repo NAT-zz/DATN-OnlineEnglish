@@ -10,6 +10,7 @@ const CONFIG = {
     DOMAIN_CLIENT: process.env.DOMAIN_CLIENT,
     DOMAIN_SERVER: process.env.DOMAIN_SERVER,
     CLOUDINARY_URL: process.env.CLOUDINARY_URL,
+    DAILY_API_KEY: process.env.DAILY_API_KEY,
 };
 
 const TOKENS = {
