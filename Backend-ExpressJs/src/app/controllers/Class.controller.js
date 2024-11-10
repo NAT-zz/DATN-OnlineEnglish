@@ -13,6 +13,8 @@ import {
     filterData,
     addToStorage,
     deleteFromStorage,
+    handleStorage,
+    deleteFromStorageStudent,
 } from '../../utils/Strorage.js';
 import { RIGHT_TYPE, ROLES, TASK_TYPE } from '../../utils/Constants.js';
 import { saveStorage } from '../../models/storage.model.js';
@@ -272,6 +274,51 @@ const studentSignup = async (req, res) => {
         }
     } catch (error) {
         console.log('Error in studentSignup: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, try again later!',
+        });
+    }
+};
+
+const studentSignout = async (req, res, next) => {
+    if (!req.userData.id || !req.params.id) {
+        return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+            message: 'Invalid request, userData or classId is required.',
+        });
+    }
+    try {
+        const getClass = await classes.findOne({ id: req.params.id });
+
+        if (getClass && getClass instanceof classes) {
+            await deleteFromStorageStudent(
+                req.userData.id,
+                req.params.id,
+                RIGHT_TYPE.class,
+            );
+            for (const lesson of getClass.lessons) {
+                await deleteFromStorageStudent(
+                    req.userData.id,
+                    lesson.id,
+                    RIGHT_TYPE.lesson,
+                );
+            }
+            for (const test of getClass.tests) {
+                await deleteFromStorageStudent(
+                    req.userData.id,
+                    test.id,
+                    RIGHT_TYPE.test,
+                );
+            }
+
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                message: 'Student has been signed out for the class',
+            });
+        }
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            message: 'Signed out failed',
+        });
+    } catch (error) {
+        console.log('Error in studentSignOut: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error, try again later!',
         });
@@ -539,6 +586,7 @@ export {
     getDetail,
     getClassAuth,
     studentSignup,
+    studentSignout,
     handleSubmit,
     getSubmitted,
     markingEssay,

@@ -6,6 +6,7 @@ import {
     getDetail,
     getClassAuth,
     studentSignup,
+    studentSignout,
     handleSubmit,
     getSubmitted,
     markingEssay,
@@ -51,6 +52,13 @@ router.get(
     studentSignup,
 );
 
+router.get(
+    '/signOut/:id',
+    verifyToken,
+    verifyPermission([ROLES.STUDENT]),
+    studentSignout,
+);
+
 router.post(
     '/submit/:type',
     verifyToken,
@@ -59,7 +67,7 @@ router.post(
 );
 
 // teacher
-router.get( 
+router.get(
     '/students/:id',
     // verifyToken,
     // verifyPermission([ROLES.TEACHER]),

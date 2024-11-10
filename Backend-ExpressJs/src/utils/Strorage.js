@@ -124,6 +124,34 @@ const deleteFromStorage = async (userId, id, type) => {
     }
 };
 
+const deleteFromStorageStudent = async (userId, id, type) => {
+    try {
+        const getStorage = await handleStorage(userId);
+
+        switch (type) {
+            case RIGHT_TYPE.class:
+                getStorage.classes = getStorage.classes.filter(
+                    (questionId) => questionId.toString() !== id,
+                );
+                break;
+            case RIGHT_TYPE.lesson:
+                getStorage.lessons = getStorage.lessons.filter(
+                    (taskId) => taskId.toString() !== id,
+                );
+            case RIGHT_TYPE.test:
+                getStorage.tests = getStorage.tests.filter(
+                    (testId) => testId.toString() !== id,
+                );
+                break;
+        }
+
+        await getStorage.save();
+    } catch (error) {
+        console.error('Error in deleteFromStorage:', error.message);
+        throw new Error('Error while deleting from storage');
+    }
+};
+
 const addToStorage = async (userId, id, type) => {
     try {
         const getStorage = await handleStorage(userId);
@@ -217,4 +245,11 @@ const getResult = async (userId, type, id) => {
     } else throw new Error('User not found');
 };
 
-export { filterData, deleteFromStorage, addToStorage, getResult };
+export {
+    filterData,
+    deleteFromStorage,
+    addToStorage,
+    getResult,
+    handleStorage,
+    deleteFromStorageStudent,
+};
