@@ -1,6 +1,8 @@
 import { makeSuccessResponse } from '../../utils/Response.js';
 import { StatusCodes } from 'http-status-codes';
 import { getReceiverSocketId, io } from '../../services/socket.js';
+import Ffmpeg from 'fluent-ffmpeg';
+import fs from 'fs';
 import ollama from 'ollama';
 
 const model = 'Ebot_v1:latest';
@@ -35,6 +37,57 @@ const generateChat = async (req, res) => {
         return makeSuccessResponse(res, StatusCodes.OK, {});
     } catch (error) {
         console.log('Error in generate: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+const handleAnalyzeVoice = async (req, res) => {
+    try {
+        const audioPath = req.file.path;
+        const convertedAudioPath = `${audioPath}.flac`;
+        const targetWord = 'student'; // Target word to check
+
+        // Convert audio to FLAC format for Google Speech-to-Text
+        Ffmpeg(audioPath)
+            .audioCodec('flac')
+            .on('end', async () => {
+                const audioData = fs.readFileSync(convertedAudioPath);
+                const audioBytes = audioData.toString('base64');
+
+                // const [response] = await speechClient.recognize({
+                //     audio: { content: audioBytes },
+                //     config: {
+                //         encoding: 'FLAC',
+                //         languageCode: 'en-US',
+                //     },
+                // });
+
+                const transcription = response.results
+                    .map((result) => result.alternatives[0].transcript)
+                    .join('\n');
+
+                // Analyze pronunciation
+                const isCorrect =
+                    transcription.toLowerCase() === targetWord.toLowerCase();
+
+                // Clean up files
+                fs.unlinkSync(audioPath);
+                fs.unlinkSync(convertedAudioPath);
+
+                if (!isCorrect) {
+                    return makeSuccessResponse(res, StatusCodes.OK, {
+                        message: `Incorrect pronunciation. You said: ${transcription}`,
+                    });
+                } else {
+                    return makeSuccessResponse(res, StatusCodes.OK, {
+                        message: 'Correct pronunciation',
+                    });
+                }
+            })
+            .save(convertedAudioPath);
+    } catch (error) {
+        console.log('Error in analyze voice: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error, please try again later!',
         });
@@ -142,4 +195,4 @@ const generateChat = async (req, res) => {
 // // console.log(words);
 // console.log(final);
 
-export { generateChat };
+export { generateChat, handleAnalyzeVoice };

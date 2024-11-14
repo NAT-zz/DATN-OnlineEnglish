@@ -38,6 +38,6 @@ app.get('/test/chat', (req, res) => {
         path.resolve(path.join(__dirname, 'src', 'test index 2.html')),
     );
 });
-
+process.on('warning', (e) => console.warn(e.stack));
 route(app);
 export default app;

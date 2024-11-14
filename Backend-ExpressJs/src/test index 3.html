@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Audio Recorder</title>
+    </head>
+    <body>
+        <h1>Audio Recorder</h1>
+        <button id="startButton">Start Recording</button>
+        <button id="stopButton" disabled>Stop Recording</button>
+        <audio id="audioPlayback" controls></audio>
+
+        <script>
+            const startButton = document.getElementById('startButton');
+            const stopButton = document.getElementById('stopButton');
+            const audioPlayback = document.getElementById('audioPlayback');
+
+            let mediaRecorder;
+            let audioChunks = [];
+
+            // Request permission and start recording
+            startButton.addEventListener('click', async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: true,
+                    });
+                    mediaRecorder = new MediaRecorder(stream);
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, {
+                            type: 'audio/wav',
+                        });
+                        audioChunks = []; // Clear chunks for the next recording
+
+                        // Create an audio URL and set it to playback
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayback.src = audioUrl;
+
+                        // Optional: Send audioBlob to your server here
+                        uploadAudio(audioBlob);
+                    };
+
+                    mediaRecorder.start();
+                    startButton.disabled = true;
+                    stopButton.disabled = false;
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                }
+            });
+
+            // Stop recording
+            stopButton.addEventListener('click', () => {
+                mediaRecorder.stop();
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            });
+
+            // Optional function to upload audio to server
+            async function uploadAudio(audioBlob) {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.wav');
+                try {
+                    const response = await fetch('/api/ai/analyze-voice', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const result = await response.json();
+                    console.log('Server response:', result);
+                } catch (error) {
+                    console.error('Error uploading audio:', error);
+                }
+            }
+        </script>
+    </body>
+</html>

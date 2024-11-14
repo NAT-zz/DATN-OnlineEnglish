@@ -16,7 +16,7 @@ import {
     handleStorage,
     deleteFromStorageStudent,
 } from '../../utils/Strorage.js';
-import { RIGHT_TYPE, ROLES, TASK_TYPE } from '../../utils/Constants.js';
+import { LEVEL, RIGHT_TYPE, ROLES, TASK_TYPE } from '../../utils/Constants.js';
 import { saveStorage } from '../../models/storage.model.js';
 
 const getTeacherOfClass = async (classId) => {
@@ -106,11 +106,28 @@ const getDetail = async (req, res) => {
                     listTest.push(getTest._doc);
                 }
 
+                // get teacher
+                const getStorage = await storages.findOne({
+                    role: ROLES.TEACHER,
+                    classes: { $in: [getOne.id] },
+                });
+                if (getStorage && getStorage instanceof storages) {
+                    const getTeacher = await users
+                        .findOne({
+                            id: getStorage.userId,
+                        })
+                        .select('id userName avatar');
+                    if (getTeacher && getTeacher instanceof users) {
+                        getOne.teacher = getTeacher;
+                    }
+                }
+
                 return makeSuccessResponse(res, StatusCodes.OK, {
                     data: {
                         ...getOne._doc,
                         lessons: listLesson,
                         tests: listTest,
+                        teacher: getOne.teacher,
                     },
                 });
             } else {
@@ -162,6 +179,9 @@ const createClass = async (req, res) => {
             const getClass = await classes.findOne({ id });
             if (getClass && getClass instanceof classes) {
                 getClass.name = req.body?.name ? req.body.name : getClass.name;
+                getClass.level = req.body?.level
+                    ? req.body.level
+                    : getClass.level;
                 getClass.description = req.body?.description
                     ? req.body.description
                     : getClass.description;
@@ -196,6 +216,7 @@ const createClass = async (req, res) => {
                 });
             let newClass = {
                 name: req.body.name,
+                level: req.body?.level ? req.body.level : LEVEL.A1,
                 description: req.body?.description,
                 lessons: req.body?.lessons,
                 tests: req.body?.tests,
@@ -205,6 +226,7 @@ const createClass = async (req, res) => {
 
             newClass = await classes.create({
                 id: Number((await findMaxId()) + 1),
+                level: newClass.level,
                 name: newClass.name,
                 description: newClass?.description,
                 lessons: newClass?.lessons,

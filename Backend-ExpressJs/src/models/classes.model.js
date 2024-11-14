@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 import classes from './classes.mongo.js';
+import { LEVEL } from '../utils/Constants.js';
 
 const __dirname = path.resolve();
 const findMaxId = async () => {
@@ -20,6 +21,9 @@ const saveClass = async (thisClass) => {
 
         if (getClass && getClass instanceof classes) {
             getClass.name = thisClass?.name ? thisClass.name : getClass.name;
+            getClass.level = thisClass?.level
+                ? thisClass.level
+                : getClass.level;
             getClass.description = thisClass?.description
                 ? thisClass.description
                 : getClass.description;
@@ -41,6 +45,7 @@ const saveClass = async (thisClass) => {
         } else {
             getClass = await classes.create({
                 id: Number((await findMaxId()) + 1),
+                level: thisClass.level ? thisClass.level : LEVEL.A1,
                 name: thisClass.name,
                 description: thisClass?.description,
                 lessons: thisClass?.lessons,

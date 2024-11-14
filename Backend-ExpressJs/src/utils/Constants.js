@@ -48,6 +48,15 @@ const RIGHT_TYPE = {
     class: 'class',
 };
 
+const LEVEL = {
+    A1: 'A1',
+    A2: 'A2',
+    B1: 'B1',
+    B2: 'B2',
+    C1: 'C1',
+    C2: 'C2',
+};
+
 ////////////////////////////////
 
 const SKILLS = {
@@ -59,20 +68,12 @@ const SKILLS = {
     SPEAKING: 'SPEAKING',
 };
 
-const COURSE = {
-    A1: 'A1',
-    A2: 'A2',
-    B1: 'B1',
-    B2: 'B2',
-    C1: 'C1',
-};
-
 export {
     CONFIG,
     TOKENS,
     ROLES,
     SKILLS,
-    COURSE,
+    LEVEL,
     QUESTION_TYPE,
     TASK_TYPE,
     LESSON_TYPE,
