@@ -35,7 +35,7 @@ app.use(cookieParser());
 
 app.get('/test/chat', (req, res) => {
     res.sendFile(
-        path.resolve(path.join(__dirname, 'src', 'test index 2.html')),
+        path.resolve(path.join(__dirname, 'src', 'test index 3.html')),
     );
 });
 process.on('warning', (e) => console.warn(e.stack));

@@ -8,6 +8,7 @@ import messages from '../../models/messages.mongo.js';
 import tokens from '../../models/tokens.mongo.js';
 import { findMaxId, saveUser } from '../../models/users.model.js';
 import { findMaxId as findMaxIdMessage } from '../../models/messages.model.js';
+import { findMaxId as findMaxIdConversation } from '../../models/conversations.model.js';
 import users from '../../models/users.mongo.js';
 import { ROLES, TOKENS, CONFIG } from '../../utils/Constants.js';
 
@@ -550,6 +551,7 @@ const sendMessage = async (req, res, next) => {
 
         if (!conversation) {
             conversation = await conversations.create({
+                id: Number((await findMaxIdConversation()) + 1),
                 participants: [senderId, receiverId],
             });
         }
