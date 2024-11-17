@@ -3,10 +3,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Audio Recorder</title>
+        <title>Pronunciation</title>
     </head>
     <body>
-        <h1>Audio Recorder</h1>
+        <h1>Pronunciation</h1>
+        <input id="word" type="text" />
+        <button id="getAudio">Get Audio</button>
+        <audio id="helpAudioPlayback" controls></audio>
+
         <button id="startButton">Start Recording</button>
         <button id="stopButton" disabled>Stop Recording</button>
         <audio id="audioPlayback" controls></audio>
@@ -15,10 +19,24 @@
             const startButton = document.getElementById('startButton');
             const stopButton = document.getElementById('stopButton');
             const audioPlayback = document.getElementById('audioPlayback');
+            const getAudioButton = document.getElementById('getAudio');
+            const getHelpAudioButton =
+                document.getElementById('helpAudioPlayback');
+            const word = document.getElementById('word');
 
             let mediaRecorder;
             let audioChunks = [];
 
+            getAudio.addEventListener('click', async () => {
+                const response = await fetch(
+                    `/api/ai/getAudio?word=${word.value}`,
+                );
+                const result = await response.json();
+
+                console.log(result);
+                // const audioUrl = URL.createObjectURL(audioBlob);
+                getHelpAudioButton.src = result.data.path;
+            });
             // Request permission and start recording
             startButton.addEventListener('click', async () => {
                 try {
@@ -41,7 +59,6 @@
                         const audioUrl = URL.createObjectURL(audioBlob);
                         audioPlayback.src = audioUrl;
 
-                        // Optional: Send audioBlob to your server here
                         uploadAudio(audioBlob);
                     };
 
@@ -63,14 +80,17 @@
             // Optional function to upload audio to server
             async function uploadAudio(audioBlob) {
                 const formData = new FormData();
-                formData.append('audio', audioBlob, 'recording.wav');
+                formData.append('audio', audioBlob, 'recording.mp3');
                 try {
-                    const response = await fetch('/api/ai/analyze-voice', {
-                        method: 'POST',
-                        body: formData,
-                    });
+                    const response = await fetch(
+                        `/api/ai/analyze-voice?word=${word.value}`,
+                        {
+                            method: 'POST',
+                            body: formData,
+                        },
+                    );
                     const result = await response.json();
-                    console.log('Server response:', result);
+                    alert(result.message);
                 } catch (error) {
                     console.error('Error uploading audio:', error);
                 }

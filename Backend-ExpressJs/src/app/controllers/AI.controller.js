@@ -1,11 +1,16 @@
 import { makeSuccessResponse } from '../../utils/Response.js';
 import { StatusCodes } from 'http-status-codes';
 import { getReceiverSocketId, io } from '../../services/socket.js';
-import Ffmpeg from 'fluent-ffmpeg';
+import { CONFIG } from '../../utils/Constants.js';
+import { createClient } from '@deepgram/sdk';
+
 import fs from 'fs';
+import path from 'path';
 import ollama from 'ollama';
 
+const deepgram = createClient(CONFIG.DEEPGRAM_API_KEY);
 const model = 'Ebot_v1:latest';
+const __dirname = path.resolve();
 let messages = [];
 
 const generateChat = async (req, res) => {
@@ -42,50 +47,45 @@ const generateChat = async (req, res) => {
         });
     }
 };
+
 const handleAnalyzeVoice = async (req, res) => {
     try {
-        const audioPath = req.file.path;
-        const convertedAudioPath = `${audioPath}.flac`;
-        const targetWord = 'student'; // Target word to check
+        const filePath = path.join(
+            __dirname,
+            `src/uploads/${req.file.filename}`,
+        );
 
-        // Convert audio to FLAC format for Google Speech-to-Text
-        Ffmpeg(audioPath)
-            .audioCodec('flac')
-            .on('end', async () => {
-                const audioData = fs.readFileSync(convertedAudioPath);
-                const audioBytes = audioData.toString('base64');
+        const targetWord = req.query.word;
+        if (!targetWord) {
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Missing target word',
+            });
+        }
 
-                // const [response] = await speechClient.recognize({
-                //     audio: { content: audioBytes },
-                //     config: {
-                //         encoding: 'FLAC',
-                //         languageCode: 'en-US',
-                //     },
-                // });
+        const { result, error } =
+            await deepgram.listen.prerecorded.transcribeFile(
+                fs.readFileSync(filePath),
+                { smart_format: true, model: 'nova-2', language: 'en-US' },
+            );
+        if (error) throw error;
 
-                const transcription = response.results
-                    .map((result) => result.alternatives[0].transcript)
-                    .join('\n');
+        const extractedWord =
+            result.results.channels[0].alternatives[0].words[0]?.word;
+        const isCorrect =
+            extractedWord.toLowerCase() === targetWord.toLowerCase();
 
-                // Analyze pronunciation
-                const isCorrect =
-                    transcription.toLowerCase() === targetWord.toLowerCase();
+        // Clean up files
+        fs.unlinkSync(filePath);
 
-                // Clean up files
-                fs.unlinkSync(audioPath);
-                fs.unlinkSync(convertedAudioPath);
-
-                if (!isCorrect) {
-                    return makeSuccessResponse(res, StatusCodes.OK, {
-                        message: `Incorrect pronunciation. You said: ${transcription}`,
-                    });
-                } else {
-                    return makeSuccessResponse(res, StatusCodes.OK, {
-                        message: 'Correct pronunciation',
-                    });
-                }
-            })
-            .save(convertedAudioPath);
+        if (!isCorrect) {
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                message: `Incorrect pronunciation. You said: ${extractedWord}`,
+            });
+        } else {
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                message: 'Correct pronunciation',
+            });
+        }
     } catch (error) {
         console.log('Error in analyze voice: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -94,6 +94,82 @@ const handleAnalyzeVoice = async (req, res) => {
     }
 };
 
+const getAudio = async (req, res) => {
+    if (!req.query.word) {
+        return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+            message: 'Missing target word',
+        });
+    }
+    const text = req.query.word;
+
+    const filePath = path.join(__dirname, `/audios/${text.toLowerCase()}.wav`);
+    if (fs.existsSync(filePath)) {
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data: {
+                path: `${
+                    CONFIG.DOMAIN_SERVER
+                }/audios/${text.toLowerCase()}.wav`,
+            },
+        });
+    } else {
+        try {
+            const response = await deepgram.speak.request(
+                { text },
+                {
+                    model: 'aura-asteria-en',
+                    encoding: 'linear16',
+                    container: 'wav',
+                },
+            );
+            const stream = await response.getStream();
+            if (stream) {
+                // Convert the stream to an audio buffer
+                const buffer = await getAudioBuffer(stream);
+                // Write the audio buffer to a file
+                fs.writeFile(filePath, buffer, (err) => {
+                    if (err) {
+                        throw err;
+                    } else {
+                        return makeSuccessResponse(res, StatusCodes.OK, {
+                            data: {
+                                path: `${
+                                    CONFIG.DOMAIN_SERVER
+                                }/audios/${text.toLowerCase()}.wav`,
+                            },
+                        });
+                    }
+                });
+            } else {
+                throw new Error('Error generating audio:', stream);
+            }
+        } catch (error) {
+            console.log('Error in getAudio: ', error);
+            return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+                message: 'Server error, please try again later!',
+            });
+        }
+    }
+};
+
+// helper function to convert stream to audio buffer
+const getAudioBuffer = async (response) => {
+    const reader = response.getReader();
+    const chunks = [];
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        chunks.push(value);
+    }
+
+    const dataArray = chunks.reduce(
+        (acc, chunk) => Uint8Array.from([...acc, ...chunk]),
+        new Uint8Array(0),
+    );
+
+    return Buffer.from(dataArray.buffer);
+};
 // import tesseract from 'tesseract.js';
 // import wordExists from 'word-exists';
 
@@ -195,4 +271,4 @@ const handleAnalyzeVoice = async (req, res) => {
 // // console.log(words);
 // console.log(final);
 
-export { generateChat, handleAnalyzeVoice };
+export { generateChat, handleAnalyzeVoice, getAudio };

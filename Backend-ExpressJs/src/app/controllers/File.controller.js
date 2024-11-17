@@ -16,7 +16,6 @@ const uploadFile = async (req, res, next) => {
                 message: 'No file found',
             });
         }
-        console.log('lol');
     } catch (error) {
         console.log('Error in uploadFile: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {

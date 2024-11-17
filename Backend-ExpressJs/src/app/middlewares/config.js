@@ -20,6 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
+app.use('/audios', express.static('audios'));
 
 // if (process.env.NODE_ENV.trim() == 'production') {
 //     app.use(express.static(path.join(__dirname, 'FrontEnd-ReactJs', 'dist')));

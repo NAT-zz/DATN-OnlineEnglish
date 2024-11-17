@@ -11,6 +11,7 @@ const CONFIG = {
     DOMAIN_SERVER: process.env.DOMAIN_SERVER,
     CLOUDINARY_URL: process.env.CLOUDINARY_URL,
     DAILY_API_KEY: process.env.DAILY_API_KEY,
+    DEEPGRAM_API_KEY: process.env.DEEPGRAM_API_KEY,
 };
 
 const TOKENS = {
