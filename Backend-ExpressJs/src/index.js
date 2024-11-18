@@ -12,6 +12,7 @@ import { initDataStorage } from './models/storage.model.js';
 import { server } from './services/socket.js';
 import { initDataMessage } from './models/messages.model.js';
 import { initDataConversation } from './models/conversations.model.js';
+import { initDataNoti } from './models/notis.model.js';
 
 const PORT = process.env.SERVER_PORT;
 (async function startServer() {
@@ -28,6 +29,8 @@ const PORT = process.env.SERVER_PORT;
 
     await initDataConversation();
     await initDataMessage();
+
+    await initDataNoti();
 
     server.listen(PORT, () => {
         console.log(`Listening on port ${PORT}`);

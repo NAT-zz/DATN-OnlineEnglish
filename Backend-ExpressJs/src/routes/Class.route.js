@@ -69,9 +69,9 @@ router.post(
 // teacher
 router.get(
     '/students/:id',
-    // verifyToken,
-    // verifyPermission([ROLES.TEACHER]),
-    // verifyRights(RIGHT_TYPE.class),
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.class),
     getStudents,
 );
 

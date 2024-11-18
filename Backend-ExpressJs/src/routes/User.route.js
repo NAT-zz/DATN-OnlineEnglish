@@ -13,11 +13,13 @@ import {
     sendMessage,
     getStudyings,
     getTeachers,
-    videoCallHandler
+    getNotis,
+    createNoti,
+    videoCallHandler,
 } from '../app/controllers/User.controller.js';
 import multer from 'multer';
-import { verifyToken, verifyPermission } from './auth.js';
-import { ROLES } from '../utils/Constants.js';
+import { verifyToken, verifyPermission, verifyRights } from './auth.js';
+import { RIGHT_TYPE, ROLES } from '../utils/Constants.js';
 
 const router = express.Router();
 const fileUpload = multer();
@@ -51,5 +53,16 @@ router.get('/video-call/:id', videoCallHandler);
 // users
 router.get('/studyings', verifyToken, getStudyings);
 router.get('/teachers', getTeachers);
+
+// notis
+router.get('/notis', verifyToken, getNotis);
+// create
+router.post(
+    '/noti/create',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER]),
+    verifyRights(RIGHT_TYPE.class),
+    createNoti,
+);
 
 export default router;

@@ -76,7 +76,7 @@ const verifyPermission = (reqRole) => {
 const verifyRights = (type) => {
     return async (req, res, next) => {
         const userId = req.userData.id;
-        const id = req.params.id || req.query.updateId;
+        const id = req.params.id || req.query.updateId || req.body.id;
         console.log(req.userData);
         if (id) {
             const getStorage = await storages.findOne({ userId: userId });

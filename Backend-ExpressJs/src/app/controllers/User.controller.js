@@ -6,9 +6,13 @@ import { makeSuccessResponse } from '../../utils/Response.js';
 import conversations from '../../models/conversations.mongo.js';
 import messages from '../../models/messages.mongo.js';
 import tokens from '../../models/tokens.mongo.js';
+import notis from '../../models/notis.mongo.js';
+import storages from '../../models/storage.mongo.js';
+
 import { findMaxId, saveUser } from '../../models/users.model.js';
 import { findMaxId as findMaxIdMessage } from '../../models/messages.model.js';
 import { findMaxId as findMaxIdConversation } from '../../models/conversations.model.js';
+import { findMaxId as findMaxIdNoti } from '../../models/notis.model.js';
 import users from '../../models/users.mongo.js';
 import { ROLES, TOKENS, CONFIG } from '../../utils/Constants.js';
 
@@ -703,6 +707,99 @@ const videoCallHandler = async (req, res) => {
     }
 };
 
+const getNotis = async (req, res) => {
+    try {
+        const userId = req.userData.id;
+        if (!userId)
+            return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
+                message: 'Missing required information',
+            });
+
+        const getNotis = await notis.find({
+            to: { $in: userId },
+        });
+
+        let data = [];
+        for (const noti of getNotis) {
+            const user = await users.findOne({ id: noti.from });
+            if (user && user instanceof users) {
+                data.push({
+                    ...noti._doc,
+                    from: user.userName,
+                    to: undefined,
+                    _id: undefined,
+                    __v: undefined,
+                });
+            }
+        }
+
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data,
+        });
+    } catch (err) {
+        console.error('Error in getNotis: ', err.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later',
+        });
+    }
+};
+
+const createNoti = async (req, res) => {
+    try {
+        const classId = req.body.id;
+        const content = req.body.content;
+        const teacherId = req.userData.id;
+
+        if (!classId || !content || !teacherId)
+            return makeSuccessResponse(res, StatusCodes.BAD_REQUEST, {
+                message: 'Missing required information',
+            });
+
+        const getStudents = await storages.find({
+            classes: { $in: classId },
+            role: ROLES.STUDENT,
+        });
+        const getTeacher = await users.findOne({ id: teacherId });
+
+        let data = [];
+        for (const student of getStudents) {
+            const user = await users.findOne(
+                { id: student.userId },
+                '-passWord',
+            );
+            if (user && user instanceof users) {
+                data.push(user.id);
+
+                let receiverSocketId = getReceiverSocketId(user.id);
+                if (receiverSocketId) {
+                    io.to(receiverSocketId).emit('newNoti', {
+                        from: getTeacher.userName,
+                        content,
+                    }); // send events to specific client
+                }
+            }
+        }
+
+        const newNoti = new notis({
+            id: Number((await findMaxIdNoti()) + 1),
+            to: data,
+            from: teacherId,
+            content,
+        });
+
+        await newNoti.save();
+
+        return makeSuccessResponse(res, StatusCodes.CREATED, {
+            data: newNoti,
+        });
+    } catch (error) {
+        console.error('Error in createNoti: ', err.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later',
+        });
+    }
+};
+
 export {
     checkAuth,
     deleteLastestUser,
@@ -718,6 +815,8 @@ export {
     resendLink,
     resetPassword,
     sendMessage,
+    getNotis,
+    createNoti,
     verifyAccount,
     videoCallHandler,
 };

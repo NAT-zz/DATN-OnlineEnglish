@@ -17,6 +17,7 @@ import lessons from '../models/lessons.mongo.js';
 import tests from '../models/tests.mongo.js';
 import classes from '../models/classes.mongo.js';
 import users from '../models/users.mongo.js';
+import notis from '../models/notis.mongo.js';
 import {
     deleteLastestUser,
     deleteUser,
@@ -44,6 +45,9 @@ function route(app) {
             let data = null;
             const type = req.query.type;
             switch (type) {
+                case 'noti':
+                    data = await notis.find();
+                    break;
                 case 'user':
                     data = await users.find();
                     break;
