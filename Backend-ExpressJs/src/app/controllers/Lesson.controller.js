@@ -9,6 +9,7 @@ import {
     addToStorage,
     deleteFromStorage,
     filterData,
+    getResult,
 } from '../../utils/Strorage.js';
 
 const getLessons = async (req, res) => {
@@ -90,14 +91,16 @@ const getDetail = async (req, res) => {
                 }
                 listTask.push(dataQuestion);
             }
-            // if(req.userData.role == ROLES.STUDENT)
-            // const result = await getResult(req.userData.id, 'lesson', id);
 
-            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+            let result;
+            if (req.userData.role == ROLES.STUDENT)
+                result = await getResult(req.userData.id, 'lesson', id);
+
+            return makeSuccessResponse(res, StatusCodes.OK, {
                 data: {
                     ...getLesson._doc,
                     tasks: listTask,
-                    // result: result ? result : []
+                    result: result ? result : [],
                 },
             });
         } else {
@@ -177,7 +180,7 @@ const createLesson = async (req, res) => {
                     data: { ...findLesson._doc, r: undefined },
                 });
             } else {
-                return makeSuccessResponse(res, StatusCodes.OK, {
+                return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
                     message: `Lesson not found with id ${id}`,
                 });
             }

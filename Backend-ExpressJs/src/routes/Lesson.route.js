@@ -33,14 +33,12 @@ router.post(
     createLesson,
 );
 
-router.get('/detail/:id', getDetail);
-
 // retrive results for student
-// router.get(
-//     '/detail/:id',
-//     verifyToken,
-//     verifyPermission([ROLES.TEACHER, ROLES.STUDENT]),
-//     getDetail,
-// );
+router.get(
+    '/detail/:id',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER, ROLES.STUDENT]),
+    getDetail,
+);
 
 export default router;

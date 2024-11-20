@@ -721,16 +721,21 @@ const getNotis = async (req, res) => {
 
         let data = [];
         for (const noti of getNotis) {
-            const user = await users.findOne({ id: noti.from });
-            if (user && user instanceof users) {
-                data.push({
-                    ...noti._doc,
-                    from: user.userName,
-                    to: undefined,
-                    _id: undefined,
-                    __v: undefined,
-                });
+            let from = 'System';
+            if (noti.from != 0) {
+                const user = await users.findOne({ id: noti.from });
+
+                if (user && user instanceof users) {
+                    from = user.userName;
+                }
             }
+            data.push({
+                ...noti._doc,
+                from,
+                to: undefined,
+                _id: undefined,
+                __v: undefined,
+            });
         }
 
         return makeSuccessResponse(res, StatusCodes.OK, {

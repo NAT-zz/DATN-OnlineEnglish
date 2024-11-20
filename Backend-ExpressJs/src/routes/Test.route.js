@@ -27,14 +27,14 @@ router.post(
     createTest,
 );
 
-router.get('/detail/:id', getDetail);
+// router.get('/detail/:id', getDetail);
 
 // retrieve rulst for student
-// router.get(
-//     '/detail/:id',
-//     verifyToken,
-//     verifyPermission([ROLES.TEACHER, ROLES.STUDENT]),
-//     getDetail,
-// );
+router.get(
+    '/detail/:id',
+    verifyToken,
+    verifyPermission([ROLES.TEACHER, ROLES.STUDENT]),
+    getDetail,
+);
 
 export default router;
