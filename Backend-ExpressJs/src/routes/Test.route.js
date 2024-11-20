@@ -27,9 +27,7 @@ router.post(
     createTest,
 );
 
-// router.get('/detail/:id', getDetail);
-
-// retrieve rulst for student
+// retrieve result for student
 router.get(
     '/detail/:id',
     verifyToken,

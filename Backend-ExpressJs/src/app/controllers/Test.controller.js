@@ -66,7 +66,7 @@ const getDetail = async (req, res) => {
             if (req.userData.role == ROLES.STUDENT)
                 result = await getResult(req.userData.id, 'test', id);
 
-            return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
+            return makeSuccessResponse(res, StatusCodes.OK, {
                 data: {
                     ...getTest._doc,
                     tasks: listTask,
