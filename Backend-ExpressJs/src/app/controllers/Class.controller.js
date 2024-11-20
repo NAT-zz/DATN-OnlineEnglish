@@ -38,7 +38,7 @@ const getTeacherOfClass = async (classId) => {
 const getClasses = async (req, res) => {
     try {
         const getAll = await classes.find({});
-        const data = await Promise.all(
+        const dataWithTeacher = await Promise.all(
             getAll.map(async (val) => {
                 const getTeacher = await getTeacherOfClass(val.id);
                 return {
@@ -47,6 +47,19 @@ const getClasses = async (req, res) => {
                 };
             }),
         );
+
+        let data = Object.keys(LEVEL).reduce((acc, key) => {
+            acc[key] = [];
+            return acc;
+        }, {});
+
+        for (const level in LEVEL) {
+            for (const val of dataWithTeacher) {
+                if (val.level == level) {
+                    data[level].push(val);
+                }
+            }
+        }
 
         return makeSuccessResponse(res, StatusCodes.OK, {
             data,
