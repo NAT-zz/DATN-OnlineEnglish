@@ -28,7 +28,7 @@ const getTeacherOfClass = async (classId) => {
     if (getStorage && getStorage instanceof storages) {
         const getTeacher = await users
             .findOne({ id: getStorage.userId })
-            .select('userName avatar description');
+            .select('userName avatar description id');
         if (getTeacher && getTeacher instanceof users) {
             return getTeacher;
         } else throw new Error('No user found');
