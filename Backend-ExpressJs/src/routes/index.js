@@ -4,6 +4,7 @@ import taskRoute from './Task.route.js';
 import lessonRoute from './Lesson.route.js';
 import testRoute from './Test.route.js';
 import classRoute from './Class.route.js';
+import dailyRoute from './DaityTask.route.js';
 import aiRoute from './AI.route.js';
 
 import multer from 'multer';
@@ -18,6 +19,8 @@ import tests from '../models/tests.mongo.js';
 import classes from '../models/classes.mongo.js';
 import users from '../models/users.mongo.js';
 import notis from '../models/notis.mongo.js';
+import daily from '../models/dailyquestions.mongo.js';
+
 import {
     deleteLastestUser,
     deleteUser,
@@ -45,6 +48,10 @@ function route(app) {
             let data = null;
             const type = req.query.type;
             switch (type) {
+                case 'daily':
+                    data = await daily.find();
+                    break;
+                case 'ai':
                 case 'noti':
                     data = await notis.find();
                     break;
@@ -92,6 +99,8 @@ function route(app) {
     app.use('/api/lesson', lessonRoute);
     app.use('/api/test', testRoute);
     app.use('/api/class', classRoute);
+
+    app.use('/api/dailytask', dailyRoute);
 
     app.use('/api/ai', aiRoute);
 }

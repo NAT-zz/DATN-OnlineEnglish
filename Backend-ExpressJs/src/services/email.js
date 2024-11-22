@@ -2,7 +2,7 @@ import { CONFIG } from '../utils/Constants.js';
 import {
     VERIFICATION_EMAIL_TEMPLATE,
     PASSWORD_RESET_REQUEST_TEMPLATE,
-    PASSWORD_RESET_SUCCESS_TEMPLATE,
+    DAILY_TEMPLATE,
 } from './emailTemplate.js';
 import nodemailer from 'nodemailer';
 
@@ -41,6 +41,24 @@ export const sendVerificationEmail = async (req, newUser, token) => {
             html: VERIFICATION_EMAIL_TEMPLATE.replace(
                 '{verificationLink}',
                 `\nhttp://${req.headers.host}/api/user/verify-email/${newUser.email}/${token.token}`,
+            ),
+        };
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Error sending email: ', error);
+        throw error;
+    }
+};
+
+export const sendDailyEmail = async (user) => {
+    try {
+        const mailOptions = {
+            from: 'no-reply@gmail.com',
+            to: user.email,
+            subject: 'Time for you daily tasks!',
+            html: DAILY_TEMPLATE.replace(
+                '{resetURL}',
+                `\nhttp://${CONFIG.DOMAIN_SERVER}/daily`,
             ),
         };
         await transporter.sendMail(mailOptions);

@@ -12,6 +12,13 @@ const CONFIG = {
     CLOUDINARY_URL: process.env.CLOUDINARY_URL,
     DAILY_API_KEY: process.env.DAILY_API_KEY,
     DEEPGRAM_API_KEY: process.env.DEEPGRAM_API_KEY,
+
+    APP_ID: process.env.APP_ID,
+    APP_KEY: process.env.APP_KEY,
+    BASE_URL: process.env.BASE_URL,
+
+    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+    GOOGLE_SEARCH_ENGINE_ID: process.env.GOOGLE_SEARCH_ENGINE_ID,
 };
 
 const TOKENS = {

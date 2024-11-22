@@ -13,6 +13,19 @@ const model = 'Ebot_v1:latest';
 const __dirname = path.resolve();
 let messages = [];
 
+const generateQuestion = async (prompt) => {
+    try {
+        const response = await ollama.generate({
+            model,
+            prompt,
+        });
+
+        return response.response;
+    } catch (error) {
+        console.log('Error in generateQuestion: ', error.message);
+    }
+};
+
 const generateChat = async (req, res) => {
     try {
         const { content } = req.body;
@@ -34,12 +47,20 @@ const generateChat = async (req, res) => {
         //         );
         //     }
         // }
-
+        console.log(
+            await generateQuestion(
+                "make a 'fill in the blank' question with 'computer' as the answer, only print the question",
+            ),
+        );
+        let data = '';
         for await (const part of response) {
             process.stdout.write(part.message?.content);
+            data += part.message?.content;
             io.emit('newMessage', part.message?.content);
         }
-        return makeSuccessResponse(res, StatusCodes.OK, {});
+        return makeSuccessResponse(res, StatusCodes.OK, {
+            data,
+        });
     } catch (error) {
         console.log('Error in generate: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -271,4 +292,4 @@ const getAudioBuffer = async (response) => {
 // // console.log(words);
 // console.log(final);
 
-export { generateChat, handleAnalyzeVoice, getAudio };
+export { generateChat, generateQuestion, handleAnalyzeVoice, getAudio };
