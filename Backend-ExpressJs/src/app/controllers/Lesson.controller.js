@@ -3,7 +3,7 @@ import { findMaxId } from '../../models/lessons.model.js';
 import lessons from '../../models/lessons.mongo.js';
 import questions from '../../models/questions.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
-import { LESSON_TYPE, RIGHT_TYPE } from '../../utils/Constants.js';
+import { LESSON_TYPE, RIGHT_TYPE, ROLES } from '../../utils/Constants.js';
 import { makeSuccessResponse } from '../../utils/Response.js';
 import {
     addToStorage,
