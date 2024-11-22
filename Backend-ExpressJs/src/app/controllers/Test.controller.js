@@ -10,7 +10,7 @@ import {
     filterData,
     getResult,
 } from '../../utils/Strorage.js';
-import { RIGHT_TYPE } from '../../utils/Constants.js';
+import { RIGHT_TYPE, ROLES } from '../../utils/Constants.js';
 
 const getTests = async (req, res) => {
     try {
