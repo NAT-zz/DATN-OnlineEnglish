@@ -3,9 +3,11 @@ import multer from 'multer';
 import {
     generateChat,
     handleAnalyzeVoice,
-    getAudio
+    getAudio,
 } from '../app/controllers/AI.controller.js';
 import path from 'path';
+
+import { verifyToken } from './auth.js';
 
 const router = express.Router();
 const __dirname = path.resolve();
@@ -45,7 +47,7 @@ const upload = multer({
     },
 });
 
-router.post('/chat', generateChat);
+router.post('/chat', verifyToken, generateChat);
 router.post('/analyze-voice', upload.single('audio'), handleAnalyzeVoice);
 router.get('/getAudio', getAudio);
 

@@ -37,27 +37,21 @@ const generateChat = async (req, res) => {
             stream: true,
         });
 
-        // const receiverSocketId = getReceiverSocketId(receiverId);
-        // if (receiverSocketId) {
-        //     for await (const part of response) {
-        //         process.stdout.write(part.message?.content);
-        //         io.to(receiverSocketId).emit(
-        //             'newMessage',
-        //             part.message?.content,
-        //         );
-        //     }
-        // }
-        console.log(
-            await generateQuestion(
-                "make a 'fill in the blank' question with 'computer' as the answer, only print the question",
-            ),
-        );
+        const receiverSocketId = getReceiverSocketId(req.userData.id);
         let data = '';
-        for await (const part of response) {
-            process.stdout.write(part.message?.content);
-            data += part.message?.content;
-            io.emit('newMessage', part.message?.content);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('startOneMessage', 'ping');
+            for await (const part of response) {
+                data += part.message?.content;
+                process.stdout.write(part.message?.content);
+                io.to(receiverSocketId).emit(
+                    'newMessage',
+                    part.message?.content,
+                );
+            }
+            io.to(receiverSocketId).emit('endOneMessage', 'ping');
         }
+
         return makeSuccessResponse(res, StatusCodes.OK, {
             data,
         });

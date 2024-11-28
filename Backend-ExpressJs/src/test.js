@@ -80,9 +80,27 @@
 
 // transcribeFile();
 
-import axios from 'axios';
+// import axios from 'axios';
 // Function to get word definition
 
-
 // Example usage
-getWordDefinition('apple');
+// getWordDefinition('apple');
+
+let data = [
+    {
+        A1: '',
+        A2: ''
+    }
+]
+
+const newData = [
+    {
+        A1: 'test 1',
+        A2: ''
+    }
+]
+
+data = data.concat(newData);
+
+data[data.length - 1].A1 = data[data.length - 1].A1.concat(' ', 'test 2')
+console.log(data);
