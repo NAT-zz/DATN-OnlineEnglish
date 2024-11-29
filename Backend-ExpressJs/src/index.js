@@ -41,36 +41,46 @@ const PORT = process.env.SERVER_PORT;
 
     // Schedule a job to run every day at 7:00 AM
     const job = new CronJob(
-        '00 07 * * *',
+        '06 17 * * *',
         async () => {
-            // create noti
-            const getStudents = await users.find({ role: ROLES.STUDENT });
-            const studentIds = getStudents.map((user) => user.id);
+            try {
+                // create noti
+                const getStudents = await users.find({ role: ROLES.STUDENT });
+                const studentIds = getStudents.map((user) => user.id);
 
-            const newNoti = new notis({
-                id: Number((await findMaxId()) + 1),
-                to: studentIds,
-                from: 'System',
-                content: 'Time for your daily questions!',
-            });
-            await newNoti.save();
+                const newNoti = new notis({
+                    id: Number((await findMaxId()) + 1),
+                    to: studentIds,
+                    from: 0,
+                    content: 'Time for your daily questions!',
+                });
+                await newNoti.save();
 
-            // send through socket
-            for (const id of studentIds) {
-                let receiverSocketId = getReceiverSocketId(id);
-                if (receiverSocketId) {
-                    io.to(receiverSocketId).emit('newNoti', {
-                        from: 'System',
-                        content,
-                    });
+                // send through socket
+                for (const id of studentIds) {
+                    let receiverSocketId = getReceiverSocketId(id);
+                    if (receiverSocketId) {
+                        io.to(receiverSocketId).emit('newNoti', {
+                            ...newNoti._doc,
+                            to: undefined,
+                            from: 'System',
+                        });
+                    }
                 }
-            }
+                console.log({
+                    ...newNoti._doc,
+                    to: undefined,
+                    from: 'System',
+                });
 
-            // send mail
-            for (const user of getStudents) await sendDailyEmail(user.email);
+                // send mail
+                for (const user of getStudents) await sendDailyEmail(user);
+            } catch (error) {
+                console.log('Error in cron job:', error.message);
+            }
         },
         null,
-        false,
+        true,
     );
 
     server.listen(PORT, () => {

@@ -36,7 +36,7 @@ app.use('/audios', express.static('audios'));
 
 app.get('/test/chat', (req, res) => {
     res.sendFile(
-        path.resolve(path.join(__dirname, 'src', 'test index.html')),
+        path.resolve(path.join(__dirname, 'src', 'test index 2.html')),
     );
 });
 process.on('warning', (e) => console.warn(e.stack));
