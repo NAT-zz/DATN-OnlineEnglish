@@ -41,7 +41,7 @@ const PORT = process.env.SERVER_PORT;
 
     // Schedule a job to run every day at 7:00 AM
     const job = new CronJob(
-        '06 17 * * *',
+        '03 09 * * *',
         async () => {
             try {
                 // create noti

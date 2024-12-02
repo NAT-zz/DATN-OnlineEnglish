@@ -93,7 +93,7 @@ const handleAnalyzeVoice = async (req, res) => {
         fs.unlinkSync(filePath);
 
         if (!isCorrect) {
-            return makeSuccessResponse(res, StatusCodes.OK, {
+            return makeSuccessResponse(res, StatusCodes.EXPECTATION_FAILED, {
                 message: `Incorrect pronunciation. You said: ${extractedWord}`,
             });
         } else {
@@ -104,7 +104,7 @@ const handleAnalyzeVoice = async (req, res) => {
     } catch (error) {
         console.log('Error in analyze voice: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: 'Server error, please try again later!',
+            message: 'Server error, Please try again later!',
         });
     }
 };

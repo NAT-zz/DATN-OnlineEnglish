@@ -86,21 +86,62 @@
 // Example usage
 // getWordDefinition('apple');
 
-let data = [
+let data = {
+    A1: {
+        detail: 'A1 - Beginner',
+        des: `A1 des`,
+    },
+    A2: {
+        detail: 'A2 - Elementary',
+        des: `A2 des`,
+    },
+};
+
+const temp = [
     {
-        A1: '',
-        A2: ''
-    }
-]
-
-const newData = [
+        level: 'A1',
+        detail: 'detail for the first A1 class',
+    },
     {
-        A1: 'test 1',
-        A2: ''
-    }
-]
+        level: 'A1',
+        detail: 'detail for the second A2 class',
+    },
+    {
+        level: 'A1',
+        detail: 'test test',
+    },
+];
 
-data = data.concat(newData);
+let res = [
+    {
+        A1: [
+            {
+                level: 'A1',
+                detail: 'detail for the first A1 class',
+            },
+            {
+                level: 'A1',
+                detail: 'detail for the second A2 class',
+            },
+            {
+                level: 'A1',
+                detail: 'test test',
+            },
+        ],
+    },
+    {
+        A2: [],
+    },
+];
 
-data[data.length - 1].A1 = data[data.length - 1].A1.concat(' ', 'test 2')
-console.log(data);
+const extractData = Object.keys(data).map((val) => {
+    return {
+        [val]: temp.filter((value) => {
+            return value.level === val;
+        }),
+    };
+});
+
+res.forEach((val) => {
+    console.log(val);
+});
