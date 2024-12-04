@@ -80,9 +80,11 @@ const createQuestions = async (req, res) => {
         for (const word of words) {
             const definition = await getWordDefinition(word);
             const image = await fetchImageForWord(word);
-            const question = await generateQuestion(
-                `Make a 'fill in the blank' question with '${word}' as the answer, the question must have the blank '_____' in it, answer me with the question only`,
+            let question = await generateQuestion(
+                `Make a sentence with '${word}', answer me with the sentence only`,
             );
+
+            question = question.replace(`${word}`, '-----');
 
             const getDaily = await dailyquestions.findOne({ word });
 
@@ -131,6 +133,7 @@ const checkQuestionAnswer = async (data) => {
     //         },
     //     ]
     // }
+    if (data.length === 0) return false;
     for (const val of data) {
         const getOnedaily = await dailyquestions.findOne({
             id: val.id,
@@ -151,9 +154,10 @@ const checkAnswer = async (req, res) => {
         if (!(getRecord && getRecord instanceof dailyRecord)) {
             throw new Error('Daily record not found');
         }
+        console.log(req.body);
 
         if (getRecord.todayStatus) {
-            return makeSuccessResponse(res, StatusCodes.OK, {
+            return makeSuccessResponse(res, StatusCodes.NOT_ACCEPTABLE, {
                 message: 'You have already answered today!',
             });
         }
@@ -166,7 +170,7 @@ const checkAnswer = async (req, res) => {
         }
 
         if (!(await checkQuestionAnswer(submittedData))) {
-            return makeSuccessResponse(res, StatusCodes.OK, {
+            return makeSuccessResponse(res, StatusCodes.NOT_ACCEPTABLE, {
                 message: 'Incorrect answers, try again!',
             });
         }
