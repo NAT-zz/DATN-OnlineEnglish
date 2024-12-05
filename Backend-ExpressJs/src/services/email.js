@@ -58,7 +58,7 @@ export const sendDailyEmail = async (user) => {
             subject: 'Time for you daily tasks!',
             html: DAILY_TEMPLATE.replace(
                 '{resetURL}',
-                `\nhttp://${CONFIG.DOMAIN_SERVER}/daily`,
+                `\n${CONFIG.DOMAIN_CLIENT}/student/daily`,
             ),
         };
         await transporter.sendMail(mailOptions);

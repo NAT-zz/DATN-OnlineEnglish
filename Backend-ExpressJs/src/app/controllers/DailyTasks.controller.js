@@ -211,10 +211,10 @@ const getDaily = async (req, res) => {
     try {
         const userRecord = await handleDailyStorage(req.userData.id);
 
-        const data = await dailyquestions
-            .find()
-            .skip(userRecord.progress)
-            .limit(5);
+        let queryLimit = userRecord.progress;
+        if (userRecord.todayStatus) queryLimit -= 5;
+
+        const data = await dailyquestions.find().skip(queryLimit).limit(5);
         return makeSuccessResponse(res, StatusCodes.OK, {
             data: {
                 questions: data,
@@ -229,4 +229,4 @@ const getDaily = async (req, res) => {
     }
 };
 
-export { createQuestions, checkAnswer, getDaily };
+export { createQuestions, checkAnswer, getDaily, handleDailyStorage };

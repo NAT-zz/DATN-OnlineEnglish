@@ -13,6 +13,7 @@ import { getReceiverSocketId, io, server } from './services/socket.js';
 import { initDataMessage } from './models/messages.model.js';
 import { initDataConversation } from './models/conversations.model.js';
 import { initDataNoti } from './models/notis.model.js';
+import { handleDailyStorage } from './app/controllers/DailyTasks.controller.js';
 
 import { CronJob } from 'cron';
 
@@ -41,7 +42,7 @@ const PORT = process.env.SERVER_PORT;
 
     // Schedule a job to run every day at 7:00 AM
     const job = new CronJob(
-        '03 09 * * *',
+        '11 15 * * *',
         async () => {
             try {
                 // create noti
@@ -74,7 +75,16 @@ const PORT = process.env.SERVER_PORT;
                 });
 
                 // send mail
-                for (const user of getStudents) await sendDailyEmail(user);
+                for (const user of getStudents) {
+                    const userRecord = await handleDailyStorage(user.id);
+
+                    if (userRecord.todayStatus === true) {
+                        userRecord.todayStatus = false;
+                    }
+                    await userRecord.save();
+
+                    await sendDailyEmail(user);
+                }
             } catch (error) {
                 console.log('Error in cron job:', error.message);
             }
