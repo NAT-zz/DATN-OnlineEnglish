@@ -10,8 +10,8 @@
         "name": "B1 course",
         "description": "Aim to teach english at B1 level",
         "level": "B1",
-        "lessons": [3],
-        "tests": [3]
+        "lessons": [2, 3, 4],
+        "tests": [2, 3]
     },
     "3": {
         "name": "C1 course",

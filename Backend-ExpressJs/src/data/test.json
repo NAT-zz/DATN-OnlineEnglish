@@ -5,10 +5,10 @@
     },
     "2": {
         "name": "Test 01",
-        "tasks": [2, 3, 4]
+        "tasks": [2]
     },
     "3": {
         "name": "Test 02",
-        "tasks": [2, 3]
+        "tasks": [3, 4]
     }
 }

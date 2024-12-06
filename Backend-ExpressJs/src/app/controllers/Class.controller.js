@@ -135,12 +135,61 @@ const getDetail = async (req, res) => {
                     }
                 }
 
+                // calculate record
+                let record = {
+                    progressLesson: 0,
+                    progressTest: 0,
+                    overall: 0,
+                };
+                const getStorageStudent = await storages.findOne({
+                    userId: req.userData.id,
+                    role: ROLES.STUDENT,
+                });
+
+                if (
+                    getStorageStudent &&
+                    getStorageStudent instanceof storages
+                ) {
+                    let lessonCount = 0;
+
+                    listLesson.forEach((lesson) => {
+                        if (
+                            getStorageStudent.lessons.find((les) => {
+                                return les.id === lesson.id;
+                            })
+                        ) {
+                            lessonCount++;
+                        }
+                    });
+
+                    let testCount = 0;
+                    listTest.forEach((test) => {
+                        if (
+                            getStorageStudent.tests.find((tst) => {
+                                return tst.id === test.id;
+                            })
+                        ) {
+                            testCount++;
+                        }
+                    });
+
+                    record.progressLesson = Math.floor(
+                        (lessonCount / listLesson.length) * 100,
+                    );
+                    record.progressTest = Math.floor(
+                        (testCount / listTest.length) * 100,
+                    );
+
+                    console.log('record: ', record);
+                }
+
                 return makeSuccessResponse(res, StatusCodes.OK, {
                     data: {
                         ...getOne._doc,
                         lessons: listLesson,
                         tests: listTest,
                         teacher: getOne.teacher,
+                        record,
                     },
                 });
             } else {

@@ -42,7 +42,7 @@ router.post(
     createClass,
 );
 
-router.get('/detail/:id', getDetail);
+router.get('/detail/:id', verifyToken, getDetail);
 
 //student
 router.get(
