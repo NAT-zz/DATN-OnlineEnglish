@@ -1,7 +1,7 @@
 For now, read package.json for setup detailed
 
--   result fix
--   show bài/chấm bài/video call
+-   progress-danh gia ket qua
+-   token
 
--   date -> end tg lớp học -> đánh giá/progress bar
+-   noti/show bài/chấm bài/video call
 -   more detail cho phong phu, clear muc tieu, dinh huong, what you can achieve from using my website?
