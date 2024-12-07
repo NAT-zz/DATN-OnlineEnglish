@@ -694,7 +694,14 @@ const videoCallHandler = async (req, res) => {
         let room = await getRoom(roomId);
 
         if (room.error) {
-            room = await createRoom(roomId);
+            const role = req?.userData?.role;
+            if (role == ROLES.TEACHER) {
+                room = await createRoom(roomId);
+            } else {
+                return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
+                    message: 'Room not found',
+                });
+            }
         }
         return makeSuccessResponse(res, StatusCodes.OK, {
             data: room,

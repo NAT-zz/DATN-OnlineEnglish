@@ -48,7 +48,7 @@ router.get('/message/:id', verifyToken, getMessages);
 router.post('/message/send/:id', verifyToken, sendMessage);
 
 // video call
-router.get('/video-call/:id', videoCallHandler);
+router.get('/video-call/:id', verifyToken, videoCallHandler);
 
 // users
 router.get('/studyings', verifyToken, getStudyings);
