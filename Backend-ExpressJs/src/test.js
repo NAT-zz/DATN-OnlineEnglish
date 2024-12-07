@@ -86,62 +86,11 @@
 // Example usage
 // getWordDefinition('apple');
 
-let data = {
-    A1: {
-        detail: 'A1 - Beginner',
-        des: `A1 des`,
-    },
-    A2: {
-        detail: 'A2 - Elementary',
-        des: `A2 des`,
-    },
-};
+const res = '30% - 2.5';
+const num = 2;
 
-const temp = [
-    {
-        level: 'A1',
-        detail: 'detail for the first A1 class',
-    },
-    {
-        level: 'A1',
-        detail: 'detail for the second A2 class',
-    },
-    {
-        level: 'A1',
-        detail: 'test test',
-    },
-];
+const total = 3;
 
-let res = [
-    {
-        A1: [
-            {
-                level: 'A1',
-                detail: 'detail for the first A1 class',
-            },
-            {
-                level: 'A1',
-                detail: 'detail for the second A2 class',
-            },
-            {
-                level: 'A1',
-                detail: 'test test',
-            },
-        ],
-    },
-    {
-        A2: [],
-    },
-];
+const result = ((parseFloat(res.slice(0, 2)) + num) / 3)/10;
 
-const extractData = Object.keys(data).map((val) => {
-    return {
-        [val]: temp.filter((value) => {
-            return value.level === val;
-        }),
-    };
-});
-
-res.forEach((val) => {
-    console.log(val);
-});
+console.log(result); // Output: 32%

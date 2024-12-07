@@ -151,27 +151,43 @@ const getDetail = async (req, res) => {
                     getStorageStudent instanceof storages
                 ) {
                     let lessonCount = 0;
+                    let lessonRes = 0;
 
                     listLesson.forEach((lesson) => {
                         if (
                             getStorageStudent.lessons.find((les) => {
-                                return les.id === lesson.id;
+                                if (les.id === lesson.id) {
+                                    lessonRes += parseFloat(
+                                        les.multiple_choice.score.slice(0, 2),
+                                    );
+                                    return true;
+                                }
+                                return false;
                             })
                         ) {
                             lessonCount++;
                         }
                     });
+                    lessonRes = lessonRes / listLesson.length;
 
                     let testCount = 0;
+                    let testRes = 0;
                     listTest.forEach((test) => {
                         if (
                             getStorageStudent.tests.find((tst) => {
-                                return tst.id === test.id;
+                                if (tst.id === test.id) {
+                                    testRes += parseFloat(
+                                        tst.multiple_choice.score.slice(0, 2),
+                                    );
+                                    return true;
+                                }
+                                return false;
                             })
                         ) {
                             testCount++;
                         }
                     });
+                    testRes = testRes / listTest.length;
 
                     record.progressLesson = Math.floor(
                         (lessonCount / listLesson.length) * 100,
@@ -179,6 +195,7 @@ const getDetail = async (req, res) => {
                     record.progressTest = Math.floor(
                         (testCount / listTest.length) * 100,
                     );
+                    record.overall = Math.floor((lessonRes + testRes) / 2);
 
                     console.log('record: ', record);
                 }
