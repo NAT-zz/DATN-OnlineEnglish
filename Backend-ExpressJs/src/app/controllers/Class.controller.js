@@ -608,10 +608,11 @@ const getSubmitted = async (req, res) => {
                 getResult.submitted.push({
                     student: getUser,
                     result: lessonRes,
+                    createdAt: Date.now(),
                 });
             } else {
                 getResult.unsubmitted.push({
-                    name: getUser,
+                    student: getUser,
                 });
             }
         }

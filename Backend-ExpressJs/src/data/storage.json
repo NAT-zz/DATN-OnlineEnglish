@@ -16,5 +16,32 @@
         "lessons": [],
         "tests": [],
         "classes": [2]
+    },
+    "3": {
+        "userId": 4,
+        "role": "STUDENT",
+        "questions": [],
+        "tasks": [],
+        "lessons": [],
+        "tests": [],
+        "classes": [2]
+    },
+    "4": {
+        "userId": 5,
+        "role": "STUDENT",
+        "questions": [],
+        "tasks": [],
+        "lessons": [],
+        "tests": [],
+        "classes": [2]
+    },
+    "5": {
+        "userId": 6,
+        "role": "STUDENT",
+        "questions": [],
+        "tasks": [],
+        "lessons": [],
+        "tests": [],
+        "classes": [2]
     }
 }
