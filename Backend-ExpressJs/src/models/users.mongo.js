@@ -44,7 +44,11 @@ const userSchema = new mongoose.Schema({
         default: false,
         required: true,
     },
-    //achivements
+    coin: {
+        type: Number,
+        default: 30,
+        required: true,
+    }
 });
 
 export default mongoose.model('User', userSchema);

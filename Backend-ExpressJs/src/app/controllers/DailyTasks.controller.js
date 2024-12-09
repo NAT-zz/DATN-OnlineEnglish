@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { CONFIG } from '../../utils/Constants.js';
 import dailyquestions from '../../models/dailyquestions.mongo.js';
+import users from '../../models/users.mongo.js';
 import { makeSuccessResponse } from '../../utils/Response.js';
 import { StatusCodes } from 'http-status-codes';
 import { generateQuestion } from './AI.controller.js';
@@ -179,6 +180,16 @@ const checkAnswer = async (req, res) => {
         getRecord.progress += 5;
 
         await getRecord.save();
+
+        // add 1 coin
+        const getUser = await users.findOne({
+            id: req.userData.id,
+        });
+        if (getUser && getUser instanceof users) {
+            getUser.coin += 1;
+            await getUser.save();
+        }
+
         return makeSuccessResponse(res, StatusCodes.OK, {
             data: getRecord,
         });

@@ -18,6 +18,10 @@ import {
 } from '../../utils/Strorage.js';
 import { LEVEL, RIGHT_TYPE, ROLES, TASK_TYPE } from '../../utils/Constants.js';
 import { saveStorage } from '../../models/storage.model.js';
+import notis from '../../models/notis.mongo.js';
+import { findMaxId as findMaxIdNoti } from '../../models/notis.model.js';
+import { getReceiverSocketId } from '../../services/socket.js';
+import { io } from '../../services/socket.js';
 
 const getTeacherOfClass = async (classId) => {
     const getStorage = await storages.findOne({
@@ -28,7 +32,7 @@ const getTeacherOfClass = async (classId) => {
     if (getStorage && getStorage instanceof storages) {
         const getTeacher = await users
             .findOne({ id: getStorage.userId })
-            .select('userName avatar description id');
+            .select('userName avatar description id coin');
         if (getTeacher && getTeacher instanceof users) {
             return getTeacher;
         } else throw new Error('No user found');
@@ -362,9 +366,45 @@ const studentSignup = async (req, res) => {
         });
     }
     try {
+        const getUser = await users.findOne({ id: req.userData.id });
+        if (getUser && getUser instanceof users) {
+            if (getUser.coin >= 30) {
+                getUser.coin -= 30;
+                await getUser.save();
+            } else
+                return makeSuccessResponse(
+                    res,
+                    StatusCodes.INTERNAL_SERVER_ERROR,
+                    {
+                        message: `You don't have enought coin`,
+                    },
+                );
+        } else throw Error('User not found');
+
         if (
             await addToStorage(req.userData.id, req.params.id, RIGHT_TYPE.class)
         ) {
+            const teacher = await getTeacherOfClass(req.params.id);
+            teacher.coin += 1;
+            await teacher.save();
+
+            const newNoti = new notis({
+                id: Number((await findMaxIdNoti()) + 1),
+                to: teacher.id,
+                from: 0,
+                content: `"${getUser.userName}" signed up for you class!, 1 coin added`,
+            });
+            await newNoti.save();
+
+            let receiverSocketId = getReceiverSocketId(teacher.id);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit('newNoti', {
+                    ...newNoti._doc,
+                    to: undefined,
+                    from: 'System',
+                });
+            }
+
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: 'Student has been signed up for the class',
             });
@@ -389,6 +429,11 @@ const studentSignout = async (req, res, next) => {
     }
     try {
         const getClass = await classes.findOne({ id: req.params.id });
+        const getUser = await users.findOne({ id: req.userData.id });
+        if (getUser && getUser instanceof users) {
+            getUser.coin += 10;
+            await getUser.save();
+        } else throw Error('User not found');
 
         if (getClass && getClass instanceof classes) {
             await deleteFromStorageStudent(

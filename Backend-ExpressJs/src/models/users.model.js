@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import users from './users.mongo.js';
 import bcrypt from 'bcryptjs';
+import { ROLES } from '../utils/Constants.js';
 
 const __dirname = path.resolve();
 const findMaxId = async () => {
@@ -30,7 +31,9 @@ const saveUser = async (user) => {
                 ? user.birthDate
                 : getUser.birthDate;
             getUser.avatar = user?.avatar ? user.avatar : getUser.avatar;
-            getUser.description = user?.description ? user.description : getUser.description;
+            getUser.description = user?.description
+                ? user.description
+                : getUser.description;
             getUser.role = user?.role ? user.role : getUser.role;
             getUser.status = user?.status ? user.status : getUser.status;
 
@@ -47,6 +50,7 @@ const saveUser = async (user) => {
                 birthDate: user?.birthDate ? user.birthDate : null,
                 description: user?.description ? user.description : null,
                 avatar: user?.avatar ? user.avatar : null,
+                coin: user?.role ? 113 : 30,
             });
             if (getUser && getUser instanceof user) return getUser._doc;
             throw new Error('Unable to create new User');
