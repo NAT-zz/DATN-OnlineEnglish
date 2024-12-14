@@ -5,7 +5,14 @@ import { makeSuccessResponse } from '../../utils/Response.js';
 const uploadFile = async (req, res, next) => {
     try {
         if (req.file) {
-            const fileUrl = await streamUpload(req.file, 'file');
+            const { mimetype } = req.file;
+            let fileType = mimetype.split('/')[0].trim();
+            if (fileType === 'application') fileType = 'raw';
+            else if (fileType !== 'image' && fileType !== 'video')
+                fileType = 'auto';
+            console.log(fileType);
+
+            const fileUrl = await streamUpload(fileType, req.file, 'file');
 
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: 'File uploaded',

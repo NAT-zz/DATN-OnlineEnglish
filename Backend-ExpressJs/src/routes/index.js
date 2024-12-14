@@ -26,6 +26,8 @@ import {
     deleteUser,
 } from '../app/controllers/User.controller.js';
 
+import { fileUploadExt, uploadFileExt } from '../services/fileUpload.js';
+
 const storage = multer.memoryStorage();
 const fileUpload = multer({ storage });
 
@@ -92,6 +94,7 @@ function route(app) {
 
     //file upload
     app.post('/api/upload', fileUpload.single('file'), uploadFile);
+    app.post('/api/upload-ext', fileUploadExt.single('file'), uploadFileExt);
 
     app.use('/api/user', userRoute);
     app.use('/api/class', classRoute);
