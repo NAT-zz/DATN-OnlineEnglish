@@ -183,7 +183,7 @@ const loginUser = async (req, res) => {
             });
         } else if (!bcrypt.compareSync(reqPasword, getUser.passWord)) {
             return makeSuccessResponse(res, StatusCodes.NOT_FOUND, {
-                message: 'Check you credentials and try again',
+                message: 'Check your credentials and try again',
             });
         } else {
             const accessToken = generateTokenAndSetCookie(res, {

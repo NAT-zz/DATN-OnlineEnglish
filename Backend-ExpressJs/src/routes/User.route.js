@@ -26,13 +26,13 @@ const fileUpload = multer();
 
 // auth
 router.get('/check-auth', verifyToken, checkAuth);
+router.post('/login', loginUser);
 router.post('/register', registerUser);
 router.get('/verify-email/:email/:token', verifyAccount);
-router.post('/login', loginUser);
+router.post('/resend', resendLink);
+router.post('/logout', verifyToken, logoutUser);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
-router.post('/logout', verifyToken, logoutUser);
-router.post('/resend', resendLink);
 
 // profile
 router.post(

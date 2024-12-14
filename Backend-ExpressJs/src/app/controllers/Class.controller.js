@@ -319,7 +319,7 @@ const createClass = async (req, res) => {
             });
 
             if (!(newClass && newClass instanceof classes))
-                throw new Error('Unable to create new Lesson!');
+                throw new Error('Unable to create new Class!');
 
             await addToStorage(req.userData.id, newClass.id, RIGHT_TYPE.class);
             return makeSuccessResponse(res, StatusCodes.OK, {

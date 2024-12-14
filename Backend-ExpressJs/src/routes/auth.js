@@ -44,7 +44,7 @@ const verifyToken = async (req, res, next) => {
 
         next();
     } catch (error) {
-        console.log('Error is verifying token: ', error);
+        console.log('Error in verifying token: ', error);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error',
         });

@@ -94,15 +94,14 @@ function route(app) {
     app.post('/api/upload', fileUpload.single('file'), uploadFile);
 
     app.use('/api/user', userRoute);
+    app.use('/api/class', classRoute);
+    app.use('/api/dailytask', dailyRoute);
+    app.use('/api/ai', aiRoute);
+
     app.use('/api/question', questionRoute);
     app.use('/api/task', taskRoute);
     app.use('/api/lesson', lessonRoute);
     app.use('/api/test', testRoute);
-    app.use('/api/class', classRoute);
-
-    app.use('/api/dailytask', dailyRoute);
-
-    app.use('/api/ai', aiRoute);
 }
 
 export default route;
