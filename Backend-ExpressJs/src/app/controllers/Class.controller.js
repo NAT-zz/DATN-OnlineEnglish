@@ -111,16 +111,25 @@ const getDetail = async (req, res) => {
             });
         } else {
             const getOne = await classes.findOne({ id });
+            const currentDate = new Date();
             if (getOne && getOne instanceof classes) {
                 let listLesson = [];
                 let listTest = [];
                 for (const id of getOne.lessons) {
-                    let getLesson = await lessons.findOne({ id }, '-r -__v');
-                    listLesson.push(getLesson._doc);
+                    let getLesson = await lessons.findOne(
+                        { id, publicDate: { $lt: currentDate } },
+                        '-r -__v',
+                    );
+                    if (getLesson && getLesson instanceof lessons)
+                        listLesson.push(getLesson._doc);
                 }
                 for (const id of getOne.tests) {
-                    let getTest = await tests.findOne({ id }, '-r -__v');
-                    listTest.push(getTest._doc);
+                    let getTest = await tests.findOne(
+                        { id, publicDate: { $lt: currentDate } },
+                        '-r -__v',
+                    );
+                    if (getTest && getTest instanceof tests)
+                        listTest.push(getTest._doc);
                 }
 
                 // get teacher
