@@ -3,6 +3,7 @@ import { findMaxId } from '../../models/lessons.model.js';
 import lessons from '../../models/lessons.mongo.js';
 import questions from '../../models/questions.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
+import classes from '../../models/classes.mongo.js';
 import { LESSON_TYPE, RIGHT_TYPE, ROLES } from '../../utils/Constants.js';
 import { makeSuccessResponse } from '../../utils/Response.js';
 import {
@@ -219,6 +220,15 @@ const createLesson = async (req, res) => {
                 newLesson.id,
                 RIGHT_TYPE.lesson,
             );
+            console.log(req.body);
+            if (req.body?.classId) {
+                const getClass = await classes.findOne({
+                    id: req.body.classId,
+                });
+
+                getClass.lessons.push(newLesson.id);
+                await getClass.save();
+            }
 
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: 'Lesson created',

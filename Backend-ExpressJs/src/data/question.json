@@ -69,5 +69,50 @@
         ],
         "key": "archaeologists",
         "questionType": "FILL"
+    },
+    "12": {
+        "sentence": "What is the position of this sheep?",
+        "answers": [
+            "On",
+            "In",
+            "At",
+            "Behind"
+        ],
+        "key": "On",
+        "questionType": "SELECT",
+        "media": {
+            "type": "image",
+            "link": "https://res.cloudinary.com/natscloud/image/upload/v1734256854/file/file_ivgdxf.png"
+        }
+    },
+    "13": {
+        "sentence": "What does the man say ?",
+        "answers": [
+            "The status look so heavy dont they?",
+            "This place is nice",
+            "The museum was over there",
+            "Where is Carl ?"
+        ],
+        "key": "The status look so heavy dont they?",
+        "questionType": "SELECT",
+        "media": {
+            "type": "audio",
+            "link": "https://res.cloudinary.com/natscloud/video/upload/v1734257137/file/file_majgkh.mp3"
+        }
+    },
+    "14": {
+        "sentence": "What is the man's name ?",
+        "answers": [
+            "Henry Brown",
+            "Henry Blue",
+            "Henry Green",
+            "Henry Cavill"
+        ],
+        "key": "Henry Green",
+        "questionType": "SELECT",
+        "media": {
+            "type": "video",
+            "link": "https://player.cloudinary.com/embed/?public_id=file%2Ffile_xkvual&cloud_name=natscloud&profile=cld-default"
+        }
     }
 }

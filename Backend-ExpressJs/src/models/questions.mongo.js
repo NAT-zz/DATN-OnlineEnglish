@@ -26,7 +26,7 @@ const questionsSchema = new mongoose.Schema({
         default: QUESTION_TYPE.SELECT,
     },
     media: {
-        type: String,
+        type: Object,
         required: false,
     },
 });

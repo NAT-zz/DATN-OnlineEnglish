@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import tests from '../../models/tests.mongo.js';
 import tasks from '../../models/tasks.mongo.js';
 import questions from '../../models/questions.mongo.js';
+import classes from '../../models/classes.mongo.js';
 import { findMaxId, saveTest } from '../../models/tests.model.js';
 import {
     addToStorage,
@@ -169,6 +170,15 @@ const createTest = async (req, res) => {
                 throw new Error('Unable to create new Test!');
 
             await addToStorage(req.userData.id, newTest.id, RIGHT_TYPE.test);
+
+            if (req.body?.classId) {
+                const getClass = await classes.findOne({
+                    id: req.body.classId,
+                });
+
+                getClass.tests.push(newTest.id);
+                await getClass.save();
+            }
 
             return makeSuccessResponse(res, StatusCodes.OK, {
                 message: 'Test created',

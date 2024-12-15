@@ -126,7 +126,7 @@ const createQuestion = async (req, res) => {
                 key: question.key,
                 answers: question.answers,
                 questionType: question?.questionType,
-                media: question.media,
+                media: question?.media,
             });
             if (!(newQuestion && newQuestion instanceof questions))
                 throw new Error('Unable to create new Question!');

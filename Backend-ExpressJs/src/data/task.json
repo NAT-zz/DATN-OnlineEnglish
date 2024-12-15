@@ -19,5 +19,11 @@
         "topic": "Thoughts",
         "questions": [],
         "taskType": "ESSAY"
+    },
+    "5": {
+        "task": "Choose the answer closet to the context",
+        "topic": "Multi media",
+        "questions": [12, 13, 14],
+        "taskType": "MULTIPLE_CHOICE"
     }
 }
