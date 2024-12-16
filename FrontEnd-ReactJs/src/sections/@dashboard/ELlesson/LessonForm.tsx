@@ -1,13 +1,16 @@
+/* eslint-disable react/no-unknown-property */
+/* eslint-disable jsx-a11y/iframe-has-title */
+/* eslint-disable jsx-a11y/media-has-caption */
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 // @mui
 import { LoadingButton } from '@mui/lab';
 import { Grid, Card, Stack, Button, Typography, MenuItem, Box, Chip } from '@mui/material';
-import { createLesson, createTask } from 'src/api/useQuestion';
+import { createLesson, createTask, getMyClass } from 'src/api/useQuestion';
 import { GridEventListener } from '@mui/x-data-grid';
 import RHFDatePicker from 'src/components/hook-form/RHFDatePicker';
 import Editor from 'src/components/editor';
@@ -28,7 +31,7 @@ export type ILessonList = {
   topic: string;
   content: string;
   tasks: number[];
-  type: string;
+  type: 'LESSON' | 'TASKS';
   publicDate: Date;
   taskEndDate: Date;
 };
@@ -36,7 +39,7 @@ const dataLesson: ILessonList = {
   topic: '',
   content: '',
   tasks: [],
-  type: '',
+  type: 'LESSON',
   publicDate: new Date(),
   taskEndDate: new Date(),
 };
@@ -84,6 +87,13 @@ export default function QuestionForm() {
       });
     }
   };
+  const [myClass, setMyClass] = useState<[]>([]);
+
+  useEffect(() => {
+    getMyClass().then((value) => {
+      setMyClass(value.data);
+    });
+  }, []);
 
   const onEditContent = (dataEditor: string) => {
     setValue('content', dataEditor);
@@ -141,10 +151,44 @@ export default function QuestionForm() {
     return result.data;
   };
 
+  const uploadFile = async (file: File) => {
+    const data = new FormData();
+    data.append('file', file);
+    const config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: '/api/upload-ext',
+      data,
+    };
+
+    const result = await axiosInstance.request(config);
+    return result.data;
+  };
+
+  const uploadVideo = async (file: File) => {
+    const data = new FormData();
+    data.append('file', file);
+    const config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: '/api/upload',
+      data,
+    };
+
+    const result = await axiosInstance.request(config);
+    // https://res.cloudinary.com/natscloud/video/upload/v1734172224/file/file_xxjvcu.avi
+    // https://player.cloudinary.com/embed/?public_id=file%2Ffile_xxjvcu&cloud_name=natscloud&profile=cld-default
+
+    const filenameWithExt = result.data.split('/').pop();
+    const fileName = filenameWithExt.split('.')[0];
+
+    return `https://player.cloudinary.com/embed/?public_id=file%2F${fileName}&cloud_name=natscloud&profile=cld-default`;
+  };
+
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={8} marginTop={-3}>
           <Card sx={{ p: 3, my: 3 }}>
             <Stack spacing={3}>
               <RHFTextField name="topic" label="Enter topic" />
@@ -153,6 +197,9 @@ export default function QuestionForm() {
                 simple
                 value={valueEditor}
                 imageHandler={uploadImage}
+                videoHandler={uploadVideo}
+                audioHandler={uploadImage}
+                fileHandler={uploadFile}
               />
               <RHFDatePicker name="publicDate" label="Enter public date" />
               <RHFDatePicker name="taskEndDate" label="Enter task end date" />
@@ -168,6 +215,18 @@ export default function QuestionForm() {
                 {['LESSON', 'TASKS'].map((option) => (
                   <MenuItem key={option} value={option}>
                     {option}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
+            </Stack>
+          </Card>
+
+          <Card sx={{ p: 3, mt: 2 }} >
+            <Stack spacing={3}>
+              <RHFSelect fullWidth name="classId" label="Add to Class" InputLabelProps={{ shrink: true }}>
+                {myClass.map((option: any) => (
+                  <MenuItem key={option} value={option.id}>
+                    {option.name}
                   </MenuItem>
                 ))}
               </RHFSelect>

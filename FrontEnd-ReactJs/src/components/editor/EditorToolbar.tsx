@@ -93,8 +93,17 @@ export default function EditorToolbar({ id, isSimple, ...other }: EditorToolbarP
         <div className="ql-formats">
           <button type="button" className="ql-link" />
           <button type="button" className="ql-image" />
-          {/* <button type="button" className="ql-video" /> */}
+          <button type="button" className="ql-video" />
+          <button type="button" className="ql-audio">
+            🎵
+          </button>
+          <button type="button" className="ql-file">
+            📎
+          </button>
         </div>
+
+        {/* <div className="ql-formats">
+        </div> */}
 
         {/* <div className="ql-formats">
           {!isSimple && <button type="button" className="ql-formula" />}

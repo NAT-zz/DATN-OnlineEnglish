@@ -1,5 +1,5 @@
 import { Alert, AlertTitle, Box, Card, Link, Popover, Stack, Typography } from '@mui/material';
-import { FC, useEffect, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 import { getClassDetail } from 'src/api/useQuestion';
 import { fileThumb } from 'src/components/file-thumbnail';
 import Label from 'src/components/label';
@@ -11,14 +11,16 @@ import CircularProgressWithLabel from 'src/components/CirclearWithValueLabel';
 type IPropsClass = {
   idClass: string;
   nameClass: string;
+  setEndDate: Dispatch<SetStateAction<string>>;
 };
-const DetailClass: FC<IPropsClass> = ({ idClass, nameClass }) => {
+const DetailClass: FC<IPropsClass> = ({ idClass, nameClass, setEndDate }) => {
   const [listTest, setListTest] = useState([]);
   const [listLession, setListLession] = useState([]);
   const [record, setRecord] = useState({} as any);
 
   useEffect(() => {
     getClassDetail(idClass).then((value) => {
+      setEndDate(value.data?.endDate);
       if (value?.data?.lessons) {
         setListLession(value.data.lessons);
       }
@@ -30,7 +32,7 @@ const DetailClass: FC<IPropsClass> = ({ idClass, nameClass }) => {
         setRecord(value.data.record);
       }
     });
-  }, [idClass]);
+  }, [idClass, setEndDate]);
 
   const listLessionClass = () => (
     <Box>
@@ -49,26 +51,36 @@ const DetailClass: FC<IPropsClass> = ({ idClass, nameClass }) => {
         </Typography>
       </Box>
 
-      <Stack flexDirection="row" gap={3}>
+      <Stack
+        flexDirection="row"
+        gap={3}
+        flexWrap="wrap"
+        justifyContent="flex-start"
+        sx={{ width: '100%' }}
+      >
         {listLession.map((e: any) => (
           <Link
             component={RouterLink}
             to={`${PATH_STUDENT.class.listMyClass}/${idClass}/${nameClass}/${e?.id}/`}
             underline="none"
+            style={{ textDecoration: 'none', width: 'calc(25% - 24px)' }}
           >
             <Card
               sx={{
                 p: 2.5,
-                minWidth: 250,
+                // minWidth: '225', // Adjust width to 25% minus gap
+                // maxWidth: '225', // Adjust width to 25% minus gap
+                width: '225',
                 boxShadow: (theme) => theme.customShadows.z20,
                 bgcolor: 'background.default',
                 border: (theme) => `solid 1px ${theme.palette.divider}`,
+                flexGrow: 1,
               }}
             >
               <Stack flexDirection="row" alignItems="center">
                 <Box
                   component="img"
-                  src={fileThumb('folder')}
+                  src={fileThumb('doc')}
                   sx={{
                     width: 32,
                     height: 32,
@@ -103,17 +115,24 @@ const DetailClass: FC<IPropsClass> = ({ idClass, nameClass }) => {
           Tests
         </Typography>
       </Box>
-      <Stack flexDirection="row" gap={3}>
+      <Stack
+        flexDirection="row"
+        gap={3}
+        flexWrap="wrap"
+        justifyContent="flex-start"
+        sx={{ width: '100%' }}
+      >
         {listTest.map((e: any) => (
           <Link
             component={RouterLink}
             to={`${PATH_STUDENT.class.listMyClass}/${idClass}/${nameClass}/test/${e?.id}/`}
             underline="none"
+            style={{ textDecoration: 'none', width: 'calc(25% - 24px)' }}
           >
             <Card
               sx={{
                 p: 2.5,
-                minWidth: 250,
+                width: '225',
                 boxShadow: (theme) => theme.customShadows.z20,
                 bgcolor: 'background.default',
                 border: (theme) => `solid 1px ${theme.palette.divider}`,
@@ -122,7 +141,7 @@ const DetailClass: FC<IPropsClass> = ({ idClass, nameClass }) => {
               <Stack flexDirection="row" alignItems="center">
                 <Box
                   component="img"
-                  src={fileThumb('folder')}
+                  src={fileThumb('zip')}
                   sx={{
                     width: 32,
                     height: 32,

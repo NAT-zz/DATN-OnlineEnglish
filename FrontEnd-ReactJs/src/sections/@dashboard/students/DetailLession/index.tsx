@@ -1,9 +1,10 @@
 /* eslint-disable react/no-danger */
-import { Box, Card, Typography } from '@mui/material';
+import { Box, Card, Stack, Typography } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
 import { getLessionDetail } from 'src/api/useQuestion';
 import Scrollbar from 'src/components/scrollbar';
 import Label from 'src/components/label';
+import { fToNow } from 'src/utils/formatTime';
 import { LessionDetail, Task } from './types';
 import DialogExcercise from './DialogExcercise';
 
@@ -20,6 +21,12 @@ const DetailLession: FC<IPropsLession> = ({ idLession }) => {
     });
   }, [idLession]);
   console.log(lessionDetail?.result);
+
+  let available = true;
+  const fromNow = fToNow(lessionDetail?.taskEndDate as unknown as Date);
+  if (fromNow.includes('ago')) {
+    available = false;
+  }
 
   return (
     <Box>
@@ -39,12 +46,23 @@ const DetailLession: FC<IPropsLession> = ({ idLession }) => {
           <div dangerouslySetInnerHTML={{ __html: lessionDetail?.content || '<p>' }} />
         </Scrollbar>
       </Card>
-      <Typography variant="h6">Exercises</Typography>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ width: '100%' }}
+      >
+        <Typography variant="h6">Exercises</Typography>
+        <Typography variant="h6">
+          End {fToNow(lessionDetail?.taskEndDate as unknown as Date)}
+        </Typography>
+      </Stack>
       {lessionDetail && lessionDetail?.tasks.length > 0 ? (
         <DialogExcercise
           lessonId={lessionDetail?.id as number}
           result={lessionDetail?.result as any}
           tasks={lessionDetail?.tasks as Task[]}
+          available={available}
         />
       ) : (
         <Label>No Exercises</Label>

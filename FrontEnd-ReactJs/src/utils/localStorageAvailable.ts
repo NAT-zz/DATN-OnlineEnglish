@@ -15,3 +15,15 @@ export default function localStorageAvailable() {
     return false;
   }
 }
+
+export function isDoingTest(doling: Boolean) {
+  try {
+    if (doling) {
+      window.localStorage.setItem('isDoing', '1');
+    } else window.localStorage.removeItem('isDoing');
+
+    return true;
+  } catch (err) {
+    return false;
+  }
+}

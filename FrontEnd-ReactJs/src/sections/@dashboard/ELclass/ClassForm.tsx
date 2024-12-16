@@ -161,7 +161,7 @@ export default function QuestionForm() {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={8} marginTop={-3}>
           <Card sx={{ p: 3, my: 3 }}>
             <Stack spacing={3}>
               <RHFTextField name="name" label="Enter name" />
@@ -174,17 +174,35 @@ export default function QuestionForm() {
           {renderTestLesson()}
         </Grid>
 
-        <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
-          <LoadingButton
-            fullWidth
-            type="submit"
-            variant="contained"
-            size="large"
-            loading={isSubmitting}
-          >
-            Create Class
-          </LoadingButton>
-        </Stack>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 3 }}>
+            <Stack spacing={3}>
+              <RHFSelect
+                fullWidth
+                name="level"
+                label="Select Level"
+                InputLabelProps={{ shrink: true }}
+              >
+                {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((option: any) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
+            </Stack>
+          </Card>
+          <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
+            <LoadingButton
+              fullWidth
+              type="submit"
+              variant="contained"
+              size="large"
+              loading={isSubmitting}
+            >
+              Create Class
+            </LoadingButton>
+          </Stack>
+        </Grid>
       </Grid>
     </FormProvider>
   );

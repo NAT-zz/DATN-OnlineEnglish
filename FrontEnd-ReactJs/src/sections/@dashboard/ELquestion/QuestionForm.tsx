@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
@@ -17,11 +17,14 @@ import {
   FormControlLabel,
   Box,
   MenuItem,
+  IconButton,
+  Link,
 } from '@mui/material';
 import { createQuestion } from 'src/api/useQuestion';
 import Iconify from 'src/components/iconify/Iconify';
 import { IconButtonAnimate } from 'src/components/animate';
 // routes
+import axiosInstance from 'src/utils/axios';
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // components
 import { useSnackbar } from '../../../components/snackbar';
@@ -60,7 +63,10 @@ export type IQuestionList = {
   questionType: 'SELECT' | 'FILL' | 'LISTEN';
   key: string;
   answers: string[];
-  media?: string;
+  media?: {
+    type: string;
+    link: string;
+  };
   answer_0?: string;
   answer_1?: string;
   answer_2?: string;
@@ -115,6 +121,11 @@ export default function QuestionForm() {
       delete data.answer_1;
       delete data.answer_2;
       delete data.answer_3;
+
+      data.media = {
+        type: mediaType,
+        link: mediaLink,
+      };
       await createQuestion(data);
       enqueueSnackbar('Create success!');
       navigate(PATH_DASHBOARD.question.list);
@@ -139,6 +150,10 @@ export default function QuestionForm() {
   const onAddQuestion = async () => {
     try {
       const newData = value;
+      newData.media = {
+        type: mediaType,
+        link: mediaLink,
+      };
       console.log(newData);
       newData.answers = [
         newData.answer_0 || '',
@@ -156,7 +171,7 @@ export default function QuestionForm() {
       enqueueSnackbar('Create success!');
       setTimeout(() => {
         navigate(0);
-      },500);
+      }, 500);
     } catch (error) {
       enqueueSnackbar(error.message || JSON.stringify(error), {
         variant: 'error',
@@ -197,13 +212,100 @@ export default function QuestionForm() {
     </Card>
   );
 
+  const [mediaLink, setMediaLink] = useState('');
+  const [mediaType, setMediaType] = useState('');
+
+  const uploadImage = async (file: File) => {
+    const data = new FormData();
+    data.append('file', file);
+    const config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: '/api/upload',
+      data,
+    };
+
+    const result = await axiosInstance.request(config);
+    return result.data;
+  };
+
+  const uploadImageHandler = useCallback(async (type: string) => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/jpeg,image/jpg');
+    input.click();
+    input.onchange = async () => {
+      const file: any = input && input.files ? input.files[0] : null;
+      const link = await uploadImage(file);
+      setMediaLink(link);
+      setMediaType(type);
+      console.log('link', link);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const uploadVideo = async (file: File) => {
+    const data = new FormData();
+    data.append('file', file);
+    const config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: '/api/upload',
+      data,
+    };
+
+    const result = await axiosInstance.request(config);
+    const filenameWithExt = result.data.split('/').pop();
+    const fileName = filenameWithExt.split('.')[0];
+
+    return `https://player.cloudinary.com/embed/?public_id=file%2F${fileName}&cloud_name=natscloud&profile=cld-default`;
+  };
+
+  const uploadVideoHandler = useCallback(async () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'video/mp4,video/webm');
+    input.click();
+    input.onchange = async () => {
+      const file: any = input && input.files ? input.files[0] : null;
+      const link = await uploadVideo(file);
+      setMediaLink(link);
+      setMediaType('video');
+      console.log('link', link);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const renderMediaType = () => (
+    <Stack direction="row" spacing={0}>
+      <IconButton onClick={(e) => uploadImageHandler('image')}>
+        <Iconify icon="formkit:fileimage" />
+      </IconButton>
+      <IconButton onClick={(e) => uploadImageHandler('audio')}>
+        <Iconify icon="formkit:fileaudio" />
+      </IconButton>
+      <IconButton onClick={uploadVideoHandler}>
+        <Iconify icon="formkit:filevideo" />
+      </IconButton>
+
+      {mediaLink && (
+        <Typography marginTop="10px">
+          <Link href={`${mediaLink}`} target="_blank" rel="noopener noreferrer">
+            Preview
+          </Link>
+        </Typography>
+      )}
+    </Stack>
+  );
+
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={8} marginTop={-3}>
           <Card sx={{ p: 3, my: 3 }}>
             <Stack spacing={3}>
               <RHFTextField name="sentence" label="Enter sentence" />
+              {renderMediaType()}
             </Stack>
           </Card>
           {renderListAnswer()}

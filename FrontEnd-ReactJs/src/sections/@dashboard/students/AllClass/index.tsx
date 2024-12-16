@@ -1,6 +1,6 @@
 /* eslint-disable no-unsafe-optional-chaining */
 import { useEffect, useState } from 'react';
-import { Avatar, Box, Card, Divider, Typography } from '@mui/material';
+import { Avatar, Box, Card, Divider, Stack, Typography } from '@mui/material';
 import SvgColor from 'src/components/svg-color';
 import { alpha, styled } from '@mui/system';
 import Image from 'src/components/image';
@@ -12,6 +12,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import { GridExpandMoreIcon } from '@mui/x-data-grid';
+import Iconify from 'src/components/iconify';
 
 const StyledOverlay = styled('div')(({ theme }) => ({
   top: 0,
@@ -33,6 +34,7 @@ type IPropsLession = {
   endDate: '2024-12-07T10:18:33.003Z';
   __v: 2;
   teacher: {
+    coin: 100;
     _id: '672c93f4293f4dc8d75c143b';
     userName: 'Nguyen Tuan';
     avatar: null;
@@ -202,9 +204,33 @@ const AllClass = () => {
 
                   <Divider sx={{ borderStyle: 'dashed' }} />
 
-                  <Typography variant="subtitle1" sx={{ mt: 1, mb: 0.5 }}>
-                    {classReg.teacher.userName}
-                  </Typography>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{
+                      width: '50%', // Reduce the width to bring the items closer to the center
+                      margin: '0 auto', // Center the Stack itself within its container
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ mt: 1, mb: 0.5 }}>
+                      {classReg.teacher.userName}
+                    </Typography>
+
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <Iconify icon="line-md:account-add" width={22} color="text.secondary" />
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                        {classReg.teacher.coin}
+                      </Typography>
+                    </Box>
+                  </Stack>
+
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     {classReg.teacher.description}
                   </Typography>

@@ -30,7 +30,7 @@ export const AUTH0_API = {
 export const MAP_API = process.env.REACT_APP_MAPBOX_API;
 
 // ROOT PATH AFTER LOGIN SUCCESSFUL
-export const PATH_AFTER_LOGIN = PATH_DASHBOARD.user.list; // as '/dashboard/app'
+export const PATH_AFTER_LOGIN = PATH_DASHBOARD.studentManager.root // as '/dashboard/app'
 export const PATH_STUDENT_AFTER_LOGIN = PATH_STUDENT.class.listMyClass; // as '/student/list-my-class'
 
 // LAYOUT

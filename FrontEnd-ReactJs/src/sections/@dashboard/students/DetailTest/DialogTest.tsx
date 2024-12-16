@@ -13,12 +13,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Stack } from '@mui/system';
 import { LoadingButton } from '@mui/lab';
 import { submitTest } from 'src/api/useQuestion';
 import useCountdown from 'src/hooks/useCountdown';
 import { useSnackbar } from 'notistack';
+import { isDoingTest } from 'src/utils/localStorageAvailable';
 import { Question, Task } from './types';
 
 export type IAnswer = {
@@ -39,11 +40,13 @@ const DialogTest = ({
   result,
   tasks,
   time,
+  available,
 }: {
   testId: number;
   result: any;
   tasks: Task[];
   time: number;
+  available: boolean;
 }) => {
   const isEmptyResult = () => {
     if (result === undefined) return true;
@@ -84,6 +87,7 @@ const DialogTest = ({
     v.setMinutes(d.getMinutes() + timer);
     setTimeCountDown((prev) => {
       setIsReady(true);
+      isDoingTest(true);
       return v;
     });
   };
@@ -197,6 +201,7 @@ const DialogTest = ({
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
+      isDoingTest(false);
       if (tasks) {
         if (contentEssay.current.idEssayTask !== -1) {
           if (contentEssay.current.content === '') {
@@ -227,8 +232,33 @@ const DialogTest = ({
       });
     } finally {
       setSubmitting(false);
+      isDoingTest(false);
     }
   };
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isReady) {
+        event.preventDefault();
+        event.returnValue = ''; // Show the browser's default confirmation dialog.
+      }
+    };
+
+    const handleUnload = () => {
+      if (isReady) {
+        handleSubmit();
+        console.log('User choose leave');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('unload', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('unload', handleUnload);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady]);
 
   return (
     <Box
@@ -308,6 +338,7 @@ const DialogTest = ({
                   variant="contained"
                   color="warning"
                   onClick={startTest}
+                  disabled={!available}
                 >
                   Are you ready?
                 </Button>

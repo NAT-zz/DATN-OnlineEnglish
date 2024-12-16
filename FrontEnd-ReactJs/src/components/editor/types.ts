@@ -12,4 +12,7 @@ export interface EditorProps extends ReactQuillProps {
   helperText?: React.ReactNode;
   sx?: SxProps<Theme>;
   imageHandler?: (file: File) => Promise<string>;
+  videoHandler?: (file: File) => Promise<string>;
+  audioHandler?: (file: File) => Promise<string>;
+  fileHandler?: (file: File) => Promise<string>;
 }

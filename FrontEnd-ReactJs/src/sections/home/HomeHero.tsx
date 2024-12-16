@@ -153,7 +153,7 @@ function Description() {
             repeat: Infinity,
           }}
         >
-          AI
+          English Space
         </StyledGradientText>
       </m.div>
 

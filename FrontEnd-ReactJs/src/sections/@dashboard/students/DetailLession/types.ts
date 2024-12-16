@@ -1,3 +1,5 @@
+import { SplitPathString } from "react-hook-form/dist/types/path/common";
+
 interface LessionDetail {
   _id: string;
   id: number;
@@ -26,6 +28,10 @@ interface Question {
   answers: string[];
   key: string;
   questionType: string;
+  media?: {
+    type: string;
+    link: string;
+  }
 }
 
 export type { LessionDetail, Task, Question };

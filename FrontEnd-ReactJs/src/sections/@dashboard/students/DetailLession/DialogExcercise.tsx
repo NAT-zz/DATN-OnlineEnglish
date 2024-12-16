@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-redeclare */
+/* eslint-disable jsx-a11y/iframe-has-title */
+/* eslint-disable jsx-a11y/media-has-caption */
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-return-assign */
 import {
@@ -7,6 +10,7 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
+  IconButton,
   Radio,
   RadioGroup,
   TextField,
@@ -18,6 +22,7 @@ import { LoadingButton } from '@mui/lab';
 import { submitLesson } from 'src/api/useQuestion';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'notistack';
+import Image from 'src/components/image';
 import { Question, Task } from './types';
 
 export type IAnswer = {
@@ -39,10 +44,12 @@ const DialogExcercise = ({
   lessonId,
   result,
   tasks,
+  available,
 }: {
   lessonId: number;
   result: any;
   tasks: Task[];
+  available: boolean;
 }) => {
   const isEmptyResult = () => {
     if (result === undefined) return true;
@@ -92,12 +99,69 @@ const DialogExcercise = ({
     listAnw.current = listTmp;
   };
 
+  const renderMedia = (type: string, link: string) => {
+    if (type === 'video') {
+      return (
+        <Box
+          sx={{
+            display: 'flex', // Enables flexbox
+            justifyContent: 'center', // Centers image horizontally
+            alignItems: 'center', // Centers image vertically
+            width: '100%',
+            height: '50vh',
+            position: 'relative',
+          }}
+        >
+          <iframe
+            src={`${link}`}
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            allowFullScreen
+            width="40%"
+            height="100%"
+          />
+        </Box>
+      );
+    }
+    if (type === 'audio') {
+      return (
+        <Box sx={{ position: 'relative', width: '100%', height: 'auto' }}>
+          <audio controls style={{ width: '100%' }}>
+            <source src={`${link}`} type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
+        </Box>
+      );
+    }
+
+    return (
+      <Box
+        sx={{
+          display: 'flex', // Enables flexbox
+          justifyContent: 'center', // Centers image horizontally
+          alignItems: 'center', // Centers image vertically
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        <Image
+          src={`${link}`}
+          alt="Description of image"
+          sx={{
+            width: '40%',
+            height: 'auto', // Maintain aspect ratio
+          }}
+        />
+      </Box>
+    );
+  };
+
   const renderQuestion = (questItem: Question) => {
     const lsAws = questItem.answers;
 
     return isEmptyResult() ? (
       <FormControl key={questItem._id}>
         <FormLabel id="demo-row-radio-buttons-group-label">{questItem.sentence}</FormLabel>
+        {questItem.media && renderMedia(questItem.media.type, questItem.media.link)}
         <RadioGroup
           row
           onChange={(_e, val) => setAws(val, questItem.id, '')}
@@ -116,6 +180,8 @@ const DialogExcercise = ({
             <FormLabel id="demo-row-radio-buttons-group-label" sx={{ color: 'green' }}>
               {questItem.sentence}
             </FormLabel>
+            {questItem.media && renderMedia(questItem.media.type, questItem.media.link)}
+
             <RadioGroup
               row
               aria-labelledby="demo-row-radio-buttons-group-label"
@@ -135,6 +201,8 @@ const DialogExcercise = ({
             <FormLabel id="demo-row-radio-buttons-group-label" sx={{ color: 'red' }}>
               {questItem.sentence}
             </FormLabel>
+            {questItem.media && renderMedia(questItem.media.type, questItem.media.link)}
+
             <RadioGroup
               row
               aria-labelledby="demo-row-radio-buttons-group-label"
@@ -260,7 +328,13 @@ const DialogExcercise = ({
         }}
       >
         {isEmptyResult() ? (
-          <LoadingButton loading={submitting} variant="contained" autoFocus onClick={handleSubmit}>
+          <LoadingButton
+            loading={submitting}
+            variant="contained"
+            autoFocus
+            onClick={handleSubmit}
+            disabled={!available}
+          >
             Submit
           </LoadingButton>
         ) : (

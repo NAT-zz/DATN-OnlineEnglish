@@ -26,13 +26,13 @@ export type ITaskList = {
   task: string;
   questions: number[];
   topic: string;
-  taskType: string;
+  taskType: 'MULTIPLE_CHOICE' | 'ESSAY';
 };
 const dataTask: ITaskList = {
   task: '',
   questions: [],
   topic: '',
-  taskType: '',
+  taskType: 'MULTIPLE_CHOICE',
 };
 
 export default function QuestionForm() {
@@ -117,7 +117,7 @@ export default function QuestionForm() {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={8} marginTop={-3}>
           <Card sx={{ p: 3, my: 3 }}>
             <Stack spacing={3}>
               <RHFTextField name="task" label="Enter task" />
