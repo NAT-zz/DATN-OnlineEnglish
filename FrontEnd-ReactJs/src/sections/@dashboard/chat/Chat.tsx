@@ -14,6 +14,7 @@ import socketApp from 'socket.io-client';
 import { CloseIcon, NextIcon } from 'yet-another-react-lightbox/core';
 
 import _mock from 'src/_mock';
+import { HOST_API_KEY } from 'src/config-global';
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // components
 import { useSettingsContext } from '../../../components/settings';
@@ -96,7 +97,7 @@ export default function Chat() {
 
   useEffect(() => {
     if (currentStudent) {
-      initSocket('http://localhost:5001');
+      initSocket(HOST_API_KEY);
     }
   }, [currentStudent, initSocket]);
 

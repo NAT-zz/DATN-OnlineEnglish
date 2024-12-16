@@ -22,6 +22,7 @@ import { getNotis } from 'src/api/useQuestion';
 import _mock from 'src/_mock';
 import socketApp from 'socket.io-client';
 import { useAuthContext } from 'src/api/useAuthContext';
+import { HOST_API_KEY } from 'src/config-global';
 import { fToNow } from '../../../utils/formatTime';
 // _mock_
 import { _notifications } from '../../../_mock/arrays';
@@ -78,7 +79,7 @@ export default function NotificationsPopover() {
   );
 
   useEffect(() => {
-    initSocket('http://localhost:5001');
+    initSocket(HOST_API_KEY);
   }, [initSocket]);
 
   const handleOpenPopover = (event: React.MouseEvent<HTMLElement>) => {

@@ -6,6 +6,7 @@ import { useAuthContext } from 'src/api/useAuthContext';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import socketApp from 'socket.io-client';
 
+import { HOST_API_KEY } from 'src/config-global';
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // components
 import { useSettingsContext } from '../../../components/settings';
@@ -76,7 +77,7 @@ export default function Chat() {
   );
 
   useEffect(() => {
-    initSocket('http://localhost:5001');
+    initSocket(HOST_API_KEY);
   }, [initSocket]);
 
   const handleSendMessage = async (value: IChatAI) => {

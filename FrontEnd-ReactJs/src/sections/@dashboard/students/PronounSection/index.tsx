@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { IconButton, Button, Box } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'notistack';
+import { HOST_API_KEY } from 'src/config-global';
 
 const PronunciationPractice = ({ word }: { word: string }) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -51,7 +52,7 @@ const PronunciationPractice = ({ word }: { word: string }) => {
     const formData = new FormData();
     formData.append('audio', audioBlob, 'recording.mp3');
     try {
-      const response = await fetch(`http://localhost:5001/api/ai/analyze-voice?word=${word}`, {
+      const response = await fetch(`${HOST_API_KEY}/api/ai/analyze-voice?word=${word}`, {
         method: 'POST',
         body: formData,
       });
