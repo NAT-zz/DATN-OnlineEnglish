@@ -676,6 +676,12 @@ const createRoom = async (room) => {
                     enable_chat: true,
                     start_video_off: true,
                     start_audio_off: false,
+                    enable_prejoin_ui: true,
+
+                    enable_live_captions_ui: true,
+                    enable_transcription: `deepgram:${CONFIG.DEEPGRAM_API_KEY}`,
+                    // enable_recording: 'local',
+                    // enable_recording_ui: true,
                     lang: 'en',
                 },
             }),
@@ -692,11 +698,13 @@ const videoCallHandler = async (req, res) => {
         }
         const roomId = req.params.id;
         let room = await getRoom(roomId);
+        console.log(room);
 
         if (room.error) {
             const role = req?.userData?.role;
             if (role == ROLES.TEACHER) {
                 room = await createRoom(roomId);
+                console.log(room);
             } else {
                 return makeSuccessResponse(res, StatusCodes.UNAUTHORIZED, {
                     message: 'Room not found',
