@@ -80,7 +80,7 @@ export default function Footer() {
             repeat: Infinity,
           }}
         >
-          English Space
+          EL-Space
         </StyledGradientText>
         <Typography variant="caption" component="div">
           © All rights reserved

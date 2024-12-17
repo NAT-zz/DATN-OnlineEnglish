@@ -5,7 +5,12 @@ import { Link as RouterLink } from 'react-router-dom';
 import { styled, alpha, useTheme } from '@mui/material/styles';
 import { Button, Box, Link, Container, Typography, Stack, Grid, Rating } from '@mui/material';
 // routes
-import { PATH_AUTH, PATH_DASHBOARD, PATH_FIGMA_PREVIEW, PATH_FREE_VERSION } from '../../routes/paths';
+import {
+  PATH_AUTH,
+  PATH_DASHBOARD,
+  PATH_FIGMA_PREVIEW,
+  PATH_FREE_VERSION,
+} from '../../routes/paths';
 // hooks
 import useResponsive from '../../hooks/useResponsive';
 // utils
@@ -139,7 +144,7 @@ function Description() {
     <StyledDescription>
       <m.div variants={varFade().in}>
         <Typography variant="h2" sx={{ textAlign: 'center', color: 'common.white' }}>
-          Learn English <br/> with
+          Learn English <br /> with
         </Typography>
       </m.div>
 
@@ -152,14 +157,17 @@ function Description() {
             duration: 20,
             repeat: Infinity,
           }}
+          style={{
+            whiteSpace: 'nowrap', // Prevents wrapping to a new line
+          }}
         >
-          English Space
+          EL-Space
         </StyledGradientText>
       </m.div>
 
       <m.div variants={varFade().in}>
         <Typography variant="body2" sx={{ textAlign: 'center', color: 'common.white' }}>
-          Improve your skills through our high-quality courses and resources.
+          Improve your skills through our high-quality classes and resources.
         </Typography>
       </m.div>
 
@@ -175,7 +183,7 @@ function Description() {
               startIcon={<Iconify icon="eva:flash-fill" width={24} />}
               sx={{
                 bgcolor: 'common.black',
-                color: (theme) => (theme.palette.mode === 'light' ? 'common.white' : 'grey.800'),
+                color: (theme) => (theme.palette.mode === 'light' ? 'primary.main' : 'common.white'),
                 '&:hover': {
                   bgcolor: 'primary.main',
                 },
@@ -194,7 +202,7 @@ function Description() {
             href={PATH_AUTH.register}
             sx={{
               borderColor: 'primary.main',
-              color: (theme) => (theme.palette.mode === 'light' ? 'primary.main' : 'grey.800'),
+              color: (theme) => (theme.palette.mode === 'light' ? 'primary.main' : 'common.white'),
             }}
           >
             Register now

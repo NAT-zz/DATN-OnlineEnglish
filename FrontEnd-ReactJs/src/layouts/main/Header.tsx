@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { m } from 'framer-motion';
 // @mui
-import { Box, Button, AppBar, Toolbar, Container, Link, BoxProps } from '@mui/material';
+import { Box, Button, AppBar, Toolbar, Container, Link, BoxProps, Stack } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 // hooks
 import useOffSetTop from '../../hooks/useOffSetTop';
@@ -63,7 +63,15 @@ export default function Header() {
           }),
         }}
       >
-        <Container sx={{ height: 1, display: 'flex', alignItems: 'center' }}>
+        <Container
+          sx={{
+            height: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between', // Distributes children with space
+            // mx: '25px',
+          }}
+        >
           <StyledGradientText
             animate={{ backgroundPosition: '200% center' }}
             transition={{
@@ -72,16 +80,28 @@ export default function Header() {
               duration: 20,
               repeat: Infinity,
             }}
+            style={{
+              border: `2px solid ${theme.palette.primary.main}`, // You can change the color and size
+              borderRadius: '8px', // Optional: for rounded corners
+              padding: '2px 7px', // Adds some spacing inside the border
+              marginLeft: '-60px',
+            }}
           >
-            English Space
+            EL-Space
           </StyledGradientText>
 
           <Box sx={{ flexGrow: 1 }} />
-
           {isDesktop && <NavDesktop isOffset={isOffset} data={navConfig} />}
 
-          <Button variant="contained" rel="noopener" href={PATH_AUTH.login}>
-            Login now
+          <Button
+            variant="contained"
+            rel="noopener"
+            href={PATH_AUTH.login}
+            sx={{
+              marginRight: '-60px',
+            }}
+          >
+            Join now
           </Button>
 
           {!isDesktop && <NavMobile isOffset={isOffset} data={navConfig} />}

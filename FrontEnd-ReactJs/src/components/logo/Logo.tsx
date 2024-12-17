@@ -56,7 +56,7 @@ const Logo = forwardRef<HTMLDivElement, LogoProps>(
           repeat: Infinity,
         }}
       >
-        English Space
+        EL-Space
       </StyledGradientText>
     );
 

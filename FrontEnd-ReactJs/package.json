@@ -3,6 +3,7 @@
   "author": "Minimals UI",
   "version": "4.3.0",
   "description": "Cra & Typescript",
+  "homepage": "/",
   "private": true,
   "scripts": {
     "start": "react-scripts start",
