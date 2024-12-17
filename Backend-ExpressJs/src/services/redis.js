@@ -2,12 +2,18 @@ import redis from 'redis';
 import { CONFIG } from '../utils/Constants.js';
 
 // connect to redis
-const redisClient = redis.createClient({
-    socket: {
-        port: CONFIG.REDIS_PORT,
-        host: CONFIG.REDIS_HOST,
-    },
-});
+
+const redisClient =
+    process.env.NODE_ENV.trim() == 'production'
+        ? redis.createClient({
+              url: CONFIG.REDIS_URL,
+          })
+        : redis.createClient({
+              socket: {
+                  port: CONFIG.REDIS_PORT,
+                  host: CONFIG.REDIS_HOST,
+              },
+          });
 
 const redisConnect = async () => {
     redisClient.on('error', (err) => console.error('Redis client error:', err));

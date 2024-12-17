@@ -7,6 +7,7 @@ const CONFIG = {
     JWT_ACCESS_TIME: process.env.JWT_ACCESS_TIME,
     REDIS_PORT: process.env.REDIS_PORT,
     REDIS_HOST: process.env.REDIS_HOST,
+    REDIS_URL: process.env.REDIS_URL,
     DOMAIN_CLIENT: process.env.DOMAIN_CLIENT,
     DOMAIN_SERVER: process.env.DOMAIN_SERVER,
     CLOUDINARY_URL: process.env.CLOUDINARY_URL,
