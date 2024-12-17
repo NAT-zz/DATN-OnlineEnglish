@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_minimal_material_kit_react=self.webpackChunk_minimal_material_kit_react||[]).push([[2773],{22773:function(t,e,i){i.r(e),i.d(e,{default:function(){return l}});var n=i(65964),r=i(68867),a=i(46417);function l(){return(0,a.jsxs)(a.Fragment,{children:[(0,a.jsx)(n.ql,{children:(0,a.jsx)("title",{children:" Chat "})}),(0,a.jsx)(r.L3,{})]})}}}]);
