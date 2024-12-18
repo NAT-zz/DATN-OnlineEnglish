@@ -4,6 +4,7 @@ import {
     generateChat,
     handleAnalyzeVoice,
     getAudio,
+    getAiMessages,
 } from '../app/controllers/AI.controller.js';
 import path from 'path';
 
@@ -48,6 +49,7 @@ const upload = multer({
 });
 
 router.post('/chat', verifyToken, generateChat);
+router.get('/messages', verifyToken, getAiMessages);
 router.post('/analyze-voice', upload.single('audio'), handleAnalyzeVoice);
 router.get('/getAudio', getAudio);
 

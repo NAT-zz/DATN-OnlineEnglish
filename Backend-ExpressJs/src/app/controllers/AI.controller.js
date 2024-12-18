@@ -63,7 +63,7 @@ const generateChat = async (req, res) => {
                     newConversation.messages.push(newMessage.id);
                 }
             }
-            newConversation.rate = rate;
+            newConversation.rate = +rate;
             await newConversation.save();
             messages = [];
 
@@ -99,6 +99,45 @@ const generateChat = async (req, res) => {
         }
     } catch (error) {
         console.log('Error in generate: ', error.message);
+        return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: 'Server error, please try again later!',
+        });
+    }
+};
+
+const getAiMessages = async (req, res) => {
+    try {
+        const userId = req.userData.id;
+        const conversation = await conversations.find({
+            participants: { $all: [userId, 0] },
+        });
+
+        let data = [];
+        if (conversation && conversation.length > 0) {
+            for (const conver of conversation) {
+                let messageData = [];
+                for (const messageId of conver.messages) {
+                    const getMessage = await messagesMongo.findOne(
+                        { id: messageId },
+                        '-_id -__v',
+                    );
+                    if (getMessage && getMessage instanceof messagesMongo) {
+                        messageData.push(getMessage);
+                    }
+                }
+                data.push({
+                    createdAt: conver.createdAt,
+                    rate: conver?.rate ? conver.rate : 0,
+                    messages: messageData,
+                });
+            }
+
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                data,
+            });
+        }
+        return makeSuccessResponse(res, StatusCodes.OK, {});
+    } catch (error) {
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {
             message: 'Server error, please try again later!',
         });
@@ -328,4 +367,10 @@ const getAudioBuffer = async (response) => {
 // // console.log(words);
 // console.log(final);
 
-export { generateChat, generateQuestion, handleAnalyzeVoice, getAudio };
+export {
+    generateChat,
+    generateQuestion,
+    handleAnalyzeVoice,
+    getAudio,
+    getAiMessages,
+};
