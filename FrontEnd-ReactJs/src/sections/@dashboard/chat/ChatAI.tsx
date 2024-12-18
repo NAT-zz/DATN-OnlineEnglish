@@ -90,7 +90,10 @@ export default function Chat() {
       ];
       // @ts-ignore
       setCurrentConversations((prev) => prev.concat(newMess));
-      await sendMessageAI({ content: value.message });
+      await sendMessageAI({
+        content: value.message,
+        rate: '',
+      });
     } catch (error) {
       console.error(error);
     }
@@ -122,7 +125,12 @@ export default function Chat() {
             <Stack flexGrow={1} sx={{ minWidth: 0 }}>
               <ChatMessageListAI conversation={currentConversations} />
 
-              <ChatMessageInputAI conversationId={0} onSend={handleSendMessage} disabled={false} />
+              <ChatMessageInputAI
+                conversationId={0}
+                onSend={handleSendMessage}
+                disabled={false}
+                setCurrentConversations={setCurrentConversations}
+              />
             </Stack>
           </Stack>
         </Stack>

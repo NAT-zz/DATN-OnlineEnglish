@@ -20,6 +20,13 @@ const conversationSchema = new mongoose.Schema(
                 default: [],
             },
         ],
+        rate: {
+            type: Number,
+            required: false,
+            default: 0,
+            min: 0,
+            max: 5,
+        },
     },
     { timestamps: true },
 );

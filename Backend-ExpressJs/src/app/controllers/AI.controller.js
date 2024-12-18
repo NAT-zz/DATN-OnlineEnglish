@@ -4,6 +4,11 @@ import { getReceiverSocketId, io } from '../../services/socket.js';
 import { CONFIG } from '../../utils/Constants.js';
 import { createClient } from '@deepgram/sdk';
 
+import conversations from '../../models/conversations.mongo.js';
+import messagesMongo from '../../models/messages.mongo.js';
+import { findMaxId as findMaxIdConversation } from '../../models/conversations.model.js';
+import { findMaxId as findMaxIdMessage } from '../../models/messages.model.js';
+
 import fs from 'fs';
 import path from 'path';
 import ollama from 'ollama';
@@ -29,32 +34,69 @@ const generateQuestion = async (prompt) => {
 const generateChat = async (req, res) => {
     try {
         const { content } = req.body;
-        messages.push({ role: 'user', content: content });
+        const rate = req.body?.rate;
 
-        const response = await ollama.chat({
-            model,
-            messages,
-            stream: true,
-        });
+        if (rate !== '') {
+            const newConversation = await conversations.create({
+                id: Number((await findMaxIdConversation()) + 1),
+                participants: [req.userData.id, '0'],
+            });
 
-        const receiverSocketId = getReceiverSocketId(req.userData.id);
-        let data = '';
-        if (receiverSocketId) {
-            io.to(receiverSocketId).emit('startOneMessage', 'ping');
-            for await (const part of response) {
-                data += part.message?.content;
-                process.stdout.write(part.message?.content);
-                io.to(receiverSocketId).emit(
-                    'newMessage',
-                    part.message?.content,
-                );
+            for (const message of messages) {
+                const newMessage =
+                    message.role === 'user'
+                        ? new messagesMongo({
+                              id: Number((await findMaxIdMessage()) + 1),
+                              senderId: req.userData.id,
+                              receiverId: 0,
+                              message: message.content,
+                          })
+                        : new messagesMongo({
+                              id: Number((await findMaxIdMessage()) + 1),
+                              senderId: 0,
+                              receiverId: req.userData.id,
+                              message: message.content,
+                          });
+
+                await newMessage.save();
+                if (newMessage) {
+                    newConversation.messages.push(newMessage.id);
+                }
             }
-            io.to(receiverSocketId).emit('endOneMessage', 'ping');
-        }
+            newConversation.rate = rate;
+            await newConversation.save();
+            messages = [];
 
-        return makeSuccessResponse(res, StatusCodes.OK, {
-            data,
-        });
+            return makeSuccessResponse(res, StatusCodes.OK, {});
+        } else {
+            messages.push({ role: 'user', content: content });
+
+            const response = await ollama.chat({
+                model,
+                messages,
+                stream: true,
+            });
+
+            const receiverSocketId = getReceiverSocketId(req.userData.id);
+            let data = '';
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit('startOneMessage', 'ping');
+                for await (const part of response) {
+                    data += part.message?.content;
+                    process.stdout.write(part.message?.content);
+                    io.to(receiverSocketId).emit(
+                        'newMessage',
+                        part.message?.content,
+                    );
+                }
+                io.to(receiverSocketId).emit('endOneMessage', 'ping');
+            }
+
+            messages.push({ role: 'bot', content: data });
+            return makeSuccessResponse(res, StatusCodes.OK, {
+                data,
+            });
+        }
     } catch (error) {
         console.log('Error in generate: ', error.message);
         return makeSuccessResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, {

@@ -30,7 +30,7 @@ const getStudentWithClass = (idClass: number) => axiosInstance.get(`api/class/st
 const sendMessage = (idReceiver: number, body: { message: string }) =>
   axiosInstance.post(`api/user/message/send/${idReceiver}`, body);
 
-const sendMessageAI = (body: { content: string }) => axiosInstance.post('api/ai/chat', body);
+const sendMessageAI = (body: { content: string, rate: string }) => axiosInstance.post('api/ai/chat', body);
 const unRegisterClass = (idClass: number) => axiosInstance.get(`api/class/signout/${idClass}`);
 const getClassDetail = (idClass: string) => axiosInstance.get(`api/class/detail/${idClass}`);
 const getLessionDetail = (idLess: string) => axiosInstance.get(`api/lesson/detail/${idLess}`);
